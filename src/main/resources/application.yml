@@ -43,3 +43,6 @@ logging:
   level:
     org:
       springframework: INFO
+
+allowed:
+  origins: http://localhost:4200
