@@ -1,4 +1,4 @@
-package ma.nttdata.externals.config;
+package ma.nttdata.externals.commons.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

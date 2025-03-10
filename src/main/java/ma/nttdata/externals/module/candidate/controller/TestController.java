@@ -1,4 +1,4 @@
-package ma.nttdata.externals.controller;
+package ma.nttdata.externals.module.candidate.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,6 +1,6 @@
-package ma.nttdata.externals.config;
+package ma.nttdata.externals.commons.config;
 
-import ma.nttdata.externals.audit.AuditorAwareImpl;
+import ma.nttdata.externals.commons.audit.AuditorAwareImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;

@@ -1,4 +1,4 @@
-package ma.nttdata.externals.audit;
+package ma.nttdata.externals.commons.audit;
 
 import org.springframework.data.domain.AuditorAware;
 
