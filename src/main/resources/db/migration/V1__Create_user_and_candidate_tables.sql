@@ -20,10 +20,10 @@ CREATE TABLE candidates
 
 CREATE TABLE contacts
 (
-    id           UUID PRIMARY KEY,
-    candidate_id UUID REFERENCES candidates (id) ON DELETE CASCADE,
-    email        VARCHAR(255),
-    phone        VARCHAR(50)
+    id            UUID PRIMARY KEY,
+    candidate_id  UUID REFERENCES candidates (id) ON DELETE CASCADE,
+    contact_type  VARCHAR(255),
+    contact_value VARCHAR(50)
 );
 
 CREATE TABLE experiences
@@ -69,4 +69,29 @@ CREATE TABLE prompts
     id          UUID PRIMARY KEY,
     prompt_code VARCHAR(255),
     prompt_desc TEXT
+);
+
+-- Create Country Table
+CREATE TABLE country
+(
+    id   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+-- Create City Table
+CREATE TABLE city
+(
+    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name       VARCHAR(255) NOT NULL,
+    country_id UUID         NOT NULL REFERENCES country (id) ON DELETE CASCADE
+);
+
+-- Create Address Table
+CREATE TABLE address
+(
+    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    street       VARCHAR(255) NOT NULL,
+    postal_code  VARCHAR(20),
+    city_id      UUID         NOT NULL REFERENCES city (id) ON DELETE CASCADE,
+    candidate_id UUID         NOT NULL UNIQUE REFERENCES candidates (id) ON DELETE CASCADE -- Link to Candidate
 );

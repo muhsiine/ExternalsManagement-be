@@ -1,10 +1,7 @@
 package ma.nttdata.externals.module.ai.service.impl;
 
 import com.google.genai.Client;
-import com.google.genai.types.Blob;
-import com.google.genai.types.Content;
-import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.Part;
+import com.google.genai.types.*;
 import ma.nttdata.externals.module.ai.service.LlmService;
 import org.apache.http.HttpException;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +40,7 @@ public class GoogleLlmService implements LlmService {
                 .parts(List.of(textPart))
                 .build();
 
-        return getText(content);
+        return getText(content, null);
     }
 
     @Override
@@ -66,21 +63,71 @@ public class GoogleLlmService implements LlmService {
         Content content = Content.builder()
                 .parts(List.of(textPart, mediaPart))
                 .build();
-
-        return getText(content);
+        return getText(content, null);
 
     }
 
-    private String getText(Content content) {
+    private String getText(Content content, GenerateContentConfig config) {
         try {
             GenerateContentResponse response = client.models.generateContent(
                     model, // Or correct model name
                     content,
-                    null);
+                    config);
             return response.text();
         }catch (IOException | HttpException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getJson(String text, String base64EncodedFile, String mimeType, String schema) {
+        Blob pdfBlob = Blob.builder()
+                .data(base64EncodedFile)
+                .mimeType(mimeType)
+                .build();
+
+        Part textPart = Part.builder()
+                .text(text)
+                .build();
+
+        Part mediaPart = Part.builder()
+                .inlineData(pdfBlob)
+                .build();
+
+
+        Content content = Content.builder()
+                .parts(List.of(textPart, mediaPart))
+                .build();
+        GenerateContentConfig config = GenerateContentConfig.builder()
+                .responseMimeType("application/json")
+//                .responseSchema(Schema.fromJson(schema))
+                .build();
+        return getText(content, config);
+    }
+    @Override
+    public String getJson2(String text, String base64EncodedFile, String mimeType, String schema) {
+        Blob pdfBlob = Blob.builder()
+                .data(base64EncodedFile)
+                .mimeType(mimeType)
+                .build();
+
+        Part textPart = Part.builder()
+                .text(text)
+                .build();
+
+        Part mediaPart = Part.builder()
+                .inlineData(pdfBlob)
+                .build();
+
+
+        Content content = Content.builder()
+                .parts(List.of(textPart, mediaPart))
+                .build();
+        GenerateContentConfig config = GenerateContentConfig.builder()
+                .responseMimeType("application/json")
+                .responseSchema(Schema.fromJson(schema))
+                .build();
+        return getText(content, config);
     }
 
     public Flux<String> callStream(String prompt) {
@@ -100,7 +147,6 @@ public class GoogleLlmService implements LlmService {
                 .flatMap(g -> Flux.fromIterable(g.candidates().get()))
                 .flatMap(c -> Flux.fromIterable(c.content().get().parts().get()))
                 .map(part -> part.text().get());
-
 
     }
 }

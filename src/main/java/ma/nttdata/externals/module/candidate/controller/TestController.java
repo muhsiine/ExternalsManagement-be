@@ -2,6 +2,9 @@ package ma.nttdata.externals.module.candidate.controller;
 
 import ma.nttdata.externals.module.ai.service.LlmService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.entity.Candidate;
+import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
+import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 
@@ -9,9 +12,12 @@ import reactor.core.publisher.Flux;
 public class TestController {
 
     private final LlmService llmService;
+    private final CandidateSrv candidateSrv;
 
-    public TestController(LlmService llmService) {
+    public TestController(LlmService llmService,
+                          CandidateSrv candidateSrv) {
         this.llmService = llmService;
+        this.candidateSrv = candidateSrv;
     }
 
     @GetMapping("/hello")
@@ -30,8 +36,10 @@ public class TestController {
     }
 
     @PostMapping("/candidate")
-    public String condidate(@RequestBody CandidateDTO candidate) {
-
-        return "Success";
+    public String candidate(@RequestBody CandidateDTO candidate) {
+//        candidateSrv.save(candidate);
+        String encodedBase64File = candidate.cvFiles().getFirst().fileContent();
+        return candidateSrv.extractCandidateInfo(encodedBase64File);
     }
+
 }

@@ -4,6 +4,6 @@ import java.util.UUID;
 
 public record ContactDTO(
         UUID id,
-        String email,
-        String phone
+        String contactType,
+        String contactValue
 ) {}

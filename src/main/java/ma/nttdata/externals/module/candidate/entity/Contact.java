@@ -20,7 +20,7 @@ public class Contact {
     @JoinColumn(name = "candidate_id", nullable = false)
     private Candidate candidate;
 
-    private String email;
-    private String phone;
+    private String contactType;
+    private String contactValue;
 
 }
