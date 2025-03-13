@@ -24,7 +24,7 @@ public class Education {
     private String institution;
     private String degree;
     @Column(name = "start_date")
-    private LocalDate startDate;
+    private String startDate;
     @Column(name = "end_date")
-    private LocalDate endDate;
+    private String endDate;
 }

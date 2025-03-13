@@ -1,20 +1,24 @@
 package ma.nttdata.externals.module.candidate.dto;
 
+import ma.nttdata.externals.module.candidate.constants.GenderEnum;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public record CandidateDTO(
         UUID id,
         String fullName,
-        LocalDate birthdate,
+        LocalDate birthDate,
+        GenderEnum gender,
         String mainTech,
         String summary,
-        LocalDateTime createdAt,
         List<ContactDTO> contacts,
         List<ExperienceDTO> experiences,
         List<SkillDTO> skills,
         List<EducationDTO> educations,
-        List<CvFileDTO> cvFiles
+        List<CvFileDTO> cvFiles,
+        AddressDTO address,
+        List<LanguageDTO> naturalLanguages
+
 ) {}

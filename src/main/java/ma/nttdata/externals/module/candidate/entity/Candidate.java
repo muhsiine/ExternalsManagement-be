@@ -3,6 +3,8 @@ package ma.nttdata.externals.module.candidate.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ma.nttdata.externals.module.candidate.constants.GenderEnum;
+import ma.nttdata.externals.module.candidate.constants.ProficiencyLevel;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,15 +24,15 @@ public class Candidate {
     @Column(name = "full_name")
     private String fullName;
 
-    private LocalDate birthdate;
+    private LocalDate birthDate;
+
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
 
     @Column(name = "main_tech")
     private String mainTech;
 
     private String summary;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contact> contacts;
@@ -46,4 +48,10 @@ public class Candidate {
 
     @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CvFile> cvFiles;
+
+    @OneToOne(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Address address;
+
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Language> languages;
 }

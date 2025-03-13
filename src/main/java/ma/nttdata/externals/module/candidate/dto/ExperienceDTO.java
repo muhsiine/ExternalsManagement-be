@@ -7,7 +7,7 @@ public record ExperienceDTO(
         UUID id,
         String companyName,
         String position,
-        LocalDate startDate,
-        LocalDate endDate,
+        String startDate,
+        String endDate,
         String description
 ) {}

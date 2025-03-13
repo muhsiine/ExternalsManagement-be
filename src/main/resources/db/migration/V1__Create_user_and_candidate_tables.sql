@@ -12,10 +12,10 @@ CREATE TABLE candidates
 (
     id         UUID PRIMARY KEY,
     full_name  VARCHAR(255),
-    birthdate  DATE,
+    birth_date DATE,
+    gender     VARCHAR(2),
     main_tech  VARCHAR(100), -- Main tech stack
-    summary    TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    summary    TEXT
 );
 
 CREATE TABLE contacts
@@ -32,8 +32,8 @@ CREATE TABLE experiences
     candidate_id UUID REFERENCES candidates (id) ON DELETE CASCADE,
     company_name VARCHAR(255),
     position     VARCHAR(255),
-    start_date   DATE,
-    end_date     DATE,
+    start_date   VARCHAR(50),
+    end_date     VARCHAR(50),
     description  TEXT
 );
 
@@ -51,8 +51,8 @@ CREATE TABLE educations
     candidate_id UUID REFERENCES candidates (id) ON DELETE CASCADE,
     institution  VARCHAR(255),
     degree       VARCHAR(255),
-    start_date   DATE,
-    end_date     DATE
+    start_date   VARCHAR(50),
+    end_date     VARCHAR(50)
 );
 
 CREATE TABLE cv_files
@@ -75,7 +75,9 @@ CREATE TABLE prompts
 CREATE TABLE country
 (
     id   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL UNIQUE,
+    english_name VARCHAR(255) NOT NULL UNIQUE
+
 );
 
 -- Create City Table
@@ -92,6 +94,21 @@ CREATE TABLE address
     id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     street       VARCHAR(255) NOT NULL,
     postal_code  VARCHAR(20),
+    full_address VARCHAR(255),
     city_id      UUID         NOT NULL REFERENCES city (id) ON DELETE CASCADE,
+    country_id   UUID         NOT NULL REFERENCES country (id) ON DELETE CASCADE,
     candidate_id UUID         NOT NULL UNIQUE REFERENCES candidates (id) ON DELETE CASCADE -- Link to Candidate
+);
+
+CREATE TABLE languages
+(
+    id                  UUID PRIMARY KEY      DEFAULT uuid_generate_v4(),
+    candidate_id        UUID         NOT NULL REFERENCES candidates (id) ON DELETE CASCADE, -- Link to Candidate
+    description         VARCHAR(100) NOT NULL,                                              -- Original language name
+    english_description VARCHAR(100) NOT NULL,                                              -- English name of the language
+    full_description    VARCHAR(255),                                                       -- Full description of the language
+    language            VARCHAR(100) NOT NULL,                                              -- Redundant field (can be same as 'description')
+    language_in_english VARCHAR(100) NOT NULL,                                              -- Language name in English
+    level               VARCHAR(50)  NOT NULL CHECK (level IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'FLUENT', 'NATIVE')),
+    is_native           BOOLEAN      NOT NULL DEFAULT FALSE
 );

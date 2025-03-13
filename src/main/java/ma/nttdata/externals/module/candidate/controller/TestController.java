@@ -12,12 +12,9 @@ import reactor.core.publisher.Flux;
 public class TestController {
 
     private final LlmService llmService;
-    private final CandidateSrv candidateSrv;
 
-    public TestController(LlmService llmService,
-                          CandidateSrv candidateSrv) {
+    public TestController(LlmService llmService) {
         this.llmService = llmService;
-        this.candidateSrv = candidateSrv;
     }
 
     @GetMapping("/hello")
@@ -35,11 +32,7 @@ public class TestController {
         return llmService.callStream(prompt);
     }
 
-    @PostMapping("/candidate")
-    public String candidate(@RequestBody CandidateDTO candidate) {
-//        candidateSrv.save(candidate);
-        String encodedBase64File = candidate.cvFiles().getFirst().fileContent();
-        return candidateSrv.extractCandidateInfo(encodedBase64File);
-    }
+
+
 
 }

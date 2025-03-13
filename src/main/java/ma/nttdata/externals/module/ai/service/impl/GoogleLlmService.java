@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.ai.service.impl;
 import com.google.genai.Client;
 import com.google.genai.types.*;
 import ma.nttdata.externals.module.ai.service.LlmService;
+import ma.nttdata.externals.module.candidate.constants.MimeType;
 import org.apache.http.HttpException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -19,10 +20,11 @@ import java.util.Map;
 public class GoogleLlmService implements LlmService {
     private String url = "https://generativelanguage.googleapis.com/v1/models/";
     private final Client client;
-    private String apiKey;
-    private String model;
+    private final String apiKey;
+    private final String model;
+
     public GoogleLlmService(@Value("${llm.api.google.key}") String apiKey,
-                             @Value("${llm.api.google.model}") String model) {
+                            @Value("${llm.api.google.model}") String model) {
         this.apiKey = apiKey;
         this.model = model;
         client = Client.builder()
@@ -32,102 +34,64 @@ public class GoogleLlmService implements LlmService {
 
     @Override
     public String call(String text) {
-
-        Part textPart = Part.builder()
-                .text(text)
-                .build();
-        Content content = Content.builder()
-                .parts(List.of(textPart))
-                .build();
-
-        return getText(content, null);
+        Part textPart = getTextPart(text);
+        Content content = getContentFromParts(textPart);
+        return getResponse(content, null);
     }
 
     @Override
     public String call(String text, byte[] fileBytes, String mimeType) {
-
-        Blob pdfBlob = Blob.builder()
-                .data(Base64.getEncoder().encodeToString(fileBytes))
-                .mimeType(mimeType)
-                .build();
-
-        Part textPart = Part.builder()
-                .text(text)
-                .build();
-
-        Part mediaPart = Part.builder()
-                .inlineData(pdfBlob)
-                .build();
-
-
-        Content content = Content.builder()
-                .parts(List.of(textPart, mediaPart))
-                .build();
-        return getText(content, null);
-
+        Part mediaPart = getMediaPart(Base64.getEncoder().encodeToString(fileBytes), mimeType);
+        Part textPart = getTextPart(text);
+        Content content = getContentFromParts(textPart, mediaPart);
+        return getResponse(content, null);
     }
 
-    private String getText(Content content, GenerateContentConfig config) {
+    private String getResponse(Content content, GenerateContentConfig config) {
         try {
             GenerateContentResponse response = client.models.generateContent(
                     model, // Or correct model name
                     content,
                     config);
             return response.text();
-        }catch (IOException | HttpException e) {
+        } catch (IOException | HttpException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public String getJson(String text, String base64EncodedFile, String mimeType, String schema) {
-        Blob pdfBlob = Blob.builder()
-                .data(base64EncodedFile)
-                .mimeType(mimeType)
-                .build();
-
-        Part textPart = Part.builder()
-                .text(text)
-                .build();
-
-        Part mediaPart = Part.builder()
-                .inlineData(pdfBlob)
-                .build();
-
-
-        Content content = Content.builder()
-                .parts(List.of(textPart, mediaPart))
-                .build();
+        Part mediaPart = getMediaPart(base64EncodedFile, mimeType);
+        Part textPart = getTextPart(text);
+        Content content = getContentFromParts(textPart, mediaPart);
         GenerateContentConfig config = GenerateContentConfig.builder()
-                .responseMimeType("application/json")
-//                .responseSchema(Schema.fromJson(schema))
-                .build();
-        return getText(content, config);
-    }
-    @Override
-    public String getJson2(String text, String base64EncodedFile, String mimeType, String schema) {
-        Blob pdfBlob = Blob.builder()
-                .data(base64EncodedFile)
-                .mimeType(mimeType)
-                .build();
-
-        Part textPart = Part.builder()
-                .text(text)
-                .build();
-
-        Part mediaPart = Part.builder()
-                .inlineData(pdfBlob)
-                .build();
-
-
-        Content content = Content.builder()
-                .parts(List.of(textPart, mediaPart))
-                .build();
-        GenerateContentConfig config = GenerateContentConfig.builder()
-                .responseMimeType("application/json")
+                .responseMimeType(MimeType.APPLICATION_JSON.getMimeString())
                 .responseSchema(Schema.fromJson(schema))
                 .build();
-        return getText(content, config);
+        return getResponse(content, config);
+    }
+
+    private Content getContentFromParts(Part... parts) {
+        return Content.builder()
+                .parts(List.of(parts))
+                .build();
+    }
+
+
+    private Part getTextPart(String text) {
+        return Part.builder()
+                .text(text)
+                .build();
+    }
+
+    private Part getMediaPart(String base64EncodedFile, String mimeType) {
+        Blob pdfBlob = Blob.builder()
+                .data(base64EncodedFile)
+                .mimeType(mimeType)
+                .build();
+        return Part.builder()
+                .inlineData(pdfBlob)
+                .build();
     }
 
     public Flux<String> callStream(String prompt) {

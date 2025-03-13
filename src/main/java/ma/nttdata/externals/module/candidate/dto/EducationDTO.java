@@ -7,6 +7,6 @@ public record EducationDTO(
         UUID id,
         String institution,
         String degree,
-        LocalDate startDate,
-        LocalDate endDate
+        String startDate,
+        String endDate
 ) {}
