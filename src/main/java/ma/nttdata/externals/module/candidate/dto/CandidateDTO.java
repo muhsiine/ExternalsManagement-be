@@ -10,6 +10,7 @@ public record CandidateDTO(
         UUID id,
         String fullName,
         LocalDate birthDate,
+        int yearsOfExperience,
         GenderEnum gender,
         String mainTech,
         String summary,

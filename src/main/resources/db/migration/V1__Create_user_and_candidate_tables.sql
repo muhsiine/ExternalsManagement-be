@@ -13,6 +13,7 @@ CREATE TABLE candidates
     id         UUID PRIMARY KEY,
     full_name  VARCHAR(255),
     birth_date DATE,
+    years_of_experience int,
     gender     VARCHAR(2),
     main_tech  VARCHAR(100), -- Main tech stack
     summary    TEXT
@@ -52,7 +53,8 @@ CREATE TABLE educations
     institution  VARCHAR(255),
     degree       VARCHAR(255),
     start_date   VARCHAR(50),
-    end_date     VARCHAR(50)
+    end_date     VARCHAR(50),
+    diploma      VARCHAR(255)
 );
 
 CREATE TABLE cv_files
@@ -74,8 +76,8 @@ CREATE TABLE prompts
 -- Create Country Table
 CREATE TABLE country
 (
-    id   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(255) NOT NULL UNIQUE,
+    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name         VARCHAR(255) NOT NULL,
     english_name VARCHAR(255) NOT NULL UNIQUE
 
 );

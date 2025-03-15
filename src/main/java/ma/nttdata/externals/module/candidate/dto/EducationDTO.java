@@ -8,5 +8,6 @@ public record EducationDTO(
         String institution,
         String degree,
         String startDate,
-        String endDate
+        String endDate,
+        String diploma
 ) {}

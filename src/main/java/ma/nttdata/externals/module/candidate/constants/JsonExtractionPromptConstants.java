@@ -2,7 +2,13 @@ package ma.nttdata.externals.module.candidate.constants;
 
 public final class JsonExtractionPromptConstants {
     private JsonExtractionPromptConstants() {}
-    public static final String text = "I'll give you this cv/resume, please give me the candidate data";
+    public static final String text = """
+    I'll give you this cv/resume, please give me the candidate data, please try to put the maximum amount of data in the description fields,
+    please take into account skill and natural languages rankings/levels could be  represented by either a star-based system or a progress bar, where the number of stars or the filled percentage of the progress bar indicates the proficiency level. The representation might be visually styled differently, 
+    but the number of stars or the progress bar's filled portion remains the key to determining the level.
+    It could be more complex than that, then you should interpret it visually the part around it to deduce the level.
+    Try your best to deduce levels by any means visually contextually..
+    """;
 
     public static final String jsonSchema = """
         {
@@ -13,6 +19,10 @@ public final class JsonExtractionPromptConstants {
             },
             "birthDate": {
               "type": "string", "description": "the date should be in the form of YYYY-MM-DD"
+            },
+            
+            "yearsOfExperience": {
+              "type": "number"
             },
             "gender": {
               "type": "string",
@@ -25,7 +35,7 @@ public final class JsonExtractionPromptConstants {
                 "type": "string"
             },
             "mainTech": {
-              "type": "string"
+              "type": "string", "description":"try to deduce the mainTech from the whole CV"
             },
             "contacts": {
               "type": "array",
@@ -57,10 +67,10 @@ public final class JsonExtractionPromptConstants {
                     "type": "string"
                   },
                   "startDate": {
-                    "type": "string"
+                    "type": "string", "description": "the date should be in the form of YYYY-MM-DD"
                   },
                   "endDate": {
-                    "type": "string"
+                    "type": "string", "description": "the date should be in the form of YYYY-MM-DD"
                   },
                   "description": {
                     "type": "string"
@@ -99,11 +109,14 @@ public final class JsonExtractionPromptConstants {
                   "institution": {
                     "type": "string"
                   },
-                  "startDate": {
+                  "diploma": {
                     "type": "string"
                   },
+                  "startDate": {
+                    "type": "string", "description": "the date should be in the form of YYYY-MM-DD"
+                  },
                   "endDate": {
-                    "type": "string"
+                    "type": "string", "description": "the date should be in the form of YYYY-MM-DD"
                   }
                 }
               }
@@ -122,6 +135,7 @@ public final class JsonExtractionPromptConstants {
                     }
                   },
                   "required": [
+                    "name",
                     "englishName"
                   ]
                 },
@@ -149,7 +163,6 @@ public final class JsonExtractionPromptConstants {
               "required": [
                 "country",
                 "city",
-                "postalCode",
                 "street"
               ]
             },
@@ -165,10 +178,12 @@ public final class JsonExtractionPromptConstants {
                     "type": "string",
                     "enum": [
                       "BEGINNER",
+                      "LOWER_INTERMEDIATE",
                       "INTERMEDIATE",
+                      "UPPER_INTERMEDIATE",
                       "ADVANCED"
                     ],
-                    "description": "if it's native, it should be Advanced"
+                    "comment": "focus only in the part around the language, don't consider the whole file, also consider (Between A1 and A2) or [*    ] -> BEGINNER, (Between A2 and B1) or [**   ]-> LOWER_INTERMEDIATE, (Between B1 and B2) or [***  ] -> INTERMEDIATE, (B2 and C1) or [**** ] -> UPPER_INTERMEDIATE, (More than C1 or native) or [*****] -> ADVANCED"
                   },
                   "englishDescription": {
                     "type": "string"
@@ -200,7 +215,6 @@ public final class JsonExtractionPromptConstants {
           },
           "required": [
             "fullName",
-            "birthDate",
             "gender",
             "contacts",
             "skills",

@@ -26,6 +26,8 @@ public class Candidate {
 
     private LocalDate birthDate;
 
+    private Integer yearsOfExperience;
+
     @Enumerated(EnumType.STRING)
     private GenderEnum gender;
 

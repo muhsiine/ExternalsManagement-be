@@ -27,4 +27,6 @@ public class Education {
     private String startDate;
     @Column(name = "end_date")
     private String endDate;
+
+    private String diploma;
 }

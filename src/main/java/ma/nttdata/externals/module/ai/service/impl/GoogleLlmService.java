@@ -65,6 +65,8 @@ public class GoogleLlmService implements LlmService {
         Part textPart = getTextPart(text);
         Content content = getContentFromParts(textPart, mediaPart);
         GenerateContentConfig config = GenerateContentConfig.builder()
+                .temperature(0.2f) // to lower the randomness
+                .topP(0.6f)
                 .responseMimeType(MimeType.APPLICATION_JSON.getMimeString())
                 .responseSchema(Schema.fromJson(schema))
                 .build();
