@@ -86,7 +86,7 @@ CREATE TABLE country
 CREATE TABLE city
 (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name       VARCHAR(255) NOT NULL,
+    name       VARCHAR(255) NOT NULL UNIQUE,
     country_id UUID         NOT NULL REFERENCES country (id) ON DELETE CASCADE
 );
 
