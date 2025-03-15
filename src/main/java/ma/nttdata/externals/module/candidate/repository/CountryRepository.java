@@ -1,6 +1,5 @@
 package ma.nttdata.externals.module.candidate.repository;
 
-import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.candidate.entity.Country;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;

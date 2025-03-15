@@ -4,7 +4,7 @@ public final class JsonExtractionPromptConstants {
     private JsonExtractionPromptConstants() {}
     public static final String text = """
     I'll give you this cv/resume, please give me the candidate data, please try to put the maximum amount of data in the description fields,
-    please take into account skill and natural languages rankings/levels could be  represented by either a star-based system or a progress bar, where the number of stars or the filled percentage of the progress bar indicates the proficiency level. The representation might be visually styled differently, 
+    please take into account skill and natural languages rankings/levels could be  represented by either a star-based system or a progress bar, where the number of stars or the filled percentage of the progress bar indicates the proficiency level. The representation might be visually styled differently,
     but the number of stars or the progress bar's filled portion remains the key to determining the level.
     It could be more complex than that, then you should interpret it visually the part around it to deduce the level.
     Try your best to deduce levels by any means visually contextually..
@@ -20,7 +20,6 @@ public final class JsonExtractionPromptConstants {
             "birthDate": {
               "type": "string", "description": "the date should be in the form of YYYY-MM-DD"
             },
-            
             "yearsOfExperience": {
               "type": "number"
             },

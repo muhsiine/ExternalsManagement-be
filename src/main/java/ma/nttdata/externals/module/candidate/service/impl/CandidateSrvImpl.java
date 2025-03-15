@@ -40,9 +40,7 @@ public class CandidateSrvImpl implements CandidateSrv {
             candidate.getAddress().getCity().setCountry(country);
         });
         Optional<City> existingCity = cityRepository.findByName(candidate.getAddress().getCity().getName());
-        existingCity.ifPresent(city -> {
-            candidate.getAddress().setCity(city);
-        });
+        existingCity.ifPresent(candidate.getAddress()::setCity);
         candidateRepository.save(candidate);
     }
 
