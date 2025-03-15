@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Service
 public class GoogleLlmService implements LlmService {
-    private String url = "https://generativelanguage.googleapis.com/v1/models/";
+    private static final String  url = "https://generativelanguage.googleapis.com/v1/models/";
     private final Client client;
     private final String apiKey;
     private final String model;
