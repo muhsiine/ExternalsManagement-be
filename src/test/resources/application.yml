@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: cv-management-system
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;SCHEMA=public
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop   # Use "update" for development, but "validate" for production
+    show-sql: true
+
+  docker:
+    compose:
+      enabled: true
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  security:
+    user:
+      name: admin
+      password: adminpassword
+  sql:
+    init:
+      mode: always
+
+logging:
+  level:
+    org:
+      springframework: INFO
+
+allowed:
+  origins: http://localhost:4200
+
+app:
+  mock:
+    flag: true
+  ai:
+    server:
+      url: http://localhost:8080
