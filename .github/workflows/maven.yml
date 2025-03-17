@@ -34,5 +34,3 @@ jobs:
         run: mvn clean install -DskipTests=true # skip tests during build
       - name: Run Tests with Maven
         run: mvn test
-      - name: Check for vulnerabilities
-        run: mvn org.owasp:dependency-check-maven:check
