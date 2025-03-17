@@ -1,8 +1,5 @@
 package ma.nttdata.externals.module.candidate.service.impl;
 
-import ma.nttdata.externals.module.ai.service.LlmService;
-import ma.nttdata.externals.module.candidate.constants.MimeType;
-import ma.nttdata.externals.module.candidate.constants.JsonExtractionPromptConstants;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.candidate.entity.City;
@@ -23,16 +20,17 @@ public class CandidateSrvImpl implements CandidateSrv {
     private final CandidateRepository candidateRepository;
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
-    private final LlmService llmService;
-    public CandidateSrvImpl(CandidateMapper candidateMapper, CandidateRepository candidateRepository, CountryRepository countryRepository, CityRepository cityRepository, LlmService llmService) {
+    public CandidateSrvImpl(CandidateMapper candidateMapper,
+                            CandidateRepository candidateRepository,
+                            CountryRepository countryRepository,
+                            CityRepository cityRepository) {
         this.mapper = candidateMapper;
         this.candidateRepository = candidateRepository;
         this.countryRepository = countryRepository;
         this.cityRepository = cityRepository;
-        this.llmService = llmService;
     }
     @Override
-    public void save(CandidateDTO candidateDTO) {
+    public CandidateDTO save(CandidateDTO candidateDTO) {
         Candidate candidate = mapper.candidateDTOToCandidate(candidateDTO);
         Optional<Country> existingCountry = countryRepository.findByEnglishName(candidate.getAddress().getCountry().getEnglishName());
         existingCountry.ifPresent(country -> {
@@ -41,11 +39,7 @@ public class CandidateSrvImpl implements CandidateSrv {
         });
         Optional<City> existingCity = cityRepository.findByName(candidate.getAddress().getCity().getName());
         existingCity.ifPresent(candidate.getAddress()::setCity);
-        candidateRepository.save(candidate);
+        return mapper.candidateToCandidateDTO(candidateRepository.save(candidate));
     }
 
-    @Override
-    public String extractCandidateInfo(String encodedBase64File) {
-        return llmService.getJson(JsonExtractionPromptConstants.text, encodedBase64File, MimeType.APPLICATION_PDF.getMimeString(), JsonExtractionPromptConstants.jsonSchema);
-    }
 }

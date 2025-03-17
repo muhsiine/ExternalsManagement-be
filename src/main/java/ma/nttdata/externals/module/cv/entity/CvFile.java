@@ -1,9 +1,10 @@
-package ma.nttdata.externals.module.candidate.entity;
+package ma.nttdata.externals.module.cv.entity;
 
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ma.nttdata.externals.module.candidate.entity.Candidate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -2,6 +2,8 @@ package ma.nttdata.externals.module.candidate.mapper;
 
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.candidate.entity.*;
+import ma.nttdata.externals.module.cv.dto.CvFileDTO;
+import ma.nttdata.externals.module.cv.entity.CvFile;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,7 +24,6 @@ public interface CandidateMapper {
     ExperienceDTO experienceToExperienceDTO(Experience experience);
     SkillDTO skillToSkillDTO(Skill skill);
     EducationDTO educationToEducationDTO(Education education);
-    @Mapping(target = "fileContent", ignore = true)
     CvFileDTO cvFileToCvFileDTO(CvFile cvFile);
     AddressDTO addressToAddressDTO(Address address);
     LanguageDTO languageToLanguageDTO(Language language);
@@ -64,8 +65,6 @@ public interface CandidateMapper {
             address.setCandidate(candidate);
             if(address.getCity() != null){
                 address.getCity().setCountry(address.getCountry());
-//                address.getCity().setAddress(List.of(address));
-//                address.getCountry().setAddress(List.of(address));
             }
         }
     }

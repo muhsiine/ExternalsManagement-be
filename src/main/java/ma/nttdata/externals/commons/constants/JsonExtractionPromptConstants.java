@@ -1,4 +1,4 @@
-package ma.nttdata.externals.module.candidate.constants;
+package ma.nttdata.externals.commons.constants;
 
 public final class JsonExtractionPromptConstants {
     private JsonExtractionPromptConstants() {}
@@ -222,5 +222,107 @@ public final class JsonExtractionPromptConstants {
           ]
         }
         """;
+    public static final String jsonMock = """
+            {
+              "fullName": "Jane Doe",
+              "birthDate": "1990-05-15",
+              "yearsOfExperience": 8,
+              "gender": "F",
+              "summary": "Experienced software engineer with a focus on web development and a passion for creating efficient and user-friendly applications.",
+              "mainTech": "JavaScript",
+              "contacts": [
+                {
+                  "contactType": "email",
+                  "contactValue": "jane.doe@example.com"
+                },
+                {
+                  "contactType": "phone",
+                  "contactValue": "+15551234567"
+                },
+                {
+                  "contactType": "linkedin",
+                  "contactValue": "linkedin.com/in/janedoe"
+                }
+              ],
+              "experiences": [
+                {
+                  "companyName": "TechCorp",
+                  "position": "Senior Software Engineer",
+                  "startDate": "2018-01-01",
+                  "endDate": "2023-12-31",
+                  "description": "Developed and maintained web applications using React and Node.js. Led a team of junior developers."
+                },
+                {
+                  "companyName": "WebSolutions",
+                  "position": "Software Engineer",
+                  "startDate": "2016-01-01",
+                  "endDate": "2017-12-31",
+                  "description": "Worked on front-end development using Angular and contributed to back-end development with Python."
+                }
+              ],
+              "skills": [
+                {
+                  "skillName": "JavaScript",
+                  "proficiencyLevel": "EXPERT"
+                },
+                {
+                  "skillName": "React",
+                  "proficiencyLevel": "EXPERT"
+                },
+                {
+                  "skillName": "Node.js",
+                  "proficiencyLevel": "INTERMEDIATE"
+                },
+                {
+                  "skillName": "Python",
+                  "proficiencyLevel": "INTERMEDIATE"
+                },
+                {
+                  "skillName": "Angular",
+                  "proficiencyLevel": "INTERMEDIATE"
+                }
+              ],
+              "educations": [
+                {
+                  "institution": "University of California, Berkeley",
+                  "diploma": "Bachelor of Science in Computer Science",
+                  "startDate": "2012-09-01",
+                  "endDate": "2016-05-31"
+                }
+              ],
+              "address": {
+                "country": {
+                  "name": "United States",
+                  "englishName": "United States"
+                },
+                "city": {
+                  "name": "San Francisco"
+                },
+                "postalCode": "94101",
+                "street": "123 Main St",
+                "fullAddress": "123 Main St, San Francisco, CA 94101, United States"
+              },
+              "naturalLanguages": [
+                {
+                  "language": "English",
+                  "level": "ADVANCED",
+                  "englishDescription": "Native speaker",
+                  "fullDescription": "Native speaker of English.",
+                  "description": "Native",
+                  "isNative": true,
+                  "languageInEnglish": "English"
+                },
+                {
+                    "language": "Spanish",
+                    "level": "INTERMEDIATE",
+                    "englishDescription": "Intermediate proficiency",
+                    "fullDescription": "Has an intermediate level of Spanish.",
+                    "description": "Intermediate",
+                    "isNative": false,
+                    "languageInEnglish": "Spanish"
+                }
+              ]
+            }
+            """;
 
 }

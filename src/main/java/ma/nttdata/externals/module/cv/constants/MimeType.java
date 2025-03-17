@@ -1,4 +1,4 @@
-package ma.nttdata.externals.module.candidate.constants;
+package ma.nttdata.externals.module.cv.constants;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
+import ma.nttdata.externals.module.cv.entity.CvFile;
 
 import java.time.LocalDate;
 import java.util.List;
