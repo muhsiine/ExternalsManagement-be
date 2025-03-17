@@ -1,8 +1,10 @@
 package ma.nttdata.externals.module.cv.mapper;
 
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
-import ma.nttdata.externals.module.cv.entity.*;
-import org.mapstruct.*;
+import ma.nttdata.externals.module.cv.entity.CvFile;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
 

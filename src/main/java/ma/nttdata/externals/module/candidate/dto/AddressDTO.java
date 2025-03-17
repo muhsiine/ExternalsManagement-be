@@ -7,7 +7,7 @@ public record AddressDTO(
         String street,
         String postalCode,
         String fullAddress,
-        CityDto city,
+        CityDTO city,
         CandidateDTO candidate,
-        CountryDto country
+        CountryDTO country
 ) {}

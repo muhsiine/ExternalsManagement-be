@@ -2,8 +2,8 @@ package ma.nttdata.externals.module.candidate.dto;
 
 import java.util.UUID;
 
-public record CityDto(
+public record CityDTO(
         UUID id,
         String name,
-        CountryDto country
+        CountryDTO country
 ) {}
