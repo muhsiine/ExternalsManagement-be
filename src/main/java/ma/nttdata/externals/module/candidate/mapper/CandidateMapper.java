@@ -25,6 +25,9 @@ public interface CandidateMapper {
     SkillDTO skillToSkillDTO(Skill skill);
     EducationDTO educationToEducationDTO(Education education);
     CvFileDTO cvFileToCvFileDTO(CvFile cvFile);
+    @Mapping(target = "candidate", ignore = true)
+    @Mapping(target = "country.cities", ignore = true)
+    @Mapping(target = "city.country.cities", ignore = true)
     AddressDTO addressToAddressDTO(Address address);
     LanguageDTO languageToLanguageDTO(Language language);
 

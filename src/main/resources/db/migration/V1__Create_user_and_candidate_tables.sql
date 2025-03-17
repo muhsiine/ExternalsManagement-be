@@ -106,9 +106,9 @@ CREATE TABLE languages
 (
     id                  UUID PRIMARY KEY      DEFAULT uuid_generate_v4(),
     candidate_id        UUID         NOT NULL REFERENCES candidates (id) ON DELETE CASCADE, -- Link to Candidate
-    description         VARCHAR(100) NOT NULL,                                              -- Original language name
-    english_description VARCHAR(100) NOT NULL,                                              -- English name of the language
-    full_description    VARCHAR(255),                                                       -- Full description of the language
+    description         TEXT NOT NULL,                                              -- Original language name
+    english_description TEXT NOT NULL,                                              -- English name of the language
+    full_description    TEXT,                                                       -- Full description of the language
     language            VARCHAR(100) NOT NULL,                                              -- Redundant field (can be same as 'description')
     language_in_english VARCHAR(100) NOT NULL,                                              -- Language name in English
     level               VARCHAR(50)  NOT NULL CHECK (level IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'FLUENT', 'NATIVE')),

@@ -150,7 +150,7 @@ public final class JsonExtractionPromptConstants {
                   ]
                 },
                 "postalCode": {
-                  "type": "string"
+                  "type": "string", "description": "try you best to get it from the whole CV"
                 },
                 "street": {
                   "type": "string"
