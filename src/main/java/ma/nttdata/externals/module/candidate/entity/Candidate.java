@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.candidate.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Table(name = "candidates")
 @Getter
 @Setter
+@Data
 public class Candidate {
 
     @Id

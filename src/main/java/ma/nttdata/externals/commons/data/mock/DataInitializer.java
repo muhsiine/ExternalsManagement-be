@@ -168,10 +168,15 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private Country createCountry(String name, String englishName) {
-        Country country = new Country();
-        country.setName(name);
-        country.setEnglishName(englishName);
-        return countryRepository.save(country);
+        // check if the country already exists
+        return countryRepository.findByEnglishName(englishName)
+                .orElseGet(() -> {
+                    // Only create and save a new country if it doesn't exist
+                    Country country = new Country();
+                    country.setName(name);
+                    country.setEnglishName(englishName);
+                    return countryRepository.save(country);
+                });
     }
 
     private List<City> createCities(Country country) {
@@ -193,10 +198,13 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private City createCity(String name, Country country) {
-        City city = new City();
-        city.setName(name);
-        city.setCountry(country);
-        return cityRepository.save(city);
+        return cityRepository.findByName(name)
+                .orElseGet(() -> {
+                    City city = new City();
+                    city.setName(name);
+                    city.setCountry(country);
+                    return cityRepository.save(city);
+                });
     }
 
     private City getRandomCity(List<City> cities) {

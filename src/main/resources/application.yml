@@ -11,6 +11,29 @@ spring:
   profiles:
     active: local
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  version: 1.0
+  servers:
+    - url: http://localhost:8080
+      description: Development server
+  info:
+    title: Candidate Management API
+    description: This API exposes endpoints to manage candidates
+    version: 1.0
+    contact:
+      name: NTT Data
+      email: contact@nttdata.ma
+      url: https://www.nttdata.com
+    license:
+      name: MIT License
+      url: https://opensource.org/licenses/MIT
+
 logging:
   level:
     org:
