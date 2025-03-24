@@ -6,6 +6,7 @@ import lombok.Setter;
 import ma.nttdata.externals.module.candidate.constants.LanguageLevel;
 
 import java.util.UUID;
+
 @Entity
 @Table(name = "languages")
 @Getter
@@ -21,19 +22,19 @@ public class Language {
     private Candidate candidate;
 
     @Column(nullable = false, length = 100)
-    private String description; // Original language name
+    private String description;
 
     @Column(nullable = false, length = 100)
-    private String englishDescription; // English version of the language
+    private String englishDescription;
 
     @Column(length = 255)
     private String fullDescription;
 
     @Column(nullable = false, length = 100)
-    private String language; // Redundant field (same as 'description')
+    private String language;
 
     @Column(nullable = false, length = 100)
-    private String languageInEnglish; // Language name in English
+    private String languageInEnglish;
 
     @Column(nullable = false, length = 50)
     @Enumerated(EnumType.STRING)
@@ -41,4 +42,9 @@ public class Language {
 
     @Column(nullable = false)
     private boolean isNative;
+
+    // Add this method to match the expected getName() in CandidateSrvImpl
+    public String getName() {
+        return language; // Or use languageInEnglish, description, etc., depending on your preference
+    }
 }
