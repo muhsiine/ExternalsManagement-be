@@ -112,6 +112,6 @@ CREATE TABLE languages
     full_description    TEXT,                                                       -- Full description of the language
     language            VARCHAR(100) NOT NULL,                                              -- Redundant field (can be same as 'description')
     language_in_english VARCHAR(100) NOT NULL,                                              -- Language name in English
-    level               VARCHAR(50)  NOT NULL CHECK (level IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'FLUENT', 'NATIVE')),
+    level               VARCHAR(50)  NOT NULL CHECK (level IN ('BEGINNER', 'LOWER_INTERMEDIATE' ,'INTERMEDIATE', 'UPPER_INTERMEDIATE', 'ADVANCED')),
     is_native           BOOLEAN      NOT NULL DEFAULT FALSE
 );

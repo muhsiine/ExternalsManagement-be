@@ -30,9 +30,6 @@ springdoc:
       name: NTT Data
       email: contact@nttdata.ma
       url: https://www.nttdata.com
-    license:
-      name: MIT License
-      url: https://opensource.org/licenses/MIT
 
 logging:
   level:

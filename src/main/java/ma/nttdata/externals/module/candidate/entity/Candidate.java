@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "candidates")
 @Getter
 @Setter
-@Data
+
 public class Candidate {
 
     @Id

@@ -1,5 +1,5 @@
 package ma.nttdata.externals.module.candidate.constants;
 
 public enum LanguageLevel {
-    BEGINNER, INTERMEDIATE, ADVANCED, FLUENT, NATIVE
+    BEGINNER, LOWER_INTERMEDIATE ,INTERMEDIATE, UPPER_INTERMEDIATE, ADVANCED
 }
