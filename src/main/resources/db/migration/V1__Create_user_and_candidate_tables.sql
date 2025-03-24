@@ -76,7 +76,7 @@ CREATE TABLE prompts
 -- Create Country Table
 CREATE TABLE country
 (
-    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id           UUID PRIMARY KEY,
     name         VARCHAR(255) NOT NULL,
     english_name VARCHAR(255) NOT NULL UNIQUE
 
@@ -85,7 +85,7 @@ CREATE TABLE country
 -- Create City Table
 CREATE TABLE city
 (
-    id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id         UUID PRIMARY KEY,
     name       VARCHAR(255) NOT NULL UNIQUE,
     country_id UUID         NOT NULL REFERENCES country (id) ON DELETE CASCADE
 );
@@ -93,7 +93,7 @@ CREATE TABLE city
 -- Create Address Table
 CREATE TABLE address
 (
-    id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id           UUID PRIMARY KEY,
     street       VARCHAR(255) NOT NULL,
     postal_code  VARCHAR(20),
     full_address VARCHAR(255),
@@ -104,7 +104,7 @@ CREATE TABLE address
 
 CREATE TABLE languages
 (
-    id                  UUID PRIMARY KEY      DEFAULT uuid_generate_v4(),
+    id                  UUID PRIMARY KEY,
     candidate_id        UUID         NOT NULL REFERENCES candidates (id) ON DELETE CASCADE, -- Link to Candidate
     description         TEXT NOT NULL,                                              -- Original language name
     english_description TEXT NOT NULL,                                              -- English name of the language
