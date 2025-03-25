@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.candidate.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.candidate.entity.City;
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CandidateSrvImpl implements CandidateSrv {
 
@@ -57,13 +59,7 @@ public class CandidateSrvImpl implements CandidateSrv {
         }
         Candidate existingCandidate = existingCandidateOpt.get();
         Candidate updatedCandidate = mapper.candidateDTOToCandidate(candidateDTO);
-        existingCandidate.setFullName(updatedCandidate.getFullName());
-        existingCandidate.setBirthDate(updatedCandidate.getBirthDate());
-        existingCandidate.setYearsOfExperience(updatedCandidate.getYearsOfExperience());
-        existingCandidate.setGender(updatedCandidate.getGender());
-        existingCandidate.setMainTech(updatedCandidate.getMainTech());
-        existingCandidate.setSummary(updatedCandidate.getSummary());
-        Candidate savedCandidate = candidateRepository.save(existingCandidate);
+        Candidate savedCandidate = candidateRepository.save(updatedCandidate);
         return mapper.candidateToCandidateDTO(savedCandidate);
     }
 
