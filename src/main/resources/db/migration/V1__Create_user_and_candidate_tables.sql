@@ -71,7 +71,8 @@ CREATE TABLE prompts
 (
     id          UUID PRIMARY KEY,
     prompt_code VARCHAR(255),
-    prompt_desc TEXT
+    prompt_desc TEXT,
+    schema TEXT
 );
 
 -- Create Country Table
