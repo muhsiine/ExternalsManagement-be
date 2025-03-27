@@ -73,4 +73,4 @@ public class CandidateController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(candidates);
     }
-}
+} 
