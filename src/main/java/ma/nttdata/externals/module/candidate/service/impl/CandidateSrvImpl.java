@@ -13,11 +13,9 @@ import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,6 +26,7 @@ public class CandidateSrvImpl implements CandidateSrv {
     private final CandidateRepository candidateRepository;
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
+
     public CandidateSrvImpl(CandidateMapper candidateMapper,
                             CandidateRepository candidateRepository,
                             CountryRepository countryRepository,
@@ -65,7 +64,7 @@ public class CandidateSrvImpl implements CandidateSrv {
     }
 
     @Override
-    public List<CandidateDTO> getAllCandidates(){
+    public List<CandidateDTO> getAllCandidates() {
         List<Candidate> candidates = candidateRepository.findAll();
         return candidates.stream()
                 .map(mapper::candidateToCandidateDTO)
@@ -73,22 +72,21 @@ public class CandidateSrvImpl implements CandidateSrv {
     }
 
     @Override
-    public CandidateDTO getById(UUID id){
+    public CandidateDTO getById(UUID id) {
         Optional<Candidate> candidate = candidateRepository.findById(id);
-        return candidate.map(mapper::candidateToCandidateDTO).orElseThrow(()-> new EntityNotFoundException("Candidate id not found : "+ id));
+        return candidate.map(mapper::candidateToCandidateDTO).orElseThrow(() -> new EntityNotFoundException("Candidate id not found : " + id));
     }
 
 
     @Override
-    public boolean delete(UUID id){
+    public boolean delete(UUID id) {
         Optional<Candidate> candidate = candidateRepository.findById(id);
-        if (candidate.isEmpty()){
+        if (candidate.isEmpty()) {
             throw new RuntimeException("Candidate id not found : " + id);
         }
         candidateRepository.deleteById(id);
         return true;
     }
-}
     @Override
     public List<CandidateDTO> getCandidates() {
         return candidateRepository.findAll().stream()

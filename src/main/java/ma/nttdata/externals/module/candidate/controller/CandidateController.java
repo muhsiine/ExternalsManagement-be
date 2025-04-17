@@ -14,11 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/candidates")
-@Tag(name= "Candidate Management", description = "Operations related to candidate management")
+@Tag(name = "Candidate Management", description = "Operations related to candidate management")
 
 public class CandidateController {
 
@@ -28,10 +30,10 @@ public class CandidateController {
         this.candidateSrv = candidateSrv;
     }
 
-    @Operation(summary = "Create a new candidate" , description = "Creates a new candidate and returns its details")
+    @Operation(summary = "Create a new candidate", description = "Creates a new candidate and returns its details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Candidate created successfully",
-                content = @Content(mediaType = "application/json",schema = @Schema(implementation = CandidateDTO.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -45,16 +47,16 @@ public class CandidateController {
     @Operation(summary = "Update a candidate", description = "Updates an existing candidate by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Candidate updated successfully",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCandidate(
-        @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
-        @RequestBody CandidateDTO candidateDTO){
-        CandidateDTO updatedCandidate = candidateSrv.update(id,candidateDTO);
-        if(updatedCandidate == null){
+            @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
+            @RequestBody CandidateDTO candidateDTO) {
+        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
+        if (updatedCandidate == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Candidate not found");
         }
@@ -64,7 +66,7 @@ public class CandidateController {
     @Operation(summary = "Partially update a candidate", description = "Updates specific fields of an existing candidate by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Candidate updated successfully",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
             @ApiResponse(responseCode = "404", description = "Candidate not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -72,9 +74,9 @@ public class CandidateController {
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchCandidate(
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
-            @RequestBody CandidateDTO candidateDTO){
-        CandidateDTO updatedCandidate = candidateSrv.update(id,candidateDTO);
-        if(updatedCandidate == null){
+            @RequestBody CandidateDTO candidateDTO) {
+        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
+        if (updatedCandidate == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Candidate not found");
         }
@@ -90,18 +92,19 @@ public class CandidateController {
         }
         return ResponseEntity.ok(candidates);
     }
+
     @Operation(summary = "Get a candidate by ID", description = "Retrieves a candidate by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidate",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
             @ApiResponse(responseCode = "404", description = "Candidate not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> getCandidate(
-            @Parameter(description = "ID of the candidate to retrieve")@PathVariable UUID id){
+            @Parameter(description = "ID of the candidate to retrieve") @PathVariable UUID id) {
         CandidateDTO candidate = candidateSrv.getById(id);
-        if (candidate == null){
+        if (candidate == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Candidate not found");
         }
@@ -116,16 +119,14 @@ public class CandidateController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteCandidate(
-            @Parameter(description = "ID of the candidate to delete")@PathVariable UUID id){
+            @Parameter(description = "ID of the candidate to delete") @PathVariable UUID id) {
         boolean deleted = candidateSrv.delete(id);
-        if(!deleted){
+        if (!deleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("Candidate not found");
         }
         return ResponseEntity.ok("Candidate deleted successfully");
     }
-}
-
 
     @GetMapping("/charts/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
