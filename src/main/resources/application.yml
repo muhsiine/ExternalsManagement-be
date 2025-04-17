@@ -4,22 +4,36 @@ server:
 spring:
   application:
     name: cv-management-system
-
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/externals-db
-    username: postgres
-    password: secret
-    driver-class-name: org.postgresql.Driver
-
   profiles:
     active: local
 
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  version: 1.0
+  servers:
+    - url: http://localhost:8080
+      description: Development server
+  info:
+    title: Candidate Management API
+    description: This API exposes endpoints to manage candidates
+    version: 1.0
+    contact:
+      name: NTT Data
+      email: contact@nttdata.ma
+      url: https://www.nttdata.com
+
 logging:
   level:
-    org:
-      springframework: INFO
+      root: INFO
+      ma.nttdata.externals: DEBUG
+      org.springframework.web: INFO
+      org.hibernate: ERROR
