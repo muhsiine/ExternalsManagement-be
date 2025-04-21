@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
 
         BindingResult result = ex.getBindingResult();
         for (FieldError fieldError : result.getFieldErrors()) {
-            errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+            errorResponse = errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
         }
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
@@ -92,10 +92,10 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST, "Validation error", request.getRequestURI());
 
-        ex.getConstraintViolations().forEach(violation -> {
+        for (var violation : ex.getConstraintViolations()) {
             String fieldName = violation.getPropertyPath().toString();
-            errorResponse.addValidationError(fieldName, violation.getMessage());
-        });
+            errorResponse = errorResponse.addValidationError(fieldName, violation.getMessage());
+        }
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }

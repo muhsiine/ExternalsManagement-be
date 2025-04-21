@@ -12,58 +12,56 @@ import java.util.List;
 /**
  * Standard error response object returned to clients.
  */
-@Setter
-@Getter
-public class ErrorResponse {
-    // Getters and setters
+public record ErrorResponse(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp;
-    private int status;
-    private String error;
-    private String message;
-    private String path;
-    private List<ValidationError> validationErrors;
-
+    LocalDateTime timestamp,
+    int status,
+    String error,
+    String message,
+    String path,
+    List<ValidationError> validationErrors
+) {
+    /**
+     * Default constructor that initializes timestamp to current time.
+     */
     public ErrorResponse() {
-        this.timestamp = LocalDateTime.now();
+        this(LocalDateTime.now(), 0, null, null, null, null);
     }
 
+    /**
+     * Constructor with HttpStatus.
+     */
     public ErrorResponse(HttpStatus status) {
-        this();
-        this.status = status.value();
-        this.error = status.getReasonPhrase();
+        this(LocalDateTime.now(), status.value(), status.getReasonPhrase(), null, null, null);
     }
 
+    /**
+     * Constructor with HttpStatus and message.
+     */
     public ErrorResponse(HttpStatus status, String message) {
-        this(status);
-        this.message = message;
+        this(LocalDateTime.now(), status.value(), status.getReasonPhrase(), message, null, null);
     }
 
+    /**
+     * Constructor with HttpStatus, message, and path.
+     */
     public ErrorResponse(HttpStatus status, String message, String path) {
-        this(status, message);
-        this.path = path;
+        this(LocalDateTime.now(), status.value(), status.getReasonPhrase(), message, path, null);
     }
 
-    public void addValidationError(String field, String message) {
-        if (validationErrors == null) {
-            validationErrors = new ArrayList<>();
-        }
-        validationErrors.add(new ValidationError(field, message));
+    /**
+     * Creates a new ErrorResponse with an additional validation error.
+     */
+    public ErrorResponse addValidationError(String field, String message) {
+        List<ValidationError> newErrors = validationErrors == null ? 
+            new ArrayList<>() : new ArrayList<>(validationErrors);
+        newErrors.add(new ValidationError(field, message));
+        return new ErrorResponse(timestamp, status, error, this.message, path, newErrors);
     }
 
     /**
      * Represents a validation error for a specific field.
      */
-    @Setter
-    @Getter
-    public static class ValidationError {
-        private String field;
-        private String message;
-
-        public ValidationError(String field, String message) {
-            this.field = field;
-            this.message = message;
-        }
-
+    public record ValidationError(String field, String message) {
     }
 }
