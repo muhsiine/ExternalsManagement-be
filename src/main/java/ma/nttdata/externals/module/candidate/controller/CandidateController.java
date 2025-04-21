@@ -48,15 +48,10 @@ public class CandidateController {
     @PostMapping
     public ResponseEntity<CandidateDTO> createCandidate(@Valid @RequestBody CandidateDTO candidate) {
         logger.info("Creating new candidate: {}", candidate.fullName());
-        try {
-            CandidateDTO savedCandidate = candidateSrv.save(candidate);
-            logger.info("Candidate created successfully with ID: {}", savedCandidate.id());
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(savedCandidate);
-        } catch (Exception e) {
-            logger.error("Error creating candidate: {}", e.getMessage(), e);
-            throw new InternalServerException("Error creating candidate", e);
-        }
+        CandidateDTO savedCandidate = candidateSrv.save(candidate);
+        logger.info("Candidate created successfully with ID: {}", savedCandidate.id());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(savedCandidate);
     }
 
     @Operation(summary = "Update a candidate", description = "Updates an existing candidate by ID")
@@ -71,20 +66,13 @@ public class CandidateController {
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
             @Valid @RequestBody CandidateDTO candidateDTO) {
         logger.info("Updating candidate with ID: {}", id);
-        try {
-            CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
-            if (updatedCandidate == null) {
-                logger.warn("Candidate not found with ID: {}", id);
-                throw new ResourceNotFoundException("Candidate", id);
-            }
-            logger.info("Candidate updated successfully with ID: {}", id);
-            return ResponseEntity.ok(updatedCandidate);
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error updating candidate with ID {}: {}", id, e.getMessage(), e);
-            throw new InternalServerException("Error updating candidate", e);
+        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
+        if (updatedCandidate == null) {
+            logger.warn("Candidate not found with ID: {}", id);
+            throw new ResourceNotFoundException("Candidate", id);
         }
+        logger.info("Candidate updated successfully with ID: {}", id);
+        return ResponseEntity.ok(updatedCandidate);
     }
 
     @Operation(summary = "Partially update a candidate", description = "Updates specific fields of an existing candidate by ID")
@@ -100,20 +88,13 @@ public class CandidateController {
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
             @Valid @RequestBody CandidateDTO candidateDTO) {
         logger.info("Partially updating candidate with ID: {}", id);
-        try {
-            CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
-            if (updatedCandidate == null) {
-                logger.warn("Candidate not found with ID: {}", id);
-                throw new ResourceNotFoundException("Candidate", id);
-            }
-            logger.info("Candidate partially updated successfully with ID: {}", id);
-            return ResponseEntity.ok(updatedCandidate);
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error partially updating candidate with ID {}: {}", id, e.getMessage(), e);
-            throw new InternalServerException("Error partially updating candidate", e);
+        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
+        if (updatedCandidate == null) {
+            logger.warn("Candidate not found with ID: {}", id);
+            throw new ResourceNotFoundException("Candidate", id);
         }
+        logger.info("Candidate partially updated successfully with ID: {}", id);
+        return ResponseEntity.ok(updatedCandidate);
     }
 
     @Operation(summary = "Get all candidates", description = "Retrieves a list of all candidates")
@@ -127,20 +108,13 @@ public class CandidateController {
     @GetMapping
     public ResponseEntity<List<CandidateDTO>> getAllCandidates() {
         logger.info("Retrieving all candidates");
-        try {
-            List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
-            if (candidates == null || candidates.isEmpty()) {
-                logger.info("No candidates found");
-                throw new ResourceNotFoundException("No candidates found");
-            }
-            logger.info("Retrieved {} candidates", candidates.size());
-            return ResponseEntity.ok(candidates);
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error retrieving all candidates: {}", e.getMessage(), e);
-            throw new InternalServerException("Error retrieving candidates", e);
+        List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
+        if (candidates == null || candidates.isEmpty()) {
+            logger.info("No candidates found");
+            throw new ResourceNotFoundException("No candidates found");
         }
+        logger.info("Retrieved {} candidates", candidates.size());
+        return ResponseEntity.ok(candidates);
     }
 
     @Operation(summary = "Get a candidate by ID", description = "Retrieves a candidate by their ID")
@@ -154,20 +128,13 @@ public class CandidateController {
     public ResponseEntity<CandidateDTO> getCandidate(
             @Parameter(description = "ID of the candidate to retrieve") @PathVariable UUID id) {
         logger.info("Retrieving candidate with ID: {}", id);
-        try {
-            CandidateDTO candidate = candidateSrv.getById(id);
-            if (candidate == null) {
-                logger.warn("Candidate not found with ID: {}", id);
-                throw new ResourceNotFoundException("Candidate", id);
-            }
-            logger.info("Retrieved candidate with ID: {}", id);
-            return ResponseEntity.ok(candidate);
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error retrieving candidate with ID {}: {}", id, e.getMessage(), e);
-            throw new InternalServerException("Error retrieving candidate", e);
+        CandidateDTO candidate = candidateSrv.getById(id);
+        if (candidate == null) {
+            logger.warn("Candidate not found with ID: {}", id);
+            throw new ResourceNotFoundException("Candidate", id);
         }
+        logger.info("Retrieved candidate with ID: {}", id);
+        return ResponseEntity.ok(candidate);
     }
 
     @Operation(summary = "Delete a candidate", description = "Deletes a candidate by their ID")
@@ -180,20 +147,13 @@ public class CandidateController {
     public ResponseEntity<String> deleteCandidate(
             @Parameter(description = "ID of the candidate to delete") @PathVariable UUID id) {
         logger.info("Deleting candidate with ID: {}", id);
-        try {
-            boolean deleted = candidateSrv.delete(id);
-            if (!deleted) {
-                logger.warn("Candidate not found with ID: {}", id);
-                throw new ResourceNotFoundException("Candidate", id);
-            }
-            logger.info("Candidate deleted successfully with ID: {}", id);
-            return ResponseEntity.ok("Candidate deleted successfully");
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error deleting candidate with ID {}: {}", id, e.getMessage(), e);
-            throw new InternalServerException("Error deleting candidate", e);
+        boolean deleted = candidateSrv.delete(id);
+        if (!deleted) {
+            logger.warn("Candidate not found with ID: {}", id);
+            throw new ResourceNotFoundException("Candidate", id);
         }
+        logger.info("Candidate deleted successfully with ID: {}", id);
+        return ResponseEntity.ok("Candidate deleted successfully");
     }
 
     @Operation(summary = "Get all technologies", description = "Retrieves a list of all technologies used by candidates")
@@ -206,25 +166,18 @@ public class CandidateController {
     @GetMapping("/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
         logger.info("Retrieving all technologies");
-        try {
-            Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
-            List<String> skills = candidatesBySkill.keySet().stream()
-                    .sorted()
-                    .collect(Collectors.toList());
+        Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
+        List<String> skills = candidatesBySkill.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
 
-            if (skills.isEmpty()) {
-                logger.info("No technologies found");
-                throw new ResourceNotFoundException("No technologies found");
-            }
-
-            logger.info("Retrieved {} technologies", skills.size());
-            return ResponseEntity.ok(skills);
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error retrieving technologies: {}", e.getMessage(), e);
-            throw new InternalServerException("Error retrieving technologies", e);
+        if (skills.isEmpty()) {
+            logger.info("No technologies found");
+            throw new ResourceNotFoundException("No technologies found");
         }
+
+        logger.info("Retrieved {} technologies", skills.size());
+        return ResponseEntity.ok(skills);
     }
 
     @Operation(summary = "Get candidates by language", description = "Retrieves a list of candidates who speak the specified language")
@@ -238,29 +191,24 @@ public class CandidateController {
     public ResponseEntity<List<CandidateDTO>> getCandidatesByLanguage(
             @Parameter(description = "Language to filter by") @PathVariable String lang) {
         logger.info("Retrieving candidates by language: {}", lang);
-        try {
-            if (lang == null || lang.trim().isEmpty()) {
-                throw new BadRequestException("Language parameter cannot be empty");
-            }
 
-            List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                    .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
-                            .anyMatch(language -> language.language().equalsIgnoreCase(lang)))
-                    .collect(Collectors.toList());
-
-            if (candidates.isEmpty()) {
-                logger.info("No candidates found with language: {}", lang);
-                throw new ResourceNotFoundException("No candidates found with language: " + lang);
-            }
-
-            logger.info("Retrieved {} candidates with language: {}", candidates.size(), lang);
-            return ResponseEntity.ok(candidates);
-        } catch (ResourceNotFoundException | BadRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error retrieving candidates by language {}: {}", lang, e.getMessage(), e);
-            throw new InternalServerException("Error retrieving candidates by language", e);
+        if (lang == null || lang.trim().isEmpty()) {
+            throw new BadRequestException("Language parameter cannot be empty");
         }
+
+        // This filtering logic should be moved to the service layer in a future refactoring
+        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
+                .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
+                        .anyMatch(language -> language.language().equalsIgnoreCase(lang)))
+                .collect(Collectors.toList());
+
+        if (candidates.isEmpty()) {
+            logger.info("No candidates found with language: {}", lang);
+            throw new ResourceNotFoundException("No candidates found with language: " + lang);
+        }
+
+        logger.info("Retrieved {} candidates with language: {}", candidates.size(), lang);
+        return ResponseEntity.ok(candidates);
     }
 
     @Operation(summary = "Get candidates by skill", description = "Retrieves a list of candidates who have the specified skill")
@@ -274,28 +222,23 @@ public class CandidateController {
     public ResponseEntity<List<CandidateDTO>> getCandidatesBySkill(
             @Parameter(description = "Skill to filter by") @PathVariable String skill) {
         logger.info("Retrieving candidates by skill: {}", skill);
-        try {
-            if (skill == null || skill.trim().isEmpty()) {
-                throw new BadRequestException("Skill parameter cannot be empty");
-            }
 
-            List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                    .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
-                            .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
-                    .collect(Collectors.toList());
-
-            if (candidates.isEmpty()) {
-                logger.info("No candidates found with skill: {}", skill);
-                throw new ResourceNotFoundException("No candidates found with skill: " + skill);
-            }
-
-            logger.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
-            return ResponseEntity.ok(candidates);
-        } catch (ResourceNotFoundException | BadRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error retrieving candidates by skill {}: {}", skill, e.getMessage(), e);
-            throw new InternalServerException("Error retrieving candidates by skill", e);
+        if (skill == null || skill.trim().isEmpty()) {
+            throw new BadRequestException("Skill parameter cannot be empty");
         }
+
+        // This filtering logic should be moved to the service layer in a future refactoring
+        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
+                .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
+                        .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
+                .collect(Collectors.toList());
+
+        if (candidates.isEmpty()) {
+            logger.info("No candidates found with skill: {}", skill);
+            throw new ResourceNotFoundException("No candidates found with skill: " + skill);
+        }
+
+        logger.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
+        return ResponseEntity.ok(candidates);
     }
 }

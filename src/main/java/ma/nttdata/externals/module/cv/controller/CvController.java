@@ -1,7 +1,5 @@
 package ma.nttdata.externals.module.cv.controller;
 
-import ma.nttdata.externals.commons.exception.BadRequestException;
-import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.service.CvSrv;
 import org.slf4j.Logger;
@@ -28,20 +26,8 @@ public class CvController {
     public ResponseEntity<?> extractCandidateInfo(@RequestBody CvFileDTO cvFileDTO) {
         logger.info("Extracting candidate information from CV");
 
-        try {
-            if (cvFileDTO == null || cvFileDTO.b64EFile() == null || cvFileDTO.b64EFile().isEmpty()) {
-                logger.warn("Invalid CV file data provided");
-                throw new BadRequestException("CV file data is required");
-            }
-
-            var extractedData = cvSrv.extractCandidateInfo(cvFileDTO);
-            logger.info("Successfully extracted candidate information from CV");
-            return ResponseEntity.ok(extractedData);
-        } catch (BadRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error("Error extracting candidate information from CV: {}", e.getMessage(), e);
-            throw new InternalServerException("Error processing CV file", e);
-        }
+        var extractedData = cvSrv.extractCandidateInfo(cvFileDTO);
+        logger.info("Successfully extracted candidate information from CV");
+        return ResponseEntity.ok(extractedData);
     }
 }
