@@ -22,22 +22,39 @@ public interface CandidateMapper {
     ExperienceDTO experienceToExperienceDTO(Experience experience);
     SkillDTO skillToSkillDTO(Skill skill);
     EducationDTO educationToEducationDTO(Education education);
+    @Mapping(target = "promptCode", ignore = true)
+    @Mapping(target = "b64EFile", ignore = true)
+    @Mapping(target = "mimeType", source = "fileType")
+    @Mapping(target = "extractedData", ignore = true)
     CvFileDTO cvFileToCvFileDTO(CvFile cvFile);
     @Mapping(target = "candidate", ignore = true)
     @Mapping(target = "country.cities", ignore = true)
     @Mapping(target = "city.country.cities", ignore = true)
     AddressDTO addressToAddressDTO(Address address);
+    @Mapping(target = "candidateDTO", ignore = true)
+    @Mapping(target = "isNative", ignore = true)
     LanguageDTO languageToLanguageDTO(Language language);
 
     // DTO to Entity
     @Mapping(source = "naturalLanguages", target = "languages")
     Candidate candidateDTOToCandidate(CandidateDTO candidateDTO);
+    @Mapping(target = "candidate", ignore = true)
     Contact contactDTOToContact(ContactDTO contactDTO);
+    @Mapping(target = "candidate", ignore = true)
     Experience experienceDTOToExperience(ExperienceDTO experienceDTO);
+    @Mapping(target = "candidate", ignore = true)
     Skill skillDTOToSkill(SkillDTO skillDTO);
+    @Mapping(target = "candidate", ignore = true)
     Education educationDTOToEducation(EducationDTO educationDTO);
+    @Mapping(target = "candidate", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fileType", source = "mimeType")
+    @Mapping(target = "uploadedAt", ignore = true)
     CvFile cvFileDTOToCvFile(CvFileDTO cvFileDTO);
+    @Mapping(target = "candidate", ignore = true)
     Address addressDTOToAddress(AddressDTO addressDTO);
+    @Mapping(target = "candidate", ignore = true)
+    @Mapping(target = "native", source = "isNative")
     Language languageDTOToLanguage(LanguageDTO languageDTO);
 
     @AfterMapping
