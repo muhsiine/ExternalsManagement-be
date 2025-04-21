@@ -165,11 +165,10 @@ public class CandidateSrvImpl implements CandidateSrv {
     @Override
     public Map<String, Long> getCandidatesByLanguage() {
         try {
-            Map<String, Long> candidatesByLanguage = candidateRepository.findAll().stream()
+
+            return candidateRepository.findAll().stream()
                     .flatMap(candidate -> candidate.getLanguages().stream())
                     .collect(Collectors.groupingBy(Language::getLanguage, Collectors.counting()));
-
-            return candidatesByLanguage;
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving candidates by language", e);
         }
@@ -178,11 +177,10 @@ public class CandidateSrvImpl implements CandidateSrv {
     @Override
     public Map<String, Long> getCandidatesBySkill() {
         try {
-            Map<String, Long> candidatesBySkill = candidateRepository.findAll().stream()
+
+            return candidateRepository.findAll().stream()
                     .flatMap(candidate -> candidate.getSkills().stream())
                     .collect(Collectors.groupingBy(Skill::getSkillName, Collectors.counting()));
-
-            return candidatesBySkill;
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving candidates by skill", e);
         }
@@ -191,8 +189,7 @@ public class CandidateSrvImpl implements CandidateSrv {
     @Override
     public Long getTotalCandidates() {
         try {
-            Long totalCandidates = candidateRepository.count();
-            return totalCandidates;
+            return candidateRepository.count();
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving total candidates count", e);
         }
