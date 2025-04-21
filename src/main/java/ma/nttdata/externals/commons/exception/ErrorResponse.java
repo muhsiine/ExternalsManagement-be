@@ -1,6 +1,8 @@
 package ma.nttdata.externals.commons.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -10,7 +12,10 @@ import java.util.List;
 /**
  * Standard error response object returned to clients.
  */
+@Setter
+@Getter
 public class ErrorResponse {
+    // Getters and setters
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
     private int status;
@@ -46,58 +51,11 @@ public class ErrorResponse {
         validationErrors.add(new ValidationError(field, message));
     }
 
-    // Getters and setters
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public List<ValidationError> getValidationErrors() {
-        return validationErrors;
-    }
-
-    public void setValidationErrors(List<ValidationError> validationErrors) {
-        this.validationErrors = validationErrors;
-    }
-
     /**
      * Represents a validation error for a specific field.
      */
+    @Setter
+    @Getter
     public static class ValidationError {
         private String field;
         private String message;
@@ -107,20 +65,5 @@ public class ErrorResponse {
             this.message = message;
         }
 
-        public String getField() {
-            return field;
-        }
-
-        public void setField(String field) {
-            this.field = field;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
     }
 }

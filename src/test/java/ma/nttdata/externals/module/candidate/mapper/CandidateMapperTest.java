@@ -129,19 +129,19 @@ class CandidateMapperTest {
         // Verify contacts
         assertNotNull(candidateDTO.contacts());
         assertEquals(1, candidateDTO.contacts().size());
-        assertEquals(contact.getContactType(), candidateDTO.contacts().get(0).contactType());
-        assertEquals(contact.getContactValue(), candidateDTO.contacts().get(0).contactValue());
+        assertEquals(contact.getContactType(), candidateDTO.contacts().getFirst().contactType());
+        assertEquals(contact.getContactValue(), candidateDTO.contacts().getFirst().contactValue());
 
         // Verify experiences
         assertNotNull(candidateDTO.experiences());
         assertEquals(1, candidateDTO.experiences().size());
-        assertEquals(experience.getCompanyName(), candidateDTO.experiences().get(0).companyName());
-        assertEquals(experience.getPosition(), candidateDTO.experiences().get(0).position());
+        assertEquals(experience.getCompanyName(), candidateDTO.experiences().getFirst().companyName());
+        assertEquals(experience.getPosition(), candidateDTO.experiences().getFirst().position());
 
         // Verify skills
         assertNotNull(candidateDTO.skills());
         assertEquals(1, candidateDTO.skills().size());
-        assertEquals(skill.getSkillName(), candidateDTO.skills().get(0).skillName());
+        assertEquals(skill.getSkillName(), candidateDTO.skills().getFirst().skillName());
     }
 
     @Test
@@ -178,24 +178,24 @@ class CandidateMapperTest {
         // Verify contacts
         assertNotNull(candidate.getContacts());
         assertEquals(1, candidate.getContacts().size());
-        assertEquals(contactDTO.contactType(), candidate.getContacts().get(0).getContactType());
-        assertEquals(contactDTO.contactValue(), candidate.getContacts().get(0).getContactValue());
+        assertEquals(contactDTO.contactType(), candidate.getContacts().getFirst().getContactType());
+        assertEquals(contactDTO.contactValue(), candidate.getContacts().getFirst().getContactValue());
 
         // Verify experiences
         assertNotNull(candidate.getExperiences());
         assertEquals(1, candidate.getExperiences().size());
-        assertEquals(experienceDTO.companyName(), candidate.getExperiences().get(0).getCompanyName());
-        assertEquals(experienceDTO.position(), candidate.getExperiences().get(0).getPosition());
+        assertEquals(experienceDTO.companyName(), candidate.getExperiences().getFirst().getCompanyName());
+        assertEquals(experienceDTO.position(), candidate.getExperiences().getFirst().getPosition());
 
         // Verify skills
         assertNotNull(candidate.getSkills());
         assertEquals(1, candidate.getSkills().size());
-        assertEquals(skillDTO.skillName(), candidate.getSkills().get(0).getSkillName());
+        assertEquals(skillDTO.skillName(), candidate.getSkills().getFirst().getSkillName());
 
         // Verify bidirectional relationships
-        assertEquals(candidate, candidate.getContacts().get(0).getCandidate());
-        assertEquals(candidate, candidate.getExperiences().get(0).getCandidate());
-        assertEquals(candidate, candidate.getSkills().get(0).getCandidate());
+        assertEquals(candidate, candidate.getContacts().getFirst().getCandidate());
+        assertEquals(candidate, candidate.getExperiences().getFirst().getCandidate());
+        assertEquals(candidate, candidate.getSkills().getFirst().getCandidate());
     }
 
     @Test

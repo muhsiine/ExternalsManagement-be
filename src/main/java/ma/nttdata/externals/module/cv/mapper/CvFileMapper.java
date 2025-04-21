@@ -4,8 +4,6 @@ import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.entity.CvFile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Mappings;
-import org.mapstruct.factory.Mappers;
 
 
 @Mapper(componentModel = "spring")

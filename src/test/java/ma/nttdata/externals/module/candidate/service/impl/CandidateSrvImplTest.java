@@ -161,8 +161,8 @@ class CandidateSrvImplTest {
         // Verify
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(candidateDTO.id(), result.get(0).id());
-        assertEquals(candidateDTO.fullName(), result.get(0).fullName());
+        assertEquals(candidateDTO.id(), result.getFirst().id());
+        assertEquals(candidateDTO.fullName(), result.getFirst().fullName());
     }
 
     @Test
@@ -225,8 +225,8 @@ class CandidateSrvImplTest {
         // Verify
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertEquals(candidateDTO.id(), result.get(0).id());
-        assertEquals(candidateDTO.fullName(), result.get(0).fullName());
+        assertEquals(candidateDTO.id(), result.getFirst().id());
+        assertEquals(candidateDTO.fullName(), result.getFirst().fullName());
     }
 
     @Test

@@ -1,11 +1,19 @@
 package ma.nttdata.externals.commons.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 /**
  * Base exception class for all application-specific exceptions.
  */
+@Getter
 public abstract class BaseException extends RuntimeException {
+    /**
+     * -- GETTER --
+     *  Returns the HTTP status associated with this exception.
+     *
+     * @return the HTTP status
+     */
     private final HttpStatus status;
 
     /**
@@ -31,12 +39,4 @@ public abstract class BaseException extends RuntimeException {
         this.status = status;
     }
 
-    /**
-     * Returns the HTTP status associated with this exception.
-     *
-     * @return the HTTP status
-     */
-    public HttpStatus getStatus() {
-        return status;
-    }
 }
