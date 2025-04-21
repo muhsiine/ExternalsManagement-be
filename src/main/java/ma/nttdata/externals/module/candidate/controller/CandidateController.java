@@ -7,6 +7,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
+import ma.nttdata.externals.commons.exception.BadRequestException;
+import ma.nttdata.externals.commons.exception.InternalServerException;
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import org.springframework.http.HttpStatus;
@@ -24,6 +30,8 @@ import java.util.stream.Collectors;
 
 public class CandidateController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CandidateController.class);
+
     private final CandidateSrv candidateSrv;
 
     public CandidateController(CandidateSrv candidateSrv) {
@@ -38,10 +46,17 @@ public class CandidateController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<?> candidate(@RequestBody CandidateDTO candidate) {
-        CandidateDTO savedCandidate = candidateSrv.save(candidate);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedCandidate);
+    public ResponseEntity<CandidateDTO> createCandidate(@Valid @RequestBody CandidateDTO candidate) {
+        logger.info("Creating new candidate: {}", candidate.fullName());
+        try {
+            CandidateDTO savedCandidate = candidateSrv.save(candidate);
+            logger.info("Candidate created successfully with ID: {}", savedCandidate.id());
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(savedCandidate);
+        } catch (Exception e) {
+            logger.error("Error creating candidate: {}", e.getMessage(), e);
+            throw new InternalServerException("Error creating candidate", e);
+        }
     }
 
     @Operation(summary = "Update a candidate", description = "Updates an existing candidate by ID")
@@ -52,15 +67,24 @@ public class CandidateController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCandidate(
+    public ResponseEntity<CandidateDTO> updateCandidate(
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
-            @RequestBody CandidateDTO candidateDTO) {
-        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
-        if (updatedCandidate == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Candidate not found");
+            @Valid @RequestBody CandidateDTO candidateDTO) {
+        logger.info("Updating candidate with ID: {}", id);
+        try {
+            CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
+            if (updatedCandidate == null) {
+                logger.warn("Candidate not found with ID: {}", id);
+                throw new ResourceNotFoundException("Candidate", id);
+            }
+            logger.info("Candidate updated successfully with ID: {}", id);
+            return ResponseEntity.ok(updatedCandidate);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error updating candidate with ID {}: {}", id, e.getMessage(), e);
+            throw new InternalServerException("Error updating candidate", e);
         }
-        return ResponseEntity.ok(updatedCandidate);
     }
 
     @Operation(summary = "Partially update a candidate", description = "Updates specific fields of an existing candidate by ID")
@@ -72,25 +96,51 @@ public class CandidateController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<?> patchCandidate(
+    public ResponseEntity<CandidateDTO> patchCandidate(
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
-            @RequestBody CandidateDTO candidateDTO) {
-        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
-        if (updatedCandidate == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Candidate not found");
+            @Valid @RequestBody CandidateDTO candidateDTO) {
+        logger.info("Partially updating candidate with ID: {}", id);
+        try {
+            CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
+            if (updatedCandidate == null) {
+                logger.warn("Candidate not found with ID: {}", id);
+                throw new ResourceNotFoundException("Candidate", id);
+            }
+            logger.info("Candidate partially updated successfully with ID: {}", id);
+            return ResponseEntity.ok(updatedCandidate);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error partially updating candidate with ID {}: {}", id, e.getMessage(), e);
+            throw new InternalServerException("Error partially updating candidate", e);
         }
-        return ResponseEntity.ok(updatedCandidate);
     }
 
-    @GetMapping("/all")
+    @Operation(summary = "Get all candidates", description = "Retrieves a list of all candidates")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
+                    content = @Content(mediaType = "application/json", 
+                            schema = @Schema(implementation = CandidateDTO.class, type = "array"))),
+            @ApiResponse(responseCode = "404", description = "No candidates found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping
     public ResponseEntity<List<CandidateDTO>> getAllCandidates() {
-        List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
-        if (candidates == null || candidates.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
+        logger.info("Retrieving all candidates");
+        try {
+            List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
+            if (candidates == null || candidates.isEmpty()) {
+                logger.info("No candidates found");
+                throw new ResourceNotFoundException("No candidates found");
+            }
+            logger.info("Retrieved {} candidates", candidates.size());
+            return ResponseEntity.ok(candidates);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving all candidates: {}", e.getMessage(), e);
+            throw new InternalServerException("Error retrieving candidates", e);
         }
-        return ResponseEntity.ok(candidates);
     }
 
     @Operation(summary = "Get a candidate by ID", description = "Retrieves a candidate by their ID")
@@ -101,14 +151,23 @@ public class CandidateController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getCandidate(
+    public ResponseEntity<CandidateDTO> getCandidate(
             @Parameter(description = "ID of the candidate to retrieve") @PathVariable UUID id) {
-        CandidateDTO candidate = candidateSrv.getById(id);
-        if (candidate == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Candidate not found");
+        logger.info("Retrieving candidate with ID: {}", id);
+        try {
+            CandidateDTO candidate = candidateSrv.getById(id);
+            if (candidate == null) {
+                logger.warn("Candidate not found with ID: {}", id);
+                throw new ResourceNotFoundException("Candidate", id);
+            }
+            logger.info("Retrieved candidate with ID: {}", id);
+            return ResponseEntity.ok(candidate);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving candidate with ID {}: {}", id, e.getMessage(), e);
+            throw new InternalServerException("Error retrieving candidate", e);
         }
-        return ResponseEntity.ok(candidate);
     }
 
     @Operation(summary = "Delete a candidate", description = "Deletes a candidate by their ID")
@@ -118,40 +177,125 @@ public class CandidateController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCandidate(
+    public ResponseEntity<String> deleteCandidate(
             @Parameter(description = "ID of the candidate to delete") @PathVariable UUID id) {
-        boolean deleted = candidateSrv.delete(id);
-        if (!deleted) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Candidate not found");
+        logger.info("Deleting candidate with ID: {}", id);
+        try {
+            boolean deleted = candidateSrv.delete(id);
+            if (!deleted) {
+                logger.warn("Candidate not found with ID: {}", id);
+                throw new ResourceNotFoundException("Candidate", id);
+            }
+            logger.info("Candidate deleted successfully with ID: {}", id);
+            return ResponseEntity.ok("Candidate deleted successfully");
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error deleting candidate with ID {}: {}", id, e.getMessage(), e);
+            throw new InternalServerException("Error deleting candidate", e);
         }
-        return ResponseEntity.ok("Candidate deleted successfully");
     }
 
-    @GetMapping("/charts/technologies")
+    @Operation(summary = "Get all technologies", description = "Retrieves a list of all technologies used by candidates")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved technologies",
+                    content = @Content(mediaType = "application/json", 
+                            schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
-        Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
-        List<String> skills = candidatesBySkill.keySet().stream()
-                .sorted()
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(skills);
+        logger.info("Retrieving all technologies");
+        try {
+            Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
+            List<String> skills = candidatesBySkill.keySet().stream()
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            if (skills.isEmpty()) {
+                logger.info("No technologies found");
+                throw new ResourceNotFoundException("No technologies found");
+            }
+
+            logger.info("Retrieved {} technologies", skills.size());
+            return ResponseEntity.ok(skills);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving technologies: {}", e.getMessage(), e);
+            throw new InternalServerException("Error retrieving technologies", e);
+        }
     }
 
-    @GetMapping("/charts/candidates/language/{lang}")
-    public ResponseEntity<List<CandidateDTO>> getCandidatesByLanguage(@PathVariable String lang) {
-        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
-                        .anyMatch(language -> language.language().equalsIgnoreCase(lang)))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(candidates);
+    @Operation(summary = "Get candidates by language", description = "Retrieves a list of candidates who speak the specified language")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
+                    content = @Content(mediaType = "application/json", 
+                            schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/languages/{lang}")
+    public ResponseEntity<List<CandidateDTO>> getCandidatesByLanguage(
+            @Parameter(description = "Language to filter by") @PathVariable String lang) {
+        logger.info("Retrieving candidates by language: {}", lang);
+        try {
+            if (lang == null || lang.trim().isEmpty()) {
+                throw new BadRequestException("Language parameter cannot be empty");
+            }
+
+            List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
+                    .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
+                            .anyMatch(language -> language.language().equalsIgnoreCase(lang)))
+                    .collect(Collectors.toList());
+
+            if (candidates.isEmpty()) {
+                logger.info("No candidates found with language: {}", lang);
+                throw new ResourceNotFoundException("No candidates found with language: " + lang);
+            }
+
+            logger.info("Retrieved {} candidates with language: {}", candidates.size(), lang);
+            return ResponseEntity.ok(candidates);
+        } catch (ResourceNotFoundException | BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving candidates by language {}: {}", lang, e.getMessage(), e);
+            throw new InternalServerException("Error retrieving candidates by language", e);
+        }
     }
 
-    @GetMapping("/charts/candidates/technology/{skill}")
-    public ResponseEntity<List<CandidateDTO>> getCandidatesBySkill(@PathVariable String skill) {
-        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
-                        .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(candidates);
+    @Operation(summary = "Get candidates by skill", description = "Retrieves a list of candidates who have the specified skill")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
+                    content = @Content(mediaType = "application/json", 
+                            schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/skills/{skill}")
+    public ResponseEntity<List<CandidateDTO>> getCandidatesBySkill(
+            @Parameter(description = "Skill to filter by") @PathVariable String skill) {
+        logger.info("Retrieving candidates by skill: {}", skill);
+        try {
+            if (skill == null || skill.trim().isEmpty()) {
+                throw new BadRequestException("Skill parameter cannot be empty");
+            }
+
+            List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
+                    .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
+                            .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
+                    .collect(Collectors.toList());
+
+            if (candidates.isEmpty()) {
+                logger.info("No candidates found with skill: {}", skill);
+                throw new ResourceNotFoundException("No candidates found with skill: " + skill);
+            }
+
+            logger.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
+            return ResponseEntity.ok(candidates);
+        } catch (ResourceNotFoundException | BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving candidates by skill {}: {}", skill, e.getMessage(), e);
+            throw new InternalServerException("Error retrieving candidates by skill", e);
+        }
     }
 }

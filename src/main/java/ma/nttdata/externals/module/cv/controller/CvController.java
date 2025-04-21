@@ -1,7 +1,11 @@
 package ma.nttdata.externals.module.cv.controller;
 
+import ma.nttdata.externals.commons.exception.BadRequestException;
+import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.service.cvSrv;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/cv")
 public class CvController {
 
+    private static final Logger logger = LoggerFactory.getLogger(CvController.class);
+
     private final cvSrv cvSrv;
 
     public CvController(cvSrv cvSrv) {
@@ -20,9 +26,22 @@ public class CvController {
 
     @PostMapping("/extract")
     public ResponseEntity<?> extractCandidateInfo(@RequestBody CvFileDTO cvFileDTO) {
-        var  extractedData = cvSrv.extractCandidateInfo(cvFileDTO);
-        return ResponseEntity.ok(extractedData);
+        logger.info("Extracting candidate information from CV");
+
+        try {
+            if (cvFileDTO == null || cvFileDTO.b64EFile() == null || cvFileDTO.b64EFile().isEmpty()) {
+                logger.warn("Invalid CV file data provided");
+                throw new BadRequestException("CV file data is required");
+            }
+
+            var extractedData = cvSrv.extractCandidateInfo(cvFileDTO);
+            logger.info("Successfully extracted candidate information from CV");
+            return ResponseEntity.ok(extractedData);
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error extracting candidate information from CV: {}", e.getMessage(), e);
+            throw new InternalServerException("Error processing CV file", e);
+        }
     }
-
-
 }
