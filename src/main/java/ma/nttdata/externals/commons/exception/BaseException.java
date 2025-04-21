@@ -12,7 +12,6 @@ public abstract class BaseException extends RuntimeException {
      * -- GETTER --
      *  Returns the HTTP status associated with this exception.
      *
-     * @return the HTTP status
      */
     private final HttpStatus status;
 

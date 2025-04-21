@@ -2,6 +2,6 @@ package ma.nttdata.externals.module.cv.service;
 
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 
-public interface cvSrv {
+public interface CvSrv {
     String extractCandidateInfo(CvFileDTO cvFileDTO);
 }

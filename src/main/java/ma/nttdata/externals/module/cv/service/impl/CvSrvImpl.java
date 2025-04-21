@@ -3,19 +3,19 @@ package ma.nttdata.externals.module.cv.service.impl;
 import ma.nttdata.externals.commons.constants.JsonExtractionPromptConstants;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
-import ma.nttdata.externals.module.cv.service.cvSrv;
+import ma.nttdata.externals.module.cv.service.CvSrv;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class cvSrvImpl implements cvSrv {
+public class CvSrvImpl implements CvSrv {
 
 
     private final boolean mockFlag;
     private final RestClient aiRestClient;
-    public cvSrvImpl(@Value("${app.mock.flag}") boolean mockFlag,
+    public CvSrvImpl(@Value("${app.mock.flag}") boolean mockFlag,
                      @Qualifier("aiServiceClient") RestClient aiRestClient) {
         this.mockFlag = mockFlag;
         this.aiRestClient = aiRestClient;

@@ -3,7 +3,7 @@ package ma.nttdata.externals.module.cv.controller;
 import ma.nttdata.externals.commons.exception.BadRequestException;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
-import ma.nttdata.externals.module.cv.service.cvSrv;
+import ma.nttdata.externals.module.cv.service.CvSrv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +18,9 @@ public class CvController {
 
     private static final Logger logger = LoggerFactory.getLogger(CvController.class);
 
-    private final cvSrv cvSrv;
+    private final CvSrv cvSrv;
 
-    public CvController(cvSrv cvSrv) {
+    public CvController(CvSrv cvSrv) {
         this.cvSrv = cvSrv;
     }
 

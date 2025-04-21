@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class cvSrvImplTest {
+class CvSrvImplTest {
 
     @Mock
     private RestClient aiRestClient;
@@ -30,18 +30,18 @@ class cvSrvImplTest {
     @Mock
     private RestClient.ResponseSpec responseSpec;
 
-    private cvSrvImpl cvSrv;
+    private CvSrvImpl cvSrv;
 
     @BeforeEach
     void setUp() {
         // Create the service with constructor parameters
-        cvSrv = new cvSrvImpl(false, aiRestClient);
+        cvSrv = new CvSrvImpl(false, aiRestClient);
     }
 
     @Test
     void testExtractCandidateInfoWithMockFlag() {
         // Create a new instance with mockFlag = true
-        cvSrv = new cvSrvImpl(true, aiRestClient);
+        cvSrv = new CvSrvImpl(true, aiRestClient);
 
         // Create a CV file DTO
         CvFileDTO cvFileDTO = new CvFileDTO(
