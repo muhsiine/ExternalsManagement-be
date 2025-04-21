@@ -8,12 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import ma.nttdata.externals.commons.exception.BadRequestException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +25,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/candidates")
 @Tag(name = "Candidate Management", description = "Operations related to candidate management")
-
+@Slf4j
 public class CandidateController {
-
-    private static final Logger logger = LoggerFactory.getLogger(CandidateController.class);
 
     private final CandidateSrv candidateSrv;
 
@@ -46,9 +43,9 @@ public class CandidateController {
     })
     @PostMapping
     public ResponseEntity<CandidateDTO> createCandidate(@Valid @RequestBody CandidateDTO candidate) {
-        logger.info("Creating new candidate: {}", candidate.fullName());
+        log.info("Creating new candidate: {}", candidate.fullName());
         CandidateDTO savedCandidate = candidateSrv.save(candidate);
-        logger.info("Candidate created successfully with ID: {}", savedCandidate.id());
+        log.info("Candidate created successfully with ID: {}", savedCandidate.id());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(savedCandidate);
     }
@@ -64,13 +61,13 @@ public class CandidateController {
     public ResponseEntity<CandidateDTO> updateCandidate(
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
             @Valid @RequestBody CandidateDTO candidateDTO) {
-        logger.info("Updating candidate with ID: {}", id);
+        log.info("Updating candidate with ID: {}", id);
         CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
         if (updatedCandidate == null) {
-            logger.warn("Candidate not found with ID: {}", id);
+            log.warn("Candidate not found with ID: {}", id);
             throw new ResourceNotFoundException("Candidate", id);
         }
-        logger.info("Candidate updated successfully with ID: {}", id);
+        log.info("Candidate updated successfully with ID: {}", id);
         return ResponseEntity.ok(updatedCandidate);
     }
 
@@ -86,13 +83,13 @@ public class CandidateController {
     public ResponseEntity<CandidateDTO> patchCandidate(
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
             @Valid @RequestBody CandidateDTO candidateDTO) {
-        logger.info("Partially updating candidate with ID: {}", id);
+        log.info("Partially updating candidate with ID: {}", id);
         CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
         if (updatedCandidate == null) {
-            logger.warn("Candidate not found with ID: {}", id);
+            log.warn("Candidate not found with ID: {}", id);
             throw new ResourceNotFoundException("Candidate", id);
         }
-        logger.info("Candidate partially updated successfully with ID: {}", id);
+        log.info("Candidate partially updated successfully with ID: {}", id);
         return ResponseEntity.ok(updatedCandidate);
     }
 
@@ -106,13 +103,13 @@ public class CandidateController {
     })
     @GetMapping
     public ResponseEntity<List<CandidateDTO>> getAllCandidates() {
-        logger.info("Retrieving all candidates");
+        log.info("Retrieving all candidates");
         List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
         if (candidates == null || candidates.isEmpty()) {
-            logger.info("No candidates found");
+            log.info("No candidates found");
             throw new ResourceNotFoundException("No candidates found");
         }
-        logger.info("Retrieved {} candidates", candidates.size());
+        log.info("Retrieved {} candidates", candidates.size());
         return ResponseEntity.ok(candidates);
     }
 
@@ -126,13 +123,13 @@ public class CandidateController {
     @GetMapping("/{id}")
     public ResponseEntity<CandidateDTO> getCandidate(
             @Parameter(description = "ID of the candidate to retrieve") @PathVariable UUID id) {
-        logger.info("Retrieving candidate with ID: {}", id);
+        log.info("Retrieving candidate with ID: {}", id);
         CandidateDTO candidate = candidateSrv.getById(id);
         if (candidate == null) {
-            logger.warn("Candidate not found with ID: {}", id);
+            log.warn("Candidate not found with ID: {}", id);
             throw new ResourceNotFoundException("Candidate", id);
         }
-        logger.info("Retrieved candidate with ID: {}", id);
+        log.info("Retrieved candidate with ID: {}", id);
         return ResponseEntity.ok(candidate);
     }
 
@@ -145,13 +142,13 @@ public class CandidateController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCandidate(
             @Parameter(description = "ID of the candidate to delete") @PathVariable UUID id) {
-        logger.info("Deleting candidate with ID: {}", id);
+        log.info("Deleting candidate with ID: {}", id);
         boolean deleted = candidateSrv.delete(id);
         if (!deleted) {
-            logger.warn("Candidate not found with ID: {}", id);
+            log.warn("Candidate not found with ID: {}", id);
             throw new ResourceNotFoundException("Candidate", id);
         }
-        logger.info("Candidate deleted successfully with ID: {}", id);
+        log.info("Candidate deleted successfully with ID: {}", id);
         return ResponseEntity.ok("Candidate deleted successfully");
     }
 
@@ -164,18 +161,18 @@ public class CandidateController {
     })
     @GetMapping("/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
-        logger.info("Retrieving all technologies");
+        log.info("Retrieving all technologies");
         Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
         List<String> skills = candidatesBySkill.keySet().stream()
                 .sorted()
                 .collect(Collectors.toList());
 
         if (skills.isEmpty()) {
-            logger.info("No technologies found");
+            log.info("No technologies found");
             throw new ResourceNotFoundException("No technologies found");
         }
 
-        logger.info("Retrieved {} technologies", skills.size());
+        log.info("Retrieved {} technologies", skills.size());
         return ResponseEntity.ok(skills);
     }
 
@@ -189,7 +186,7 @@ public class CandidateController {
     @GetMapping("/languages/{lang}")
     public ResponseEntity<List<CandidateDTO>> getCandidatesByLanguage(
             @Parameter(description = "Language to filter by") @PathVariable String lang) {
-        logger.info("Retrieving candidates by language: {}", lang);
+        log.info("Retrieving candidates by language: {}", lang);
 
         if (lang == null || lang.trim().isEmpty()) {
             throw new BadRequestException("Language parameter cannot be empty");
@@ -202,11 +199,11 @@ public class CandidateController {
                 .collect(Collectors.toList());
 
         if (candidates.isEmpty()) {
-            logger.info("No candidates found with language: {}", lang);
+            log.info("No candidates found with language: {}", lang);
             throw new ResourceNotFoundException("No candidates found with language: " + lang);
         }
 
-        logger.info("Retrieved {} candidates with language: {}", candidates.size(), lang);
+        log.info("Retrieved {} candidates with language: {}", candidates.size(), lang);
         return ResponseEntity.ok(candidates);
     }
 
@@ -220,7 +217,7 @@ public class CandidateController {
     @GetMapping("/skills/{skill}")
     public ResponseEntity<List<CandidateDTO>> getCandidatesBySkill(
             @Parameter(description = "Skill to filter by") @PathVariable String skill) {
-        logger.info("Retrieving candidates by skill: {}", skill);
+        log.info("Retrieving candidates by skill: {}", skill);
 
         if (skill == null || skill.trim().isEmpty()) {
             throw new BadRequestException("Skill parameter cannot be empty");
@@ -233,11 +230,11 @@ public class CandidateController {
                 .collect(Collectors.toList());
 
         if (candidates.isEmpty()) {
-            logger.info("No candidates found with skill: {}", skill);
+            log.info("No candidates found with skill: {}", skill);
             throw new ResourceNotFoundException("No candidates found with skill: " + skill);
         }
 
-        logger.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
+        log.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
         return ResponseEntity.ok(candidates);
     }
 }

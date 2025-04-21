@@ -6,8 +6,6 @@ import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
 import ma.nttdata.externals.module.cv.service.CvSrv;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,8 +13,6 @@ import org.springframework.web.client.RestClient;
 
 @Service
 public class CvSrvImpl implements CvSrv {
-
-    private static final Logger logger = LoggerFactory.getLogger(CvSrvImpl.class);
     private final boolean mockFlag;
     private final RestClient aiRestClient;
 
@@ -31,7 +27,6 @@ public class CvSrvImpl implements CvSrv {
         try {
             // Validate input
             if (cvFileDTO == null || cvFileDTO.b64EFile() == null || cvFileDTO.b64EFile().isEmpty()) {
-                logger.warn("Invalid CV file data provided");
                 throw new BadRequestException("CV file data is required");
             }
 
@@ -39,7 +34,6 @@ public class CvSrvImpl implements CvSrv {
         } catch (BadRequestException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Error extracting candidate information from CV: {}", e.getMessage(), e);
             throw new InternalServerException("Error processing CV file", e);
         }
     }
