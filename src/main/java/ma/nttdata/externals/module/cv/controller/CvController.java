@@ -24,5 +24,16 @@ public class CvController {
         return ResponseEntity.ok(extractedData);
     }
 
+    @PostMapping("/save")
+    public ResponseEntity<?> saveCandidateFromCv(@RequestBody CandidateDTO candidateDTO) {
+        try {
+            CandidateDTO savedCandidate = candidateSrv.save(candidateDTO);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(savedCandidate);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error saving candidate: " + e.getMessage());
+        }
+    }
 
 }
