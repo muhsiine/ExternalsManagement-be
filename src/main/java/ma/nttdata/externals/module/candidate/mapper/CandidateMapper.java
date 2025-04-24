@@ -16,7 +16,8 @@ public interface CandidateMapper {
     CandidateMapper INSTANCE = Mappers.getMapper(CandidateMapper.class);
 
     // Entity to DTO
-    @Mapping(source = "languages", target = "naturalLanguages")
+    @Mapping(source =
+            "languages", target = "naturalLanguages")
     CandidateDTO candidateToCandidateDTO(Candidate candidate);
     ContactDTO contactToContactDTO(Contact contact);
     ExperienceDTO experienceToExperienceDTO(Experience experience);
