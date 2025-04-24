@@ -19,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/candidates")
+@RequestMapping("/api/v1/candidates")
 @Tag(name = "Candidate Management", description = "Operations related to candidate management")
 
 public class CandidateController {
@@ -153,5 +153,46 @@ public class CandidateController {
                         .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(candidates);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<CandidateDTO>> filterCandidates(
+            @RequestParam(required = false) String skills,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) Integer yearsOfExperience) {
+        
+        List<CandidateDTO> filteredCandidates = candidateSrv.getCandidates();
+        
+        if (skills != null && !skills.isEmpty()) {
+            String[] skillArray = skills.split(",");
+            filteredCandidates = filteredCandidates.stream()
+                .filter(candidate -> candidate.skills() != null && 
+                    candidate.skills().stream()
+                        .anyMatch(s -> {
+                            for (String skill : skillArray) {
+                                if (s.skillName().equalsIgnoreCase(skill.trim())) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }))
+                .collect(Collectors.toList());
+        }
+        
+        if (language != null && !language.isEmpty()) {
+            filteredCandidates = filteredCandidates.stream()
+                .filter(candidate -> candidate.naturalLanguages() != null && 
+                    candidate.naturalLanguages().stream()
+                        .anyMatch(l -> l.language().equalsIgnoreCase(language)))
+                .collect(Collectors.toList());
+        }
+        
+        if (yearsOfExperience != null) {
+            filteredCandidates = filteredCandidates.stream()
+                .filter(candidate -> candidate.yearsOfExperience() >= yearsOfExperience)
+                .collect(Collectors.toList());
+        }
+        
+        return ResponseEntity.ok(filteredCandidates);
     }
 }
