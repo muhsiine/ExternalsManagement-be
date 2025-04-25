@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CvController {
 
     private final cvSrv cvSrv;
+    private final CandidateSrv candidateSrv;
 
     public CvController(cvSrv cvSrv) {
         this.cvSrv = cvSrv;
