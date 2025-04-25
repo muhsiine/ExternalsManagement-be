@@ -19,9 +19,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/candidates")
-@Tag(name = "Candidate Management", description = "Operations related to candidate management")
-
+@RequestMapping("/candidates")
+@Tag(name = "Candidate Management and Statistics", description = "Operations related to candidate management and statistics")
 public class CandidateController {
 
     private final CandidateSrv candidateSrv;
@@ -29,6 +28,8 @@ public class CandidateController {
     public CandidateController(CandidateSrv candidateSrv) {
         this.candidateSrv = candidateSrv;
     }
+
+    // === Candidate Management Endpoints ===
 
     @Operation(summary = "Create a new candidate", description = "Creates a new candidate and returns its details")
     @ApiResponses(value = {
@@ -83,12 +84,17 @@ public class CandidateController {
         return ResponseEntity.ok(updatedCandidate);
     }
 
+    @Operation(summary = "Get all candidates", description = "Retrieves all candidates")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @GetMapping("/all")
     public ResponseEntity<List<CandidateDTO>> getAllCandidates() {
         List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
         if (candidates == null || candidates.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
+            return ResponseEntity.ok(List.of()); // Return empty list with 200 OK
         }
         return ResponseEntity.ok(candidates);
     }
@@ -128,16 +134,48 @@ public class CandidateController {
         return ResponseEntity.ok("Candidate deleted successfully");
     }
 
+    // === Candidate Statistics Endpoints ===
+
+    @Operation(summary = "Get total number of candidates")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved total count")
+    })
+    @GetMapping("/charts/total")
+    public ResponseEntity<Long> getTotalCandidates() {
+        return ResponseEntity.ok(candidateSrv.getTotalCandidates());
+    }
+
+    @Operation(summary = "Get all languages")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved languages")
+    })
+    @GetMapping("/charts/languages")
+    public ResponseEntity<List<String>> getAllLanguages() {
+        Map<String, Long> languagesMap = candidateSrv.getCandidatesByLanguage();
+        List<String> languages = languagesMap.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(languages);
+    }
+
+    @Operation(summary = "Get all technologies/skills")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved technologies")
+    })
     @GetMapping("/charts/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
-        Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
-        List<String> skills = candidatesBySkill.keySet().stream()
+        Map<String, Long> skillsMap = candidateSrv.getCandidatesBySkill();
+        List<String> skills = skillsMap.keySet().stream()
                 .sorted()
                 .collect(Collectors.toList());
         return ResponseEntity.ok(skills);
     }
 
-    @GetMapping("/charts/candidates/language/{lang}")
+    @Operation(summary = "Get candidates by language")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates by language")
+    })
+    @GetMapping("/charts/language/{lang}")
     public ResponseEntity<List<CandidateDTO>> getCandidatesByLanguage(@PathVariable String lang) {
         List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
                 .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
@@ -146,53 +184,16 @@ public class CandidateController {
         return ResponseEntity.ok(candidates);
     }
 
-    @GetMapping("/charts/candidates/technology/{skill}")
+    @Operation(summary = "Get candidates by technology/skill")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates by technology")
+    })
+    @GetMapping("/charts/technology/{skill}")
     public ResponseEntity<List<CandidateDTO>> getCandidatesBySkill(@PathVariable String skill) {
         List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
                 .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
                         .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(candidates);
-    }
-
-    @GetMapping("/filter")
-    public ResponseEntity<List<CandidateDTO>> filterCandidates(
-            @RequestParam(required = false) String skills,
-            @RequestParam(required = false) String language,
-            @RequestParam(required = false) Integer yearsOfExperience) {
-        
-        List<CandidateDTO> filteredCandidates = candidateSrv.getCandidates();
-        
-        if (skills != null && !skills.isEmpty()) {
-            String[] skillArray = skills.split(",");
-            filteredCandidates = filteredCandidates.stream()
-                .filter(candidate -> candidate.skills() != null && 
-                    candidate.skills().stream()
-                        .anyMatch(s -> {
-                            for (String skill : skillArray) {
-                                if (s.skillName().equalsIgnoreCase(skill.trim())) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        }))
-                .collect(Collectors.toList());
-        }
-        
-        if (language != null && !language.isEmpty()) {
-            filteredCandidates = filteredCandidates.stream()
-                .filter(candidate -> candidate.naturalLanguages() != null && 
-                    candidate.naturalLanguages().stream()
-                        .anyMatch(l -> l.language().equalsIgnoreCase(language)))
-                .collect(Collectors.toList());
-        }
-        
-        if (yearsOfExperience != null) {
-            filteredCandidates = filteredCandidates.stream()
-                .filter(candidate -> candidate.yearsOfExperience() >= yearsOfExperience)
-                .collect(Collectors.toList());
-        }
-        
-        return ResponseEntity.ok(filteredCandidates);
     }
 }
