@@ -1,7 +1,10 @@
 package ma.nttdata.externals.module.cv.controller;
 
+import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.service.cvSrv;
+import ma.nttdata.externals.module.candidate.service.CandidateSrv;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +20,7 @@ public class CvController {
 
     public CvController(cvSrv cvSrv) {
         this.cvSrv = cvSrv;
+        this.candidateSrv = candidateSrv;
     }
 
     @PostMapping("/extract")
