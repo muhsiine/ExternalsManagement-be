@@ -17,6 +17,7 @@ public class CvController {
 
     public CvController(cvSrv cvSrv) {
         this.cvSrv = cvSrv;
+        this.candidateSrv = candidateSrv;
     }
 
     @PostMapping("/extract")
