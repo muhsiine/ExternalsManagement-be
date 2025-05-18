@@ -62,16 +62,24 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         var allowedOrigins = this.allowedOrigins.split(",");
         final var configuration = new CorsConfiguration();
+        
+        // Set the allowed origins only once to avoid duplication
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        
+        // Explicitly list all required HTTP methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"));
+        
         configuration.setAllowCredentials(true);
-        // the below three lines will add the relevant CORS response headers
-        for(String link: allowedOrigins) {
-            configuration.addAllowedOrigin(link);
-        }
+        
+        // Remove the duplicate origin addition
+        // for(String link: allowedOrigins) {
+        //     configuration.addAllowedOrigin(link);
+        // }
+        
         configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
+        
         configuration.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);
+        
         final var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
