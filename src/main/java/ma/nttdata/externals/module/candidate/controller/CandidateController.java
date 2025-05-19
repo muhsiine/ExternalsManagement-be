@@ -96,7 +96,7 @@ public class CandidateController {
     @Operation(summary = "Get all candidates", description = "Retrieves a list of all candidates")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
-                    content = @Content(mediaType = "application/json", 
+                    content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CandidateDTO.class, type = "array"))),
             @ApiResponse(responseCode = "404", description = "No candidates found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -155,7 +155,7 @@ public class CandidateController {
     @Operation(summary = "Get all technologies", description = "Retrieves a list of all technologies used by candidates")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved technologies",
-                    content = @Content(mediaType = "application/json", 
+                    content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = List.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -179,7 +179,7 @@ public class CandidateController {
     @Operation(summary = "Get candidates by language", description = "Retrieves a list of candidates who speak the specified language")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
-                    content = @Content(mediaType = "application/json", 
+                    content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = List.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -210,7 +210,7 @@ public class CandidateController {
     @Operation(summary = "Get candidates by skill", description = "Retrieves a list of candidates who have the specified skill")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
-                    content = @Content(mediaType = "application/json", 
+                    content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = List.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
