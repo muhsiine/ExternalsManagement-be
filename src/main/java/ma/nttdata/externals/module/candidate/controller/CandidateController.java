@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @RestController
 @RequestMapping("api/candidates")
 @Tag(name = "Candidate Management", description = "Operations related to candidate management")
