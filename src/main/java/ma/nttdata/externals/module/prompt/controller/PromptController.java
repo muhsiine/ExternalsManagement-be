@@ -1,5 +1,10 @@
 package ma.nttdata.externals.module.prompt.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
@@ -24,12 +29,34 @@ public class PromptController {
         this.promptService = promptService;
     }
 
+
+    @Operation(
+            summary = "Create a new Prompt",
+            description = "Creates a new Prompt and returns its details"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Prompt created successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = PromptDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input", content=@Content(schema = @Schema(type="object"))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content=@Content(schema = @Schema(type="object")))
+    })
+
     @PostMapping
     public ResponseEntity<PromptDTO> createPrompt(@RequestBody PromptDTO promptDTO) {
         PromptDTO createdPrompt = promptService.createPrompt(promptDTO);
-        return new ResponseEntity<>(createdPrompt, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(createdPrompt);
     }
 
+
+    @Operation(summary = "Get a Prompt by ID", description = "Retrieves a Prompt by their ID")
+    @ApiResponses(value={
+            @ApiResponse(responseCode="200" ,description ="Prompt retrieves successfully",
+                    content = @Content(mediaType="Application/json" ,schema=@Schema(implementation=PromptDTO.class))),
+            @ApiResponse(responseCode = "400" ,description = "Invalid input"),
+            @ApiResponse(responseCode = "405" ,description = "Prompt not found"),
+            @ApiResponse(responseCode = "500" ,description = "Internal server error")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<PromptDTO> getPromptById(@PathVariable UUID id) {
         return promptService.getPromptById(id)
@@ -37,6 +64,15 @@ public class PromptController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+    @Operation(summary = "Get all Prompts", description = "Retrieves all Prompts")
+    @ApiResponses(value={
+            @ApiResponse(responseCode="200" ,description = "Prompts retrieved successfully",content=@Content(mediaType = "Application/json", schema=@Schema(implementation=PromptDTO.class))),
+            @ApiResponse(responseCode="204",description="No content. No Prompt found."),
+            @ApiResponse(responseCode="400",description="Invalid input"),
+            @ApiResponse(responseCode="404",description="Not found"),
+            @ApiResponse(responseCode="500",description="Internal server error", content=@Content(mediaType = "application/json"))
+    })
     @GetMapping
     public ResponseEntity<List<PromptDTO>> getAllPrompts() {
         List<PromptDTO> prompts = promptService.getAllPrompts();
