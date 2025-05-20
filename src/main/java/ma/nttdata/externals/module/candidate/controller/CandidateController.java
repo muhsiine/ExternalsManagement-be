@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("api/candidates")
+@RequestMapping("/api/v1/candidates")
 @Tag(name = "Candidate Management", description = "Operations related to candidate management")
 @Slf4j
 public class CandidateController {

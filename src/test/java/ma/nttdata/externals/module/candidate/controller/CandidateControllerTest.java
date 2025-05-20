@@ -30,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CandidateController.class)
 class CandidateControllerTest {
 
+    public static final String API_URL = "/api/v1/candidates";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -42,6 +44,8 @@ class CandidateControllerTest {
     private CandidateDTO candidateDTO;
     private UUID candidateId;
     private List<CandidateDTO> candidateList;
+
+
 
     @BeforeEach
     void setUp() {
@@ -79,7 +83,7 @@ class CandidateControllerTest {
     void testCreateCandidate() throws Exception {
         when(candidateSrv.save(any(CandidateDTO.class))).thenReturn(candidateDTO);
 
-        mockMvc.perform(post("/api/candidates")
+        mockMvc.perform(post(API_URL)
                         .contentType("application/json")
                         .accept("application/json")
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -96,7 +100,7 @@ class CandidateControllerTest {
     void testUpdateCandidate() throws Exception {
         when(candidateSrv.update(eq(candidateId), any(CandidateDTO.class))).thenReturn(candidateDTO);
 
-        mockMvc.perform(put("/api/candidates/{id}", candidateId)
+        mockMvc.perform(put(API_URL+"/{id}", candidateId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -113,7 +117,7 @@ class CandidateControllerTest {
     void testUpdateCandidateNotFound() throws Exception {
         when(candidateSrv.update(eq(candidateId), any(CandidateDTO.class))).thenReturn(null);
 
-        mockMvc.perform(put("/api/candidates/{id}", candidateId)
+        mockMvc.perform(put(API_URL+"/{id}", candidateId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .content(objectMapper.writeValueAsString(candidateDTO)))
@@ -130,7 +134,7 @@ class CandidateControllerTest {
     void testPatchCandidate() throws Exception {
         when(candidateSrv.update(eq(candidateId), any(CandidateDTO.class))).thenReturn(candidateDTO);
 
-        mockMvc.perform(patch("/api/candidates/{id}", candidateId)
+        mockMvc.perform(patch(API_URL+"/{id}", candidateId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -147,7 +151,7 @@ class CandidateControllerTest {
     void testPatchCandidateNotFound() throws Exception {
         when(candidateSrv.update(eq(candidateId), any(CandidateDTO.class))).thenReturn(null);
 
-        mockMvc.perform(patch("/api/candidates/{id}", candidateId)
+        mockMvc.perform(patch(API_URL+"/{id}", candidateId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .with(SecurityMockMvcRequestPostProcessors.csrf())
                         .content(objectMapper.writeValueAsString(candidateDTO)))
@@ -164,7 +168,7 @@ class CandidateControllerTest {
     void testGetAllCandidates() throws Exception {
         when(candidateSrv.getAllCandidates()).thenReturn(candidateList);
 
-        mockMvc.perform(get("/api/candidates")
+        mockMvc.perform(get(API_URL)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -180,7 +184,7 @@ class CandidateControllerTest {
     void testGetAllCandidatesEmpty() throws Exception {
         when(candidateSrv.getAllCandidates()).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get("/api/candidates"))
+        mockMvc.perform(get(API_URL))
                 .andExpect(status().isNotFound());
 
         verify(candidateSrv).getAllCandidates();
@@ -191,7 +195,7 @@ class CandidateControllerTest {
     void testGetCandidateById() throws Exception {
         when(candidateSrv.getById(candidateId)).thenReturn(candidateDTO);
 
-        mockMvc.perform(get("/api/candidates/{id}", candidateId)
+        mockMvc.perform(get(API_URL+"/{id}", candidateId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(candidateId.toString()))
@@ -205,7 +209,7 @@ class CandidateControllerTest {
     void testGetCandidateByIdNotFound() throws Exception {
         when(candidateSrv.getById(candidateId)).thenReturn(null);
 
-        mockMvc.perform(get("/api/candidates/{id}", candidateId))
+        mockMvc.perform(get(API_URL+"/{id}", candidateId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"))
@@ -218,7 +222,7 @@ class CandidateControllerTest {
     @WithMockUser
     void testDeleteCandidate() throws Exception {
         when(candidateSrv.delete(candidateId)).thenReturn(true);
-        mockMvc.perform(delete("/api/candidates/{id}", candidateId)
+        mockMvc.perform(delete(API_URL+"/{id}", candidateId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Candidate deleted successfully"));
@@ -229,7 +233,7 @@ class CandidateControllerTest {
     @WithMockUser
     void testDeleteCandidateNotFound() throws Exception {
         when(candidateSrv.delete(candidateId)).thenReturn(false);
-        mockMvc.perform(delete("/api/candidates/{id}", candidateId)
+        mockMvc.perform(delete(API_URL+"/{id}", candidateId)
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
@@ -248,7 +252,7 @@ class CandidateControllerTest {
 
         when(candidateSrv.getCandidatesBySkill()).thenReturn(skillsMap);
 
-        mockMvc.perform(get("/api/candidates/technologies")
+        mockMvc.perform(get(API_URL+"/technologies")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)))
@@ -283,7 +287,7 @@ class CandidateControllerTest {
         // Use doReturn().when() syntax to avoid issues with matchers
         doReturn(candidatesWithEnglish).when(candidateSrv).getCandidates();
 
-        mockMvc.perform(get("/api/candidates/languages/{lang}", "English")
+        mockMvc.perform(get(API_URL+"/languages/{lang}", "English")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
@@ -316,7 +320,7 @@ class CandidateControllerTest {
         // Use doReturn().when() syntax to avoid issues with matchers
         doReturn(candidatesWithJava).when(candidateSrv).getCandidates();
 
-        mockMvc.perform(get("/api/candidates/skills/{skill}", "Java")
+        mockMvc.perform(get(API_URL+"/skills/{skill}", "Java")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
