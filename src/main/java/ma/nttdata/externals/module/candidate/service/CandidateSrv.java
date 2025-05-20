@@ -7,7 +7,7 @@ import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import java.util.Map;
 
 public interface CandidateSrv {
-    CandidateDTO save(CandidateDTO candidateDTO);
+
     CandidateDTO update(UUID id, CandidateDTO candidateDTO);
     List<CandidateDTO> getAllCandidates();
     CandidateDTO getById(UUID id);
@@ -18,4 +18,10 @@ public interface CandidateSrv {
     Map<String, Long> getCandidatesByLanguage();
     Map<String, Long> getCandidatesBySkill();
     Long getTotalCandidates();
+
+    //New methods
+    CandidateDTO save(CandidateDTO candidateDTO);
+
+
+
 }

@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring") // Use Spring component model
+@Mapper(componentModel = "spring")
 public interface CandidateMapper {
 
     CandidateMapper INSTANCE = Mappers.getMapper(CandidateMapper.class);
@@ -57,6 +57,11 @@ public interface CandidateMapper {
     @Mapping(target = "native", source = "isNative")
     Language languageDTOToLanguage(LanguageDTO languageDTO);
 
+    // new method added
+    @Mapping(target = "id", ignore = true)
+    void updateCandidateFromDTO(CandidateDTO candidateDTO, @MappingTarget Candidate candidate);
+
+    // AfterMapping
     @AfterMapping
     default void setCandidateInRelatedEntities(CandidateDTO candidateDTO, @MappingTarget Candidate candidate) {
         if (candidate.getContacts() != null) {
@@ -81,10 +86,9 @@ public interface CandidateMapper {
         Address address = candidate.getAddress();
         if (address != null) {
             address.setCandidate(candidate);
-            if(address.getCity() != null){
+            if (address.getCity() != null) {
                 address.getCity().setCountry(address.getCountry());
             }
         }
     }
-
 }

@@ -74,18 +74,16 @@ public class CandidateSrvImpl implements CandidateSrv {
             if (id == null) {
                 throw new BadRequestException("Candidate ID is required");
             }
-
             if (candidateDTO == null) {
                 throw new BadRequestException("Candidate data is required");
             }
-
             Optional<Candidate> existingCandidateOpt = candidateRepository.findById(id);
             if (existingCandidateOpt.isEmpty()) {
                 throw new ResourceNotFoundException("Candidate", id);
             }
-
-            Candidate updatedCandidate = mapper.candidateDTOToCandidate(candidateDTO);
-            Candidate savedCandidate = candidateRepository.save(updatedCandidate);
+            Candidate existingCandidate = existingCandidateOpt.get();
+            mapper.updateCandidateFromDTO(candidateDTO, existingCandidate);
+            Candidate savedCandidate = candidateRepository.save(existingCandidate);
             return mapper.candidateToCandidateDTO(savedCandidate);
         } catch (ResourceNotFoundException | BadRequestException e) {
             throw e;
@@ -93,6 +91,8 @@ public class CandidateSrvImpl implements CandidateSrv {
             throw new InternalServerException("Error updating candidate", e);
         }
     }
+
+
 
     @Override
     public List<CandidateDTO> getAllCandidates() {
@@ -112,6 +112,7 @@ public class CandidateSrvImpl implements CandidateSrv {
             throw new InternalServerException("Error retrieving candidates", e);
         }
     }
+
 
     @Override
     public CandidateDTO getById(UUID id) {

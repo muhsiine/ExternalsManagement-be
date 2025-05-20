@@ -44,12 +44,10 @@ public class CandidateController {
     })
     @PostMapping
     public ResponseEntity<CandidateDTO> createCandidate(@Valid @RequestBody CandidateDTO candidate) {
-        log.info("Creating new candidate: {}", candidate.fullName());
         CandidateDTO savedCandidate = candidateSrv.save(candidate);
-        log.info("Candidate created successfully with ID: {}", savedCandidate.id());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(savedCandidate);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
     }
+
 
     @Operation(summary = "Update a candidate", description = "Updates an existing candidate by ID")
     @ApiResponses(value = {
@@ -62,35 +60,8 @@ public class CandidateController {
     public ResponseEntity<CandidateDTO> updateCandidate(
             @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
             @Valid @RequestBody CandidateDTO candidateDTO) {
-        log.info("Updating candidate with ID: {}", id);
-        CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
-        if (updatedCandidate == null) {
-            log.warn("Candidate not found with ID: {}", id);
-            throw new ResourceNotFoundException("Candidate", id);
-        }
-        log.info("Candidate updated successfully with ID: {}", id);
-        return ResponseEntity.ok(updatedCandidate);
-    }
 
-    @Operation(summary = "Partially update a candidate", description = "Updates specific fields of an existing candidate by ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Candidate updated successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = CandidateDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Candidate not found"),
-            @ApiResponse(responseCode = "400", description = "Invalid input"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @PatchMapping("/{id}")
-    public ResponseEntity<CandidateDTO> patchCandidate(
-            @Parameter(description = "ID of the candidate to update") @PathVariable UUID id,
-            @Valid @RequestBody CandidateDTO candidateDTO) {
-        log.info("Partially updating candidate with ID: {}", id);
         CandidateDTO updatedCandidate = candidateSrv.update(id, candidateDTO);
-        if (updatedCandidate == null) {
-            log.warn("Candidate not found with ID: {}", id);
-            throw new ResourceNotFoundException("Candidate", id);
-        }
-        log.info("Candidate partially updated successfully with ID: {}", id);
         return ResponseEntity.ok(updatedCandidate);
     }
 
@@ -104,15 +75,9 @@ public class CandidateController {
     })
     @GetMapping
     public ResponseEntity<List<CandidateDTO>> getAllCandidates() {
-        log.info("Retrieving all candidates");
-        List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
-        if (candidates == null || candidates.isEmpty()) {
-            log.info("No candidates found");
-            throw new ResourceNotFoundException("No candidates found");
-        }
-        log.info("Retrieved {} candidates", candidates.size());
-        return ResponseEntity.ok(candidates);
+        return ResponseEntity.ok(candidateSrv.getAllCandidates());
     }
+
 
     @Operation(summary = "Get a candidate by ID", description = "Retrieves a candidate by their ID")
     @ApiResponses(value = {
@@ -124,15 +89,9 @@ public class CandidateController {
     @GetMapping("/{id}")
     public ResponseEntity<CandidateDTO> getCandidate(
             @Parameter(description = "ID of the candidate to retrieve") @PathVariable UUID id) {
-        log.info("Retrieving candidate with ID: {}", id);
-        CandidateDTO candidate = candidateSrv.getById(id);
-        if (candidate == null) {
-            log.warn("Candidate not found with ID: {}", id);
-            throw new ResourceNotFoundException("Candidate", id);
-        }
-        log.info("Retrieved candidate with ID: {}", id);
-        return ResponseEntity.ok(candidate);
+        return ResponseEntity.ok(candidateSrv.getById(id));
     }
+
 
     @Operation(summary = "Delete a candidate", description = "Deletes a candidate by their ID")
     @ApiResponses(value = {
@@ -143,15 +102,10 @@ public class CandidateController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCandidate(
             @Parameter(description = "ID of the candidate to delete") @PathVariable UUID id) {
-        log.info("Deleting candidate with ID: {}", id);
-        boolean deleted = candidateSrv.delete(id);
-        if (!deleted) {
-            log.warn("Candidate not found with ID: {}", id);
-            throw new ResourceNotFoundException("Candidate", id);
-        }
-        log.info("Candidate deleted successfully with ID: {}", id);
+        candidateSrv.delete(id);
         return ResponseEntity.ok("Candidate deleted successfully");
     }
+
 
     @Operation(summary = "Get all technologies", description = "Retrieves a list of all technologies used by candidates")
     @ApiResponses(value = {
