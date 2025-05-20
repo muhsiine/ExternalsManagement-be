@@ -154,16 +154,47 @@ public class DataInitializer implements CommandLineRunner {
 
     private List<Language> generateRandomLanguages(Candidate candidate) {
         List<Language> languages = new ArrayList<>();
-        Language language = new Language();
-        language.setDescription("English");
-        language.setEnglishDescription("English");
-        language.setFullDescription("English Language");
-        language.setLanguage("English");
-        language.setLanguageInEnglish("English");
-        language.setLevel(LanguageLevel.values()[random.nextInt(LanguageLevel.values().length)]);
-        language.setNative(random.nextBoolean());
-        language.setCandidate(candidate);
-        languages.add(language);
+
+        String[][] languageData = {
+                {"Arabic", "العربية", "Arabic", "اللغة العربية"},
+                {"English", "English", "English", "English Language"},
+                {"French", "Français", "French", "Langue Française"},
+                {"Spanish", "Español", "Spanish", "Idioma Español"},
+        };
+        
+        // pour assigner 1 or  laguages
+        int numLanguages = random.nextInt(3) + 1;
+        List<Integer> selectedIndices = new ArrayList<>();
+        
+        // bcuz english are most demanded , we will make thance to make more
+        if (random.nextDouble() < 0.7) {
+            selectedIndices.add(1);
+            numLanguages--;
+        }
+        
+        // Add other random languages
+        while (selectedIndices.size() < numLanguages + 1) {
+            int index = random.nextInt(languageData.length);
+            if (!selectedIndices.contains(index)) {
+                selectedIndices.add(index);
+            }
+        }
+        
+        // Create language elemets for selected languages
+        for (int index : selectedIndices) {
+            String[] data = languageData[index];
+            Language language = new Language();
+            language.setLanguage(data[0]); // title of the language
+            language.setDescription(data[1]); // Native value
+            language.setLanguageInEnglish(data[2]); // Name in english
+            language.setEnglishDescription(data[2]); // Redundant
+            language.setFullDescription(data[3]); // full word
+            language.setLevel(LanguageLevel.values()[random.nextInt(LanguageLevel.values().length)]);
+            language.setNative(random.nextBoolean());
+            language.setCandidate(candidate);
+            languages.add(language);
+        }
+
         return languages;
     }
 

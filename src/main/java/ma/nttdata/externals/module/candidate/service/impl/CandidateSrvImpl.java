@@ -11,9 +11,11 @@ import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
 import ma.nttdata.externals.module.candidate.repository.CityRepository;
 import ma.nttdata.externals.module.candidate.repository.CountryRepository;
+import ma.nttdata.externals.module.candidate.repository.LanguageRepository;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,15 +28,18 @@ public class CandidateSrvImpl implements CandidateSrv {
     private final CandidateRepository candidateRepository;
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
+    private final LanguageRepository languageRepository;
 
     public CandidateSrvImpl(CandidateMapper candidateMapper,
                             CandidateRepository candidateRepository,
                             CountryRepository countryRepository,
-                            CityRepository cityRepository) {
+                            CityRepository cityRepository,
+                            LanguageRepository languageRepository) {
         this.mapper = candidateMapper;
         this.candidateRepository = candidateRepository;
         this.countryRepository = countryRepository;
         this.cityRepository = cityRepository;
+        this.languageRepository = languageRepository;
     }
 
     @Override
@@ -165,10 +170,16 @@ public class CandidateSrvImpl implements CandidateSrv {
     @Override
     public Map<String, Long> getCandidatesByLanguage() {
         try {
-
-            return candidateRepository.findAll().stream()
-                    .flatMap(candidate -> candidate.getLanguages().stream())
-                    .collect(Collectors.groupingBy(Language::getLanguage, Collectors.counting()));
+            List<Object[]> results = languageRepository.countCandidatesByLanguage();
+            Map<String, Long> languageCountMap = new HashMap<>();
+            
+            for (Object[] result : results) {
+                String language = (String) result[0];
+                long count = (Long) result[1];
+                languageCountMap.put(language, count);
+            }
+            
+            return languageCountMap;
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving candidates by language", e);
         }
@@ -177,8 +188,7 @@ public class CandidateSrvImpl implements CandidateSrv {
     @Override
     public Map<String, Long> getCandidatesBySkill() {
         try {
-
-            return candidateRepository.findAll().stream()
+                        return candidateRepository.findAll().stream()
                     .flatMap(candidate -> candidate.getSkills().stream())
                     .collect(Collectors.groupingBy(Skill::getSkillName, Collectors.counting()));
         } catch (Exception e) {

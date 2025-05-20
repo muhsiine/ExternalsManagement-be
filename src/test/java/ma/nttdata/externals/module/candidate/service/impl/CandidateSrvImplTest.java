@@ -8,6 +8,7 @@ import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
 import ma.nttdata.externals.module.candidate.repository.CityRepository;
 import ma.nttdata.externals.module.candidate.repository.CountryRepository;
+import ma.nttdata.externals.module.candidate.repository.LanguageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,9 @@ class CandidateSrvImplTest {
 
     @Mock
     private CityRepository cityRepository;
+
+    @Mock
+    private LanguageRepository languageRepository;
 
     @InjectMocks
     private CandidateSrvImpl candidateSrv;
@@ -232,8 +236,11 @@ class CandidateSrvImplTest {
     @Test
     void testGetCandidatesByLanguage() {
         // Setup
-        List<Candidate> candidates = Collections.singletonList(candidate);
-        when(candidateRepository.findAll()).thenReturn(candidates);
+        List<Object[]> languageResults = new ArrayList<>();
+        Object[] englishResult = new Object[] {"English", 1L};
+        languageResults.add(englishResult);
+        
+        when(languageRepository.countCandidatesByLanguage()).thenReturn(languageResults);
 
         // Execute
         Map<String, Long> result = candidateSrv.getCandidatesByLanguage();
