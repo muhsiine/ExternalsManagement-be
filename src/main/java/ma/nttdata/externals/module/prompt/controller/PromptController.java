@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.prompt.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/prompts")
+@Tag(name= "Prompt Management", description = "Operations related to prompt management")
 public class PromptController {
 
     private final PromptService promptService;
