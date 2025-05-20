@@ -22,8 +22,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @RestController
-@RequestMapping("/candidates")
+@RequestMapping("api/candidates")
 @Tag(name = "Candidate Management", description = "Operations related to candidate management")
 @Slf4j
 public class CandidateController {
@@ -236,5 +237,26 @@ public class CandidateController {
 
         log.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
         return ResponseEntity.ok(candidates);
+    }
+
+    @Operation(summary = "Get statistics of candidates by language", description = "Retrieves statistics of how many candidates speak each language")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved language statistics",
+                    content = @Content(mediaType = "application/json", 
+                            schema = @Schema(implementation = Map.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/statistics/languages")
+    public ResponseEntity<Map<String, Long>> getCandidateStatsByLanguages() {
+        log.info("Retrieving candidate statistics by language");
+        Map<String, Long> languageStats = candidateSrv.getCandidatesByLanguage();
+        
+        if (languageStats.isEmpty()) {
+            log.info("No language statistics found");
+            return ResponseEntity.ok(languageStats); // Return empty map instead of 404
+        }
+        
+        log.info("Retrieved statistics for {} languages", languageStats.size());
+        return ResponseEntity.ok(languageStats);
     }
 }
