@@ -8,60 +8,71 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface CandidateMapper {
 
-    CandidateMapper INSTANCE = Mappers.getMapper(CandidateMapper.class);
-
-    // Entity to DTO
+    // Entity to DTO mappings
     @Mapping(source = "languages", target = "naturalLanguages")
     CandidateDTO candidateToCandidateDTO(Candidate candidate);
+
     ContactDTO contactToContactDTO(Contact contact);
+
     ExperienceDTO experienceToExperienceDTO(Experience experience);
+
     SkillDTO skillToSkillDTO(Skill skill);
+
     EducationDTO educationToEducationDTO(Education education);
+
     @Mapping(target = "promptCode", ignore = true)
     @Mapping(target = "b64EFile", ignore = true)
     @Mapping(target = "mimeType", source = "fileType")
     @Mapping(target = "extractedData", ignore = true)
     CvFileDTO cvFileToCvFileDTO(CvFile cvFile);
+
     @Mapping(target = "candidate", ignore = true)
     @Mapping(target = "country.cities", ignore = true)
     @Mapping(target = "city.country.cities", ignore = true)
     AddressDTO addressToAddressDTO(Address address);
+
     @Mapping(target = "candidateDTO", ignore = true)
     @Mapping(target = "isNative", ignore = true)
     LanguageDTO languageToLanguageDTO(Language language);
 
-    // DTO to Entity
+    // DTO to Entity mappings
     @Mapping(source = "naturalLanguages", target = "languages")
     Candidate candidateDTOToCandidate(CandidateDTO candidateDTO);
+
     @Mapping(target = "candidate", ignore = true)
     Contact contactDTOToContact(ContactDTO contactDTO);
+
     @Mapping(target = "candidate", ignore = true)
     Experience experienceDTOToExperience(ExperienceDTO experienceDTO);
+
     @Mapping(target = "candidate", ignore = true)
     Skill skillDTOToSkill(SkillDTO skillDTO);
+
     @Mapping(target = "candidate", ignore = true)
     Education educationDTOToEducation(EducationDTO educationDTO);
+
     @Mapping(target = "candidate", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "fileType", source = "mimeType")
     @Mapping(target = "uploadedAt", ignore = true)
     CvFile cvFileDTOToCvFile(CvFileDTO cvFileDTO);
+
     @Mapping(target = "candidate", ignore = true)
     Address addressDTOToAddress(AddressDTO addressDTO);
+
     @Mapping(target = "candidate", ignore = true)
     @Mapping(target = "native", source = "isNative")
     Language languageDTOToLanguage(LanguageDTO languageDTO);
 
-    // new method added
+    // Update existing Candidate entity from CandidateDTO (ignore id)
     @Mapping(target = "id", ignore = true)
     void updateCandidateFromDTO(CandidateDTO candidateDTO, @MappingTarget Candidate candidate);
 
-    // AfterMapping
+    // After mapping to set back references in child entities to Candidate
     @AfterMapping
     default void setCandidateInRelatedEntities(CandidateDTO candidateDTO, @MappingTarget Candidate candidate) {
         if (candidate.getContacts() != null) {
@@ -86,7 +97,7 @@ public interface CandidateMapper {
         Address address = candidate.getAddress();
         if (address != null) {
             address.setCandidate(candidate);
-            if (address.getCity() != null) {
+            if (address.getCity() != null && address.getCountry() != null) {
                 address.getCity().setCountry(address.getCountry());
             }
         }

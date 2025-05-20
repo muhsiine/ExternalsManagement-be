@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/api/v1/candidates")
@@ -35,6 +33,7 @@ public class CandidateController {
         this.candidateSrv = candidateSrv;
     }
 
+    //Create
     @Operation(summary = "Create a new candidate", description = "Creates a new candidate and returns its details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Candidate created successfully",
@@ -48,7 +47,7 @@ public class CandidateController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
     }
 
-
+    //Update
     @Operation(summary = "Update a candidate", description = "Updates an existing candidate by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Candidate updated successfully",
@@ -65,12 +64,12 @@ public class CandidateController {
         return ResponseEntity.ok(updatedCandidate);
     }
 
+    //Get All
     @Operation(summary = "Get all candidates", description = "Retrieves a list of all candidates")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CandidateDTO.class, type = "array"))),
-            @ApiResponse(responseCode = "404", description = "No candidates found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
@@ -78,7 +77,7 @@ public class CandidateController {
         return ResponseEntity.ok(candidateSrv.getAllCandidates());
     }
 
-
+    // Get By ID
     @Operation(summary = "Get a candidate by ID", description = "Retrieves a candidate by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidate",
@@ -92,7 +91,7 @@ public class CandidateController {
         return ResponseEntity.ok(candidateSrv.getById(id));
     }
 
-
+    //Delete
     @Operation(summary = "Delete a candidate", description = "Deletes a candidate by their ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted candidate"),
@@ -106,36 +105,27 @@ public class CandidateController {
         return ResponseEntity.ok("Candidate deleted successfully");
     }
 
-
+    // Technologies
     @Operation(summary = "Get all technologies", description = "Retrieves a list of all technologies used by candidates")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved technologies",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = List.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
         log.info("Retrieving all technologies");
-        Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
-        List<String> skills = candidatesBySkill.keySet().stream()
-                .sorted()
-                .collect(Collectors.toList());
-
-        if (skills.isEmpty()) {
-            log.info("No technologies found");
-            throw new ResourceNotFoundException("No technologies found");
-        }
-
+        List<String> skills = candidateSrv.getAllTechnologies();
         log.info("Retrieved {} technologies", skills.size());
         return ResponseEntity.ok(skills);
     }
 
+    // Candidates by Language
     @Operation(summary = "Get candidates by language", description = "Retrieves a list of candidates who speak the specified language")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = List.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "404", description = "No candidates found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/languages/{lang}")
@@ -143,15 +133,7 @@ public class CandidateController {
             @Parameter(description = "Language to filter by") @PathVariable String lang) {
         log.info("Retrieving candidates by language: {}", lang);
 
-        if (lang == null || lang.trim().isEmpty()) {
-            throw new BadRequestException("Language parameter cannot be empty");
-        }
-
-        // This filtering logic should be moved to the service layer in a future refactoring
-        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
-                        .anyMatch(language -> language.language().equalsIgnoreCase(lang)))
-                .collect(Collectors.toList());
+        List<CandidateDTO> candidates = candidateSrv.getCandidatesByLanguage(lang);
 
         if (candidates.isEmpty()) {
             log.info("No candidates found with language: {}", lang);
@@ -162,11 +144,13 @@ public class CandidateController {
         return ResponseEntity.ok(candidates);
     }
 
+    //Candidates by Skill
     @Operation(summary = "Get candidates by skill", description = "Retrieves a list of candidates who have the specified skill")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved candidates",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = List.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = List.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "404", description = "No candidates found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/skills/{skill}")
@@ -178,11 +162,7 @@ public class CandidateController {
             throw new BadRequestException("Skill parameter cannot be empty");
         }
 
-        // This filtering logic should be moved to the service layer in a future refactoring
-        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
-                        .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
-                .collect(Collectors.toList());
+        List<CandidateDTO> candidates = candidateSrv.getCandidatesBySkill(skill);
 
         if (candidates.isEmpty()) {
             log.info("No candidates found with skill: {}", skill);
@@ -193,23 +173,18 @@ public class CandidateController {
         return ResponseEntity.ok(candidates);
     }
 
+    // Statistics by Language
     @Operation(summary = "Get statistics of candidates by language", description = "Retrieves statistics of how many candidates speak each language")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved language statistics",
-                    content = @Content(mediaType = "application/json", 
-                            schema = @Schema(implementation = Map.class))),
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/statistics/languages")
     public ResponseEntity<Map<String, Long>> getCandidateStatsByLanguages() {
         log.info("Retrieving candidate statistics by language");
         Map<String, Long> languageStats = candidateSrv.getCandidatesByLanguage();
-        
-        if (languageStats.isEmpty()) {
-            log.info("No language statistics found");
-            return ResponseEntity.ok(languageStats); // Return empty map instead of 404
-        }
-        
+
         log.info("Retrieved statistics for {} languages", languageStats.size());
         return ResponseEntity.ok(languageStats);
     }

@@ -15,11 +15,7 @@ import ma.nttdata.externals.module.candidate.repository.LanguageRepository;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +25,7 @@ public class CandidateSrvImpl implements CandidateSrv {
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
     private final LanguageRepository languageRepository;
+    private final CandidateMapper candidateMapper;
 
     public CandidateSrvImpl(CandidateMapper candidateMapper,
                             CandidateRepository candidateRepository,
@@ -40,6 +37,7 @@ public class CandidateSrvImpl implements CandidateSrv {
         this.countryRepository = countryRepository;
         this.cityRepository = cityRepository;
         this.languageRepository = languageRepository;
+        this.candidateMapper = candidateMapper;
     }
 
     @Override
@@ -92,8 +90,6 @@ public class CandidateSrvImpl implements CandidateSrv {
         }
     }
 
-
-
     @Override
     public List<CandidateDTO> getAllCandidates() {
         try {
@@ -112,7 +108,6 @@ public class CandidateSrvImpl implements CandidateSrv {
             throw new InternalServerException("Error retrieving candidates", e);
         }
     }
-
 
     @Override
     public CandidateDTO getById(UUID id) {
@@ -133,7 +128,6 @@ public class CandidateSrvImpl implements CandidateSrv {
             throw new InternalServerException("Error retrieving candidate", e);
         }
     }
-
 
     @Override
     public boolean delete(UUID id) {
@@ -169,31 +163,53 @@ public class CandidateSrvImpl implements CandidateSrv {
     }
 
     @Override
-    public Map<String, Long> getCandidatesByLanguage() {
-        try {
-            List<Object[]> results = languageRepository.countCandidatesByLanguage();
-            Map<String, Long> languageCountMap = new HashMap<>();
-            
-            for (Object[] result : results) {
-                String language = (String) result[0];
-                long count = (Long) result[1];
-                languageCountMap.put(language, count);
-            }
-            
-            return languageCountMap;
-        } catch (Exception e) {
-            throw new InternalServerException("Error retrieving candidates by language", e);
+    public List<CandidateDTO> getCandidatesByLanguage(String language) {
+        if (language == null || language.trim().isEmpty()) {
+            throw new BadRequestException("Language parameter cannot be empty");
         }
+
+        return candidateRepository.findAll().stream()
+                .filter(candidate -> candidate.getLanguages() != null &&
+                        candidate.getLanguages().stream()
+                                .anyMatch(lang -> lang.getLanguage().equalsIgnoreCase(language)))
+                .map(candidateMapper::candidateToCandidateDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Map<String, Long> getCandidatesBySkill() {
+    public List<CandidateDTO> getCandidatesBySkill(String skill) {
         try {
-                        return candidateRepository.findAll().stream()
-                    .flatMap(candidate -> candidate.getSkills().stream())
-                    .collect(Collectors.groupingBy(Skill::getSkillName, Collectors.counting()));
+            return candidateRepository.findAll().stream()
+                    .filter(candidate -> candidate.getSkills() != null &&
+                            candidate.getSkills().stream()
+                                    .anyMatch(s -> s.getSkillName().equalsIgnoreCase(skill)))
+                    .map(candidateMapper::candidateToCandidateDTO)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving candidates by skill", e);
+        }
+    }
+
+
+
+    @Override
+    public List<String> getAllTechnologies() {
+        try {
+            Map<String, Long> candidatesBySkill = candidateRepository.findAll().stream()
+                    .flatMap(candidate -> candidate.getSkills().stream())
+                    .collect(Collectors.groupingBy(Skill::getSkillName, Collectors.counting()));
+
+            List<String> skills = candidatesBySkill.keySet().stream()
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            if (skills.isEmpty()) {
+                throw new ResourceNotFoundException("No technologies found");
+            }
+
+            return skills;
+        } catch (Exception e) {
+            throw new InternalServerException("Error retrieving technologies", e);
         }
     }
 
@@ -203,6 +219,17 @@ public class CandidateSrvImpl implements CandidateSrv {
             return candidateRepository.count();
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving total candidates count", e);
+        }
+    }
+
+    @Override
+    public Map<String, Long> getCandidatesByLanguage() {
+        try {
+            return candidateRepository.findAll().stream()
+                    .flatMap(candidate -> candidate.getLanguages().stream())
+                    .collect(Collectors.groupingBy(Language::getLanguage, Collectors.counting()));
+        } catch (Exception e) {
+            throw new InternalServerException("Error retrieving candidates by language", e);
         }
     }
 }

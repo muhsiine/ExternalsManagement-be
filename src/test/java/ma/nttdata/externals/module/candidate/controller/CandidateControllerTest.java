@@ -245,21 +245,19 @@ class CandidateControllerTest {
     @Test
     @WithMockUser
     void testGetAllTechnologies() throws Exception {
-        Map<String, Long> skillsMap = new HashMap<>();
-        skillsMap.put("Java", 5L);
-        skillsMap.put("Python", 3L);
-        skillsMap.put("Spring", 4L);
+        List<String> technologies = List.of("Java", "Python", "Spring");
 
-        when(candidateSrv.getCandidatesBySkill()).thenReturn(skillsMap);
+        when(candidateSrv.getAllTechnologies()).thenReturn(technologies);
 
-        mockMvc.perform(get(API_URL+"/technologies")
+        mockMvc.perform(get(API_URL + "/technologies")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$", containsInAnyOrder("Java", "Python", "Spring")));
 
-        verify(candidateSrv).getCandidatesBySkill();
+        verify(candidateSrv).getAllTechnologies();
     }
+
 
     @Test
     @WithMockUser

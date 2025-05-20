@@ -16,11 +16,18 @@ public interface CandidateSrv {
 
     // New methods
     Map<String, Long> getCandidatesByLanguage();
-    Map<String, Long> getCandidatesBySkill();
     Long getTotalCandidates();
 
     //New methods
     CandidateDTO save(CandidateDTO candidateDTO);
+    List<String> getAllTechnologies();
+    public List<CandidateDTO> getCandidatesByLanguage(String language);
+    List<CandidateDTO> getCandidatesBySkill(String skill);
+
+
+
+
+
 
 
 
