@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.prompt.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,6 +11,7 @@ import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,9 +55,9 @@ public class PromptController {
     @ApiResponses(value={
             @ApiResponse(responseCode="200" ,description ="Prompt retrieves successfully",
                     content = @Content(mediaType="Application/json" ,schema=@Schema(implementation=PromptDTO.class))),
-            @ApiResponse(responseCode = "400" ,description = "Invalid input"),
-            @ApiResponse(responseCode = "405" ,description = "Prompt not found"),
-            @ApiResponse(responseCode = "500" ,description = "Internal server error")
+            @ApiResponse(responseCode = "400" ,description = "Invalid input",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode = "404" ,description = "Prompt not found",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode = "500" ,description = "Internal server error",content = @Content(schema=@Schema(type="object")))
     })
     @GetMapping("/{id}")
     public ResponseEntity<PromptDTO> getPromptById(@PathVariable UUID id) {
@@ -67,11 +69,10 @@ public class PromptController {
 
     @Operation(summary = "Get all Prompts", description = "Retrieves all Prompts")
     @ApiResponses(value={
-            @ApiResponse(responseCode="200" ,description = "Prompts retrieved successfully",content=@Content(mediaType = "Application/json", schema=@Schema(implementation=PromptDTO.class))),
-            @ApiResponse(responseCode="204",description="No content. No Prompt found."),
-            @ApiResponse(responseCode="400",description="Invalid input"),
-            @ApiResponse(responseCode="404",description="Not found"),
-            @ApiResponse(responseCode="500",description="Internal server error", content=@Content(mediaType = "application/json"))
+            @ApiResponse(responseCode="200" ,description = "Prompts retrieved successfully",content=@Content(mediaType = "Application/json", array = @ArraySchema(schema = @Schema(implementation = PromptDTO.class)))),
+            @ApiResponse(responseCode="400",description="Invalid input",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="404",description="Not found",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="500",description="Internal server error",content = @Content(schema=@Schema(type="object")))
     })
     @GetMapping
     public ResponseEntity<List<PromptDTO>> getAllPrompts() {
@@ -79,12 +80,25 @@ public class PromptController {
         return ResponseEntity.ok(prompts);
     }
 
+    @Operation(summary = "Get all Prompts paginated", description = "Retrieves all Prompts paginated")
+    @ApiResponses(value={
+            @ApiResponse(responseCode="200" ,description = "Prompts retrieved successfully",content=@Content(mediaType = "Application/json", schema=@Schema(implementation= Page.class))),
+            @ApiResponse(responseCode="404",description="Not found",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="500",description="Internal server error",content = @Content(schema=@Schema(type="object")))
+    })
     @GetMapping("/paginated")
     public ResponseEntity<Page<PromptDTO>> getAllPromptsPaginated(@PageableDefault(size = 10) Pageable pageable) {
         Page<PromptDTO> prompts = promptService.getAllPromptsPaginated(pageable);
         return ResponseEntity.ok(prompts);
     }
 
+    @Operation(summary = "Update a Prompt", description = "Updates an existing Prompt by ID")
+    @ApiResponses(value={
+            @ApiResponse(responseCode="200" ,description = "Prompt updated successfully",content=@Content(mediaType = "Application/json", schema=@Schema(implementation=PromptDTO.class))),
+            @ApiResponse(responseCode="400",description="Invalid input",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="404",description="Prompt not found",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="500",description="Internal server error",content = @Content(schema=@Schema(type="object")))
+    })
     @PutMapping("/{id}")
     public ResponseEntity<PromptDTO> updatePrompt(@PathVariable UUID id, @RequestBody PromptDTO promptDTO) {
         if (!promptService.getPromptById(id).isPresent()) {
@@ -94,6 +108,14 @@ public class PromptController {
         return ResponseEntity.ok(promptDTO);
     }
 
+
+    @Operation(summary = "Delete a Prompt", description = "Deletes a Prompt by ID")
+    @ApiResponses(value={
+            @ApiResponse(responseCode="200" ,description = "Prompt deleted successfully",content=@Content( schema=@Schema(type = "object"))),
+            @ApiResponse(responseCode="400",description="Invalid input",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="404",description="Prompt not found",content = @Content(schema=@Schema(type="object"))),
+            @ApiResponse(responseCode="500",description="Internal server error",content = @Content(schema=@Schema(type="object")))
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePrompt(@PathVariable UUID id) {
         if (!promptService.getPromptById(id).isPresent()) {
