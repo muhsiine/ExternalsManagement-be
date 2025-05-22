@@ -24,8 +24,9 @@ public interface CandidateSrv {
     public List<CandidateDTO> getCandidatesByLanguage(String language);
     List<CandidateDTO> getCandidatesBySkill(String skill);
 
-    // Overloaded method for tests - returns all candidates (needed for the test compatibility)
-    List<CandidateDTO> getCandidatesBySkill();
+    // Overloaded method for tests - returns skill counts map (needed for the test compatibility)
+    Map<String, Long> getCandidatesBySkill();
 
     Map<String, Long> getCandidatesBySkillCount();
+
 }

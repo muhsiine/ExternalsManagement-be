@@ -191,13 +191,13 @@ public class CandidateSrvImpl implements CandidateSrv {
     }
 
     @Override
-    public List<CandidateDTO> getCandidatesBySkill() {
+    public Map<String, Long> getCandidatesBySkill() {
         try {
-            // Return all candidates that have at least one skill
+            // Return a map of skills with their counts (for test compatibility)
             return candidateRepository.findAll().stream()
                     .filter(candidate -> candidate.getSkills() != null && !candidate.getSkills().isEmpty())
-                    .map(candidateMapper::candidateToCandidateDTO)
-                    .collect(Collectors.toList());
+                    .flatMap(candidate -> candidate.getSkills().stream())
+                    .collect(Collectors.groupingBy(Skill::getSkillName, Collectors.counting()));
         } catch (Exception e) {
             throw new InternalServerException("Error retrieving candidates by skill", e);
         }

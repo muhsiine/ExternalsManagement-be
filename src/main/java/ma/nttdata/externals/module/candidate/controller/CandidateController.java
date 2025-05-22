@@ -123,17 +123,12 @@ public class CandidateController {
     public ResponseEntity<List<String>> getAllTechnologies() {
         log.info("Retrieving all technologies");
 
-        // Get all candidates and extract their skills
-        List<CandidateDTO> candidates = candidateSrv.getCandidatesBySkill();
-
-        Set<String> skills = candidates.stream()
-                .filter(c -> c.skills() != null)
-                .flatMap(c -> c.skills().stream())
-                .map(SkillDTO::skillName)
-                .collect(Collectors.toSet());
+        // Get skill counts map and extract the skill names
+        Map<String, Long> skillsMap = candidateSrv.getCandidatesBySkill();
+        List<String> skills = new ArrayList<>(skillsMap.keySet());
 
         log.info("Retrieved {} technologies", skills.size());
-        return ResponseEntity.ok(List.copyOf(skills));
+        return ResponseEntity.ok(skills);
     }
 
     // Candidates by Language
