@@ -190,6 +190,17 @@ public class CandidateSrvImpl implements CandidateSrv {
         }
     }
 
+    @Override
+    public Map<String, Long> getCandidatesBySkillCount() {
+        List<Candidate> candidates = candidateRepository.findAll();
+
+        return candidates.stream()
+                .flatMap(candidate -> candidate.getSkills().stream())
+                .collect(Collectors.groupingBy(
+                        Skill::getName,
+                        Collectors.counting()
+                ));
+    }
 
 
     @Override

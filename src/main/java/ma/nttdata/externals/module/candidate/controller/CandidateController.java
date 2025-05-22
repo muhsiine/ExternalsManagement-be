@@ -16,10 +16,17 @@ import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import ma.nttdata.externals.module.candidate.dto.SkillDTO;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import java.util.stream.Collectors;
+
+
 
 @RestController
 @RequestMapping("/api/v1/candidates")
@@ -115,9 +122,18 @@ public class CandidateController {
     @GetMapping("/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
         log.info("Retrieving all technologies");
-        List<String> skills = candidateSrv.getAllTechnologies();
+
+        // Get all candidates and extract their skills
+        List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
+
+        Set<String> skills = candidates.stream()
+                .filter(c -> c.skills() != null)
+                .flatMap(c -> c.skills().stream())
+                .map(SkillDTO::skillName)
+                .collect(Collectors.toSet());
+
         log.info("Retrieved {} technologies", skills.size());
-        return ResponseEntity.ok(skills);
+        return ResponseEntity.ok(List.copyOf(skills));
     }
 
     // Candidates by Language
