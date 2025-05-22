@@ -1,30 +1,41 @@
 package ma.nttdata.externals.module.cv.service.impl;
 
 import ma.nttdata.externals.commons.constants.JsonExtractionPromptConstants;
+import ma.nttdata.externals.commons.exception.BadRequestException;
+import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
-import ma.nttdata.externals.module.cv.service.cvSrv;
+import ma.nttdata.externals.module.cv.service.CvSrv;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class cvSrvImpl implements cvSrv {
-
-
+public class CvSrvImpl implements CvSrv {
     private final boolean mockFlag;
     private final RestClient aiRestClient;
-    public cvSrvImpl(@Value("${app.mock.flag}") boolean mockFlag,
+
+    public CvSrvImpl(@Value("${app.mock.flag}") boolean mockFlag,
                      @Qualifier("aiServiceClient") RestClient aiRestClient) {
         this.mockFlag = mockFlag;
         this.aiRestClient = aiRestClient;
     }
 
-
     @Override
     public String extractCandidateInfo(CvFileDTO cvFileDTO) {
-       return mockFlag ? JsonExtractionPromptConstants.jsonMock : getExtractedData(cvFileDTO);
+        try {
+            // Validate input
+            if (cvFileDTO == null || cvFileDTO.b64EFile() == null || cvFileDTO.b64EFile().isEmpty()) {
+                throw new BadRequestException("CV file data is required");
+            }
+
+            return mockFlag ? JsonExtractionPromptConstants.jsonMock : getExtractedData(cvFileDTO);
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerException("Error processing CV file", e);
+        }
     }
 
     private String getExtractedData(CvFileDTO cvFileDTO) {

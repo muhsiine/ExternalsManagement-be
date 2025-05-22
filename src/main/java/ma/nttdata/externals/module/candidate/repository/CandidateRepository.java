@@ -8,4 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface CandidateRepository extends ListCrudRepository<Candidate, UUID> {
+//  Candidate findByFullName(String name);
+///query method sprigng jpa
 }
