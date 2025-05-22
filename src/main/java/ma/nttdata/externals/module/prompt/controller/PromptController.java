@@ -112,6 +112,7 @@ public class PromptController {
     @Operation(summary = "Delete a Prompt", description = "Deletes a Prompt by ID")
     @ApiResponses(value={
             @ApiResponse(responseCode="200" ,description = "Prompt deleted successfully",content=@Content( schema=@Schema(type = "object"))),
+            @ApiResponse(responseCode="204",description="Prompt deleted successfully without prompt returned ",content=@Content( schema=@Schema(type = "object"))),
             @ApiResponse(responseCode="400",description="Invalid input",content = @Content(schema=@Schema(type="object"))),
             @ApiResponse(responseCode="404",description="Prompt not found",content = @Content(schema=@Schema(type="object"))),
             @ApiResponse(responseCode="500",description="Internal server error",content = @Content(schema=@Schema(type="object")))
