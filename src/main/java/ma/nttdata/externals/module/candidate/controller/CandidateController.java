@@ -124,7 +124,7 @@ public class CandidateController {
         log.info("Retrieving all technologies");
 
         // Get all candidates and extract their skills
-        List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
+        List<CandidateDTO> candidates = candidateSrv.getCandidatesBySkill();
 
         Set<String> skills = candidates.stream()
                 .filter(c -> c.skills() != null)

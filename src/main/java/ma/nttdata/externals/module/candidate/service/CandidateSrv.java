@@ -23,6 +23,9 @@ public interface CandidateSrv {
     List<String> getAllTechnologies();
     public List<CandidateDTO> getCandidatesByLanguage(String language);
     List<CandidateDTO> getCandidatesBySkill(String skill);
-    Map<String, Long> getCandidatesBySkillCount();
 
+    // Overloaded method for tests - returns all candidates (needed for the test compatibility)
+    List<CandidateDTO> getCandidatesBySkill();
+
+    Map<String, Long> getCandidatesBySkillCount();
 }
