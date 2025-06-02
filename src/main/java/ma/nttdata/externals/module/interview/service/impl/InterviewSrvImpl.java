@@ -12,6 +12,7 @@ import ma.nttdata.externals.module.interview.dto.InterviewRequestDTO;
 import ma.nttdata.externals.module.interview.service.InterviewSrv;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import jakarta.annotation.PostConstruct;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,14 +27,13 @@ public class InterviewSrvImpl implements InterviewSrv {
     private final ObjectMapper objectMapper;
     private final RestTemplate aiRestClient;
 
-    public InterviewSrvImpl(CandidateRepository candidateRepository, ObjectMapper objectMapper, RestTemplate aiRestClient) {
-        this.candidateRepository = candidateRepository;
-        this.objectMapper = configureObjectMapper(objectMapper);
-        this.aiRestClient = aiRestClient;
+    @PostConstruct
+    public void init() {
+        configureObjectMapper(objectMapper);
     }
 
-    private ObjectMapper configureObjectMapper(ObjectMapper objectMapper) {
-        return objectMapper
+    private void configureObjectMapper(ObjectMapper objectMapper) {
+        objectMapper
                 .registerModule(new JavaTimeModule())
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
