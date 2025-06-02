@@ -6,14 +6,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import ma.nttdata.externals.config.TestConfig;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
     "spring.docker.compose.enabled=false",
-    "app.mock.flag=true"
+    "app.mock.flag=true",
+    "app.ai.server.url=http://mock-ai-server"
 })
-@Import(TestConfig.class)
+@ContextConfiguration(classes = TestConfig.class)
 class ExternalsManagementBeApplicationTests {
 
 	@Test
