@@ -12,7 +12,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create   # Use "update" for development, but "validate" for production
+      ddl-auto: none  # Let Flyway handle all schema creation
     show-sql: true
     properties:
       hibernate:
@@ -24,10 +24,10 @@ spring:
     compose:
       enabled: true
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
-
+    
   security:
     user:
       name: admin
@@ -35,6 +35,9 @@ spring:
   sql:
     init:
       mode: always
+      schema-locations: classpath:db/migration/V1__Create_user_and_candidate_tables.sql  # Point to the migrtaion file
+      data-locations: classpath:db/insertion/V1__data.sql  # Point to the insertion of data file
+      continue-on-error: false
 
 logging:
   level:
@@ -50,3 +53,4 @@ app:
   ai:
     server:
       url: http://localhost:8080
+      
