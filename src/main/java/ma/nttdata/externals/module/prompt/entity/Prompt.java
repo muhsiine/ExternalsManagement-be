@@ -1,9 +1,6 @@
 package ma.nttdata.externals.module.prompt.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,8 +17,10 @@ public class Prompt {
 
     private String promptCode;
 
+    @Column(columnDefinition = "TEXT")
     private String promptDesc;
 
+    @Column(columnDefinition = "TEXT")
     private String schema;
 
     public void setId(UUID id) {
