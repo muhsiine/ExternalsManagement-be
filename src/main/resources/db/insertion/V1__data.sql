@@ -122,12 +122,23 @@ FROM candidates;
 -- Skills with varied proficiency
 INSERT INTO skills (id, candidate_id, skill_name, proficiency_level)
 WITH candidate_skills AS (
-    SELECT id, (ARRAY['Java','Spring Boot','React','Angular','Python','Django','Node.js','AWS', 'Docker','Kubernetes','SQL','NoSQL','JavaScript','TypeScript','PHP','Laravel', '.NET','C#','Swift','Kotlin'])[FLOOR(RANDOM()*20)+1] AS skill
+    SELECT
+        id,
+        (ARRAY['Java','React','Angular','Python','JavaScript','Laravel','.NET','C#'])[FLOOR(RANDOM()*8)+1] AS skill
     FROM candidates
     CROSS JOIN generate_series(1, (FLOOR(RANDOM()*5)+3)::integer)
 )
-SELECT uuid_generate_v4(), id, skill, CASE WHEN RANDOM() < 0.2 THEN 'BEGINNER' WHEN RANDOM() < 0.6 THEN 'INTERMEDIATE' ELSE 'EXPERT' END
+SELECT
+    uuid_generate_v4(),
+    id,
+    skill,
+    CASE
+        WHEN RANDOM() < 0.2 THEN 'BEGINNER'
+        WHEN RANDOM() < 0.6 THEN 'INTERMEDIATE'
+        ELSE 'EXPERT'
+    END
 FROM candidate_skills;
+
 
 -- Education with Moroccan institutions
 INSERT INTO educations (id, candidate_id, institution, degree, start_date, end_date, diploma)
@@ -151,54 +162,70 @@ FROM candidates;
 
 -- Languages with Moroccan context
 INSERT INTO languages (id, candidate_id, description, english_description, full_description, language, language_in_english, level, is_native)
+WITH language_data AS (
+    -- Define the language dataset with row_number
+    SELECT *, ROW_NUMBER() OVER () - 1 AS row_number
+    FROM (VALUES
+        ('العربية', 'Arabic', 'اللغة العربية الفصحى', 'Arabic', 'Arabic'),
+        ('Français', 'French', 'Langue Française', 'French', 'French'),
+        ('English', 'English', 'English Language', 'English', 'English'),
+        ('Español', 'Spanish', 'Idioma Español', 'Spanish', 'Spanish')
+    ) AS langs (description, english_description, full_description, language, language_in_english)
+),
+candidate_language_counts AS (
+    -- Generate 1–3 languages per candidate
+    SELECT id AS candidate_id, (FLOOR(RANDOM() * 3) + 1)::integer AS num_languages
+    FROM candidates
+),
+candidate_english AS (
+    -- Assign English (index 2) with 70% probability
+    SELECT candidate_id, 2 AS lang_index
+    FROM candidate_language_counts
+    WHERE RANDOM() < 0.7
+),
+candidate_other_languages AS (
+    -- Generate additional languages (excluding English) with num_languages correlation
+    SELECT
+        c.candidate_id,
+        l.row_number AS lang_index,
+        ROW_NUMBER() OVER (PARTITION BY c.candidate_id ORDER BY RANDOM()) AS rn,
+        c.num_languages
+    FROM candidate_language_counts c
+    CROSS JOIN generate_series(1, c.num_languages) g
+    CROSS JOIN LATERAL (
+        SELECT row_number
+        FROM language_data
+        WHERE row_number != 2 -- Exclude English
+    ) l
+    WHERE NOT EXISTS (
+        SELECT 1 FROM candidate_english ce WHERE ce.candidate_id = c.candidate_id AND ce.lang_index = l.row_number
+    )
+    AND (c.num_languages > 1 OR NOT EXISTS (SELECT 1 FROM candidate_english ce WHERE ce.candidate_id = c.candidate_id))
+),
+candidate_languages AS (
+    -- Combine English and other languages, ensuring no duplicates
+    SELECT candidate_id, lang_index
+    FROM candidate_english
+    UNION ALL
+    SELECT candidate_id, lang_index
+    FROM candidate_other_languages col
+    WHERE rn <= col.num_languages - (SELECT COUNT(*) FROM candidate_english ce WHERE ce.candidate_id = col.candidate_id)
+)
 SELECT
-    uuid_generate_v4(),
-    id,
-    lang_data->>'desc',
-    lang_data->>'eng_desc',
-    lang_data->>'full_desc',
-    lang_data->>'lang',
-    lang_data->>'eng_lang',
-    CASE (RANDOM()*5)::INT
+    uuid_generate_v4() AS id,
+    cl.candidate_id,
+    ld.description,
+    ld.english_description,
+    ld.full_description,
+    ld.language,
+    ld.language_in_english,
+    CASE (RANDOM() * 5)::integer
         WHEN 0 THEN 'BEGINNER'
         WHEN 1 THEN 'LOWER_INTERMEDIATE'
         WHEN 2 THEN 'INTERMEDIATE'
         WHEN 3 THEN 'UPPER_INTERMEDIATE'
         ELSE 'ADVANCED'
-    END,
-    (lang_data->>'native')::BOOLEAN
-FROM candidates
-CROSS JOIN (
-    SELECT jsonb_build_object(
-        'desc', 'العربية',
-        'eng_desc', 'Arabic',
-        'full_desc', 'اللغة العربية الفصحى',
-        'lang', 'Arabic',
-        'eng_lang', 'Arabic',
-        'native', true
-    ) AS lang_data
-    UNION ALL SELECT jsonb_build_object(
-        'desc', 'Français',
-        'eng_desc', 'French',
-        'full_desc', 'Langue Française',
-        'lang', 'French',
-        'eng_lang', 'French',
-        'native', false
-    ) WHERE RANDOM() < 0.8  -- 80% speak French
-    UNION ALL SELECT jsonb_build_object(
-        'desc', 'English',
-        'eng_desc', 'English',
-        'full_desc', 'English Language',
-        'lang', 'English',
-        'eng_lang', 'English',
-        'native', false
-    ) WHERE RANDOM() < 0.7  -- 70% speak English
-    UNION ALL SELECT jsonb_build_object(
-        'desc', 'Español',
-        'eng_desc', 'Spanish',
-        'full_desc', 'Idioma Español',
-        'lang', 'Spanish',
-        'eng_lang', 'Spanish',
-        'native', false
-    ) WHERE RANDOM() < 0.2  -- 20% speak Spanish
-) AS langs;
+    END AS level,
+    (RANDOM() < 0.5) AS is_native
+FROM candidate_languages cl
+JOIN language_data ld ON ld.row_number = cl.lang_index;

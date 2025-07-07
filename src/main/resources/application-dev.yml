@@ -36,12 +36,12 @@ spring:
 
   docker:
     compose:
-      enabled: false
+      enabled: true
 
   sql:
     init:
       mode: always
-      data-locations: classpath:db/insertion/V1__data.sql  # Correct path
+      data-locations: classpath:db/insertion/V1__data.sql
       continue-on-error: false
 
 logging:
