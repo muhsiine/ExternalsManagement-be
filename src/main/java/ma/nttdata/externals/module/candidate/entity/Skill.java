@@ -27,4 +27,9 @@ public class Skill {
     @Enumerated(EnumType.STRING)
     @Column(name = "proficiency_level")
     private ProficiencyLevel proficiencyLevel;
+
+    // Add this method to match the expected getName() in CandidateSrvImpl
+    public String getName() {
+        return skillName;
+    }
 }
