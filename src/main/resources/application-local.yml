@@ -35,7 +35,9 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:db/migration/V1__Create_user_and_candidate_tables.sql  # Point to the migrtaion file
+      schema-locations:
+      - classpath:db/migration/V1__Create_user_and_candidate_tables.sql
+      - classpath:db/migration/V2__Offers__and__interviews__tables.sql # Point to the migrtaion file
       data-locations: classpath:db/insertion/V1__data.sql  # Point to the insertion of data file
       continue-on-error: false
 
