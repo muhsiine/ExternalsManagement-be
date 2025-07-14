@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS offers (
     department VARCHAR(100)
 );
 
+
 -- Create interview table
 CREATE TABLE IF NOT EXISTS interviews (
     id UUID PRIMARY KEY,

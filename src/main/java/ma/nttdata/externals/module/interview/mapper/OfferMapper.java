@@ -13,7 +13,7 @@ public interface OfferMapper {
 
     OfferMapper INSTANCE = Mappers.getMapper(OfferMapper.class);
 
-    // Entity to DTO
+    //entity to dto
     @Mapping(target = "titre", source = "titre")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "createdAt", source = "createdAt")
@@ -22,7 +22,7 @@ public interface OfferMapper {
     @Mapping(target = "department", source = "department")
     OfferDTO toDto(Offer offer);
 
-    // DTO to Entity
+    //dto to entity
     @Mapping(target = "titre", source = "titre")
     @Mapping(target = "description", source = "description")
     @Mapping(target = "createdAt", source = "createdAt")

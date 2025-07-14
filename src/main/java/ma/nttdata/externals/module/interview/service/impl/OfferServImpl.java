@@ -6,7 +6,9 @@ import ma.nttdata.externals.module.interview.entity.Offer;
 import ma.nttdata.externals.module.interview.mapper.OfferMapper;
 import ma.nttdata.externals.module.interview.repository.OfferRepository;
 import ma.nttdata.externals.module.interview.service.OfferServ;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,13 +17,14 @@ import java.util.UUID;
 @Transactional
 
 public class OfferServImpl implements OfferServ {
-    private final OfferRepository offerRepository ;
-    private final OfferMapper offerMapper ;
+    private final OfferRepository offerRepository;
+    private final OfferMapper offerMapper;
 
     public OfferServImpl(OfferRepository offerRepository, OfferMapper offerMapper) {
         this.offerRepository = offerRepository;
         this.offerMapper = offerMapper;
     }
+
     @Override
     public OfferDTO createOffer(OfferDTO offerDTO) {
         Offer offer = offerMapper.toEntity(offerDTO);
@@ -53,9 +56,9 @@ public class OfferServImpl implements OfferServ {
 
     @Override
     public void deleteOffer(UUID id) {
-        if (!offerRepository.existsById(id)) {
-            throw new RuntimeException("Offer not found with id: " + id);
-        }
-        offerRepository.deleteById(id);
+        Offer offer = offerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        offerRepository.delete(offer);
+
     }
+
 }

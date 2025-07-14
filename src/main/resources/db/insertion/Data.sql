@@ -229,3 +229,11 @@ SELECT
     (RANDOM() < 0.5) AS is_native
 FROM candidate_languages cl
 JOIN language_data ld ON ld.row_number = cl.lang_index;
+
+INSERT INTO offers (id, titre, description, created_at, status, type, department)
+VALUES
+  (uuid_generate_v4(), 'Software Engineer', 'Develop cutting-edge software', NOW(), 'Open', 'Full-time', 'Engineering'),
+  (uuid_generate_v4(), 'Data Scientist', 'Analyze data and build models', NOW(), 'Pending', 'Contract', 'Data Science'),
+  (uuid_generate_v4(), 'DevOps Engineer', 'Manage CI/CD pipelines', NOW(), 'Closed', 'Full-time', 'Operations'),
+  (uuid_generate_v4(), 'Frontend Developer', 'Build beautiful UIs', NOW(), 'Open', 'Part-time', 'Product'),
+  (uuid_generate_v4(), 'Backend Developer', 'Design APIs and systems', NOW(), 'Pending', 'Full-time', 'Engineering');

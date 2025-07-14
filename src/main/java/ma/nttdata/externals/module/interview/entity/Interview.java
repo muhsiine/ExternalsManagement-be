@@ -6,6 +6,8 @@ import lombok.Setter;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -31,4 +33,6 @@ public class Interview {
 
     @Column
     private String status;
+
+
 }

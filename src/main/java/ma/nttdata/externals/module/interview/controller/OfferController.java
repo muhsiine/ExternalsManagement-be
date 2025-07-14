@@ -19,11 +19,13 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/offers")
+@CrossOrigin(origins = "http://localhost:4200")
 @Tag(name = "Offer Management API", description = "This API exposes endpoints to manage offers")
 public class OfferController {
     private final OfferServ offerServ;
     @Autowired
     public OfferController(OfferServ offerServ) {
+
         this.offerServ= offerServ;
     }
 
@@ -72,7 +74,7 @@ public class OfferController {
         return ResponseEntity.ok(updatedOffer);
     }
 
-        @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}")
     @Operation(summary = "Delete an offer", description = "Deletes a job offer by its UUID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Offer deleted successfully"),
