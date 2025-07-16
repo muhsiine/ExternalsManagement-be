@@ -24,6 +24,6 @@ public class Prompt {
     private String schema;
 
     public void setId(UUID id) {
-
+        this.id = id;
     }
 }
