@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import ma.nttdata.externals.commons.exception.BadRequestException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping("/api/v1/candidates")
@@ -163,18 +160,9 @@ public class CandidateController {
     @GetMapping("/technologies")
     public ResponseEntity<List<String>> getAllTechnologies() {
         log.info("Retrieving all technologies");
-        Map<String, Long> candidatesBySkill = candidateSrv.getCandidatesBySkill();
-        List<String> skills = candidatesBySkill.keySet().stream()
-                .sorted()
-                .collect(Collectors.toList());
-
-        if (skills.isEmpty()) {
-            log.info("No technologies found");
-            throw new ResourceNotFoundException("No technologies found");
-        }
-
+        List<String> skills = candidateSrv.getAllTechnologies();
         log.info("Retrieved {} technologies", skills.size());
-        return ResponseEntity.ok(skills);
+        return ResponseEntity.ok(skills); // Return empty list with 200 status
     }
 
     @Operation(summary = "Get candidates by language", description = "Retrieves a list of candidates who speak the specified language")
@@ -188,24 +176,9 @@ public class CandidateController {
     public ResponseEntity<List<CandidateDTO>> getCandidatesByLanguage(
             @Parameter(description = "Language to filter by") @PathVariable String lang) {
         log.info("Retrieving candidates by language: {}", lang);
-
-        if (lang == null || lang.trim().isEmpty()) {
-            throw new BadRequestException("Language parameter cannot be empty");
-        }
-
-        // This filtering logic should be moved to the service layer in a future refactoring
-        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                .filter(candidate -> candidate.naturalLanguages() != null && candidate.naturalLanguages().stream()
-                        .anyMatch(language -> language.language().equalsIgnoreCase(lang)))
-                .collect(Collectors.toList());
-
-        if (candidates.isEmpty()) {
-            log.info("No candidates found with language: {}", lang);
-            throw new ResourceNotFoundException("No candidates found with language: " + lang);
-        }
-
+        List<CandidateDTO> candidates = candidateSrv.getCandidatesByLanguage(lang);
         log.info("Retrieved {} candidates with language: {}", candidates.size(), lang);
-        return ResponseEntity.ok(candidates);
+        return ResponseEntity.ok(candidates); // Return empty list with 200 status
     }
 
     @Operation(summary = "Get candidates by skill", description = "Retrieves a list of candidates who have the specified skill")
@@ -219,30 +192,15 @@ public class CandidateController {
     public ResponseEntity<List<CandidateDTO>> getCandidatesBySkill(
             @Parameter(description = "Skill to filter by") @PathVariable String skill) {
         log.info("Retrieving candidates by skill: {}", skill);
-
-        if (skill == null || skill.trim().isEmpty()) {
-            throw new BadRequestException("Skill parameter cannot be empty");
-        }
-
-        // This filtering logic should be moved to the service layer in a future refactoring
-        List<CandidateDTO> candidates = candidateSrv.getCandidates().stream()
-                .filter(candidate -> candidate.skills() != null && candidate.skills().stream()
-                        .anyMatch(s -> s.skillName().equalsIgnoreCase(skill)))
-                .collect(Collectors.toList());
-
-        if (candidates.isEmpty()) {
-            log.info("No candidates found with skill: {}", skill);
-            throw new ResourceNotFoundException("No candidates found with skill: " + skill);
-        }
-
+        List<CandidateDTO> candidates = candidateSrv.getCandidatesBySkill(skill);
         log.info("Retrieved {} candidates with skill: {}", candidates.size(), skill);
-        return ResponseEntity.ok(candidates);
+        return ResponseEntity.ok(candidates); // Return empty list with 200 status
     }
 
     @Operation(summary = "Get statistics of candidates by language", description = "Retrieves statistics of how many candidates speak each language")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved language statistics",
-                    content = @Content(mediaType = "application/json", 
+                    content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Map.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
@@ -250,12 +208,10 @@ public class CandidateController {
     public ResponseEntity<Map<String, Long>> getCandidateStatsByLanguages() {
         log.info("Retrieving candidate statistics by language");
         Map<String, Long> languageStats = candidateSrv.getCandidatesByLanguage();
-        
         if (languageStats.isEmpty()) {
             log.info("No language statistics found");
             return ResponseEntity.ok(languageStats); // Return empty map instead of 404
         }
-        
         log.info("Retrieved statistics for {} languages", languageStats.size());
         return ResponseEntity.ok(languageStats);
     }

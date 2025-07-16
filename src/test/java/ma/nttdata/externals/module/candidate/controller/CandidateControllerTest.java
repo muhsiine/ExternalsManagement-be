@@ -45,8 +45,6 @@ class CandidateControllerTest {
     private UUID candidateId;
     private List<CandidateDTO> candidateList;
 
-
-
     @BeforeEach
     void setUp() {
         candidateId = UUID.randomUUID();
@@ -245,12 +243,10 @@ class CandidateControllerTest {
     @Test
     @WithMockUser
     void testGetAllTechnologies() throws Exception {
-        Map<String, Long> skillsMap = new HashMap<>();
-        skillsMap.put("Java", 5L);
-        skillsMap.put("Python", 3L);
-        skillsMap.put("Spring", 4L);
+        // Mock the getAllTechnologies method instead of getCandidatesBySkill
+        List<String> technologies = Arrays.asList("Java", "Python", "Spring");
 
-        when(candidateSrv.getCandidatesBySkill()).thenReturn(skillsMap);
+        when(candidateSrv.getAllTechnologies()).thenReturn(technologies);
 
         mockMvc.perform(get(API_URL+"/technologies")
                         .accept(MediaType.APPLICATION_JSON))
@@ -258,7 +254,7 @@ class CandidateControllerTest {
                 .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$", containsInAnyOrder("Java", "Python", "Spring")));
 
-        verify(candidateSrv).getCandidatesBySkill();
+        verify(candidateSrv).getAllTechnologies();
     }
 
     @Test
@@ -266,7 +262,7 @@ class CandidateControllerTest {
     void testGetCandidatesByLanguage() throws Exception {
         // Create candidates with languages
         List<LanguageDTO> englishLanguages = Collections.singletonList(
-                new LanguageDTO(UUID.randomUUID(), null, "English description", "English description", 
+                new LanguageDTO(UUID.randomUUID(), null, "English description", "English description",
                         null, "English", "English", null, false)
         );
 
@@ -283,9 +279,8 @@ class CandidateControllerTest {
 
         List<CandidateDTO> candidatesWithEnglish = Collections.singletonList(candidateWithEnglish);
 
-        when(candidateSrv.getCandidates()).thenReturn(candidateList);
-        // Use doReturn().when() syntax to avoid issues with matchers
-        doReturn(candidatesWithEnglish).when(candidateSrv).getCandidates();
+        // Mock the getCandidatesByLanguage(String) method instead of getCandidates()
+        when(candidateSrv.getCandidatesByLanguage("English")).thenReturn(candidatesWithEnglish);
 
         mockMvc.perform(get(API_URL+"/languages/{lang}", "English")
                         .accept(MediaType.APPLICATION_JSON))
@@ -293,7 +288,7 @@ class CandidateControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].fullName").value("John English"));
 
-        verify(candidateSrv).getCandidates();
+        verify(candidateSrv).getCandidatesByLanguage("English");
     }
 
     @Test
@@ -317,8 +312,8 @@ class CandidateControllerTest {
 
         List<CandidateDTO> candidatesWithJava = Collections.singletonList(candidateWithJava);
 
-        // Use doReturn().when() syntax to avoid issues with matchers
-        doReturn(candidatesWithJava).when(candidateSrv).getCandidates();
+        // Mock the getCandidatesBySkill(String) method instead of getCandidates()
+        when(candidateSrv.getCandidatesBySkill("Java")).thenReturn(candidatesWithJava);
 
         mockMvc.perform(get(API_URL+"/skills/{skill}", "Java")
                         .accept(MediaType.APPLICATION_JSON))
@@ -326,6 +321,6 @@ class CandidateControllerTest {
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].fullName").value("Java Developer"));
 
-        verify(candidateSrv).getCandidates();
+        verify(candidateSrv).getCandidatesBySkill("Java");
     }
 }
