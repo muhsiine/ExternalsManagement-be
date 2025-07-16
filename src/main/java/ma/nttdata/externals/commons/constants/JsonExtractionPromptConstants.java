@@ -42,7 +42,12 @@ public final class JsonExtractionPromptConstants {
                 "type": "object",
                 "properties": {
                   "contactType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                      "EMAIL",
+                      "PHONE",
+                      "LINKEDIN"
+                    ]
                   },
                   "contactValue": {
                     "type": "string"
