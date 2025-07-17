@@ -1,6 +1,6 @@
-package ma.nttdata.externals.module.interview.service;
+package ma.nttdata.externals.module.offer.service;
 
-import ma.nttdata.externals.module.interview.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 
 import java.util.List;
 import java.util.UUID;

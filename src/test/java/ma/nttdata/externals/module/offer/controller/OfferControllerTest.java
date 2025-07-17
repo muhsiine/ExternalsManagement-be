@@ -1,8 +1,9 @@
-package ma.nttdata.externals.module.interview.controller;
+package ma.nttdata.externals.module.offer.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ma.nttdata.externals.module.interview.dto.OfferDTO;
-import ma.nttdata.externals.module.interview.service.OfferServ;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.service.OfferServ;
+import ma.nttdata.externals.module.offer.controller.OfferController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

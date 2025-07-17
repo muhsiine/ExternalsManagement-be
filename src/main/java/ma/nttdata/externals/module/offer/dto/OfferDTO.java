@@ -1,6 +1,5 @@
-package ma.nttdata.externals.module.interview.dto;
+package ma.nttdata.externals.module.offer.dto;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record OfferDTO(

@@ -1,4 +1,4 @@
-package ma.nttdata.externals.module.interview.entity;
+package ma.nttdata.externals.module.offer.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;

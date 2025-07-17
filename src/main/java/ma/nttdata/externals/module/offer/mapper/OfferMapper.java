@@ -1,7 +1,7 @@
-package ma.nttdata.externals.module.interview.mapper;
+package ma.nttdata.externals.module.offer.mapper;
 
-import ma.nttdata.externals.module.interview.dto.OfferDTO;
-import ma.nttdata.externals.module.interview.entity.Offer;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.entity.Offer;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

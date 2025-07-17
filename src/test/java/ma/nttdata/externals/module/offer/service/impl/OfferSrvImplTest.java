@@ -1,10 +1,11 @@
-package ma.nttdata.externals.module.interview.service.impl;
+package ma.nttdata.externals.module.offer.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
-import ma.nttdata.externals.module.interview.dto.OfferDTO;
-import ma.nttdata.externals.module.interview.entity.Offer;
-import ma.nttdata.externals.module.interview.mapper.OfferMapperTest;
-import ma.nttdata.externals.module.interview.repository.OfferRepository;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.entity.Offer;
+import ma.nttdata.externals.module.offer.mapper.OfferMapperTest;
+import ma.nttdata.externals.module.offer.repository.OfferRepository;
+import ma.nttdata.externals.module.offer.service.impl.OfferServImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;

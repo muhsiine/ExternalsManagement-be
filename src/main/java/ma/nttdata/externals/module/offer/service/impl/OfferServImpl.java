@@ -1,11 +1,10 @@
-package ma.nttdata.externals.module.interview.service.impl;
-
+package ma.nttdata.externals.module.offer.service.impl;
 import jakarta.transaction.Transactional;
-import ma.nttdata.externals.module.interview.dto.OfferDTO;
-import ma.nttdata.externals.module.interview.entity.Offer;
-import ma.nttdata.externals.module.interview.mapper.OfferMapper;
-import ma.nttdata.externals.module.interview.repository.OfferRepository;
-import ma.nttdata.externals.module.interview.service.OfferServ;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.entity.Offer;
+import ma.nttdata.externals.module.offer.mapper.OfferMapper;
+import ma.nttdata.externals.module.offer.repository.OfferRepository;
+import ma.nttdata.externals.module.offer.service.OfferServ;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
