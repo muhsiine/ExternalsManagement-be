@@ -13,22 +13,17 @@ public interface OfferMapper {
 
     OfferMapper INSTANCE = Mappers.getMapper(OfferMapper.class);
 
-    //entity to dto
-    @Mapping(target = "titre", source = "titre")
+    // to dto
+    @Mapping(target = "title", source = "title")
     @Mapping(target = "description", source = "description")
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "status", source = "status")
-    @Mapping(target = "type", source = "type")
-    @Mapping(target = "department", source = "department")
+    @Mapping(target = "id", source = "id")
     OfferDTO toDto(Offer offer);
 
-    //dto to entity
-    @Mapping(target = "titre", source = "titre")
+
+    // to entity
+    @Mapping(target = "title", source = "title")
     @Mapping(target = "description", source = "description")
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "status", source = "status")
-    @Mapping(target = "type", source = "type")
-    @Mapping(target = "department", source = "department")
+    @Mapping(target = "id", source = "id")
     Offer toEntity(OfferDTO offerDTO);
 
     List<OfferDTO> toDtoList(List<Offer> offers);

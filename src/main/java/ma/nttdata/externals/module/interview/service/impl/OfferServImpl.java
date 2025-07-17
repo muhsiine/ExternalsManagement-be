@@ -15,8 +15,8 @@ import java.util.UUID;
 
 @Service
 @Transactional
-
 public class OfferServImpl implements OfferServ {
+
     private final OfferRepository offerRepository;
     private final OfferMapper offerMapper;
 
@@ -25,13 +25,14 @@ public class OfferServImpl implements OfferServ {
         this.offerMapper = offerMapper;
     }
 
+    // create srv
     @Override
     public OfferDTO createOffer(OfferDTO offerDTO) {
         Offer offer = offerMapper.toEntity(offerDTO);
         Offer savedOffer = offerRepository.save(offer);
         return offerMapper.toDto(savedOffer);
     }
-
+    // by id srv
     @Override
     public OfferDTO getOfferById(UUID id) {
         Offer offer = offerRepository.findById(id)
@@ -39,11 +40,13 @@ public class OfferServImpl implements OfferServ {
         return offerMapper.toDto(offer);
     }
 
+    // all srv
     @Override
     public List<OfferDTO> getAllOffers() {
         return offerMapper.toDtoList(offerRepository.findAll());
     }
 
+    // update srv
     @Override
     public OfferDTO updateOffer(UUID id, OfferDTO offerDTO) {
         Offer offer = offerRepository.findById(id)
@@ -54,6 +57,7 @@ public class OfferServImpl implements OfferServ {
         return offerMapper.toDto(updatedOffer);
     }
 
+    // delete srv
     @Override
     public void deleteOffer(UUID id) {
         Offer offer = offerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

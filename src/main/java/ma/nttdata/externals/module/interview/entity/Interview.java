@@ -6,8 +6,6 @@ import lombok.Setter;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -20,19 +18,27 @@ public class Interview {
     @Column(columnDefinition = "UUID")
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "offer_id", nullable = false)
-    private Offer offer;
+    @Column(name = "startTime")
+    private LocalDateTime startTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidate_id" , nullable = false)
+    @Column(name = "endTime")
+    private LocalDateTime endTime;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "link")
+    private String link ;
+
+    @Column(name = "feedback_general")
+    private String feedback_general;
+
+    @ManyToOne(fetch =  FetchType.EAGER)
+    @JoinColumn(name = "candidateId" , nullable = false)
     private Candidate candidate;
 
-    @Column(name = "scheduled_date")
-    private LocalDateTime scheduledDate;
-
-    @Column
-    private String status;
-
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "offerId", nullable = false)
+    private Offer offer;
 
 }

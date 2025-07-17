@@ -1,6 +1,5 @@
 package ma.nttdata.externals.module.interview.entity;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,20 +7,20 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "offers")
+@Table(name = "evaluation_types")
 @Getter
 @Setter
 
-public class Offer {
+public class EvaluationType {
     @Id
-    @GeneratedValue(strategy =  GenerationType.UUID)
-    private UUID id ;
-
-    @Column(nullable = false)
-    private String title;
+    @GeneratedValue
+    @Column(columnDefinition = "UUID")
+    private UUID id;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name="coefficient")
+    private Number coefficient;
 
 }

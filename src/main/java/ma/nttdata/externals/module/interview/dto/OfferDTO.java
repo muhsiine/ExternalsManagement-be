@@ -5,12 +5,7 @@ import java.util.UUID;
 
 public record OfferDTO(
         UUID id,
-        String titre,
-        String description,
-        LocalDateTime createdAt,
-        String status,
-        String type,
-        String department
-
+        String title,
+        String description
 
 ) {}

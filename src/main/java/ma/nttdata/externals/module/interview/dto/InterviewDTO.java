@@ -1,12 +1,16 @@
 package ma.nttdata.externals.module.interview.dto;
 
+import java.security.Timestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record InterviewDTO(
         UUID id,
+        LocalDateTime startTime,
+        LocalDateTime endTime,
+        String description ,
+        String link  ,
+        String feedback_general ,
         UUID offerId,
-        UUID candidateId,
-        LocalDateTime scheduledDate,
-        String status
+        UUID candidateId
 ) {}

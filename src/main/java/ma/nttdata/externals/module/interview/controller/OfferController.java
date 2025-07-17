@@ -19,6 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/offers")
+
 @CrossOrigin(origins = "http://localhost:4200")
 @Tag(name = "Offer Management API", description = "This API exposes endpoints to manage offers")
 public class OfferController {
@@ -29,6 +30,7 @@ public class OfferController {
         this.offerServ= offerServ;
     }
 
+    // create offer
     @PostMapping
     @Operation(summary = "Create a new offer", description = "Creates a new job offer and returns the created offer")
     @ApiResponses(value = {
@@ -42,7 +44,7 @@ public class OfferController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOffer);
     }
 
-
+    // get offer by id
     @GetMapping("/{id}")
     @Operation(summary = "Get an offer by ID", description = "Retrieves a job offer by its UUID")
     @ApiResponses(value = {
@@ -54,6 +56,8 @@ public class OfferController {
         return ResponseEntity.ok(offer);
     }
 
+
+    // all of
     @GetMapping("/all")
     @Operation(summary = "Get all offers", description = "Retrieves a list of all job offers")
     @ApiResponse(responseCode = "200", description = "List of offers retrieved successfully")
@@ -62,10 +66,12 @@ public class OfferController {
         return ResponseEntity.ok(offers);
     }
 
+
+    // update request
     @PutMapping("/{id}")
     @Operation(summary = "Update an offer", description = "Updates an existing job offer by its UUID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Offer updated successfully"),
+            @ApiResponse(responseCode = "200", description = "Offer updated successfully !"),
             @ApiResponse(responseCode = "404", description = "Offer not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
@@ -74,13 +80,14 @@ public class OfferController {
         return ResponseEntity.ok(updatedOffer);
     }
 
+
+    // delete request
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an offer", description = "Deletes a job offer by its UUID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Offer deleted successfully"),
+            @ApiResponse(responseCode = "204", description = "Offer deleted successfully !"),
             @ApiResponse(responseCode = "404", description = "Offer not found")
     })
-
     public ResponseEntity<Void> deleteOffer(@PathVariable UUID id) {
         offerServ.deleteOffer(id);
         return ResponseEntity.noContent().build();

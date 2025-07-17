@@ -1,16 +1,16 @@
-package ma.nttdata.externals.module.interview.entity;
-
-
+package  ma.nttdata.externals.module.interview.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+
 import java.util.UUID;
 
 @Entity
-@Table(name = "questions")
+@Table(name = "responses")
 @Getter
 @Setter
-public class Question {
+public class Answer {
 
     @Id
     @GeneratedValue
@@ -24,8 +24,9 @@ public class Question {
     @Column(name = "duration_in_minutes")
     private Integer durationInMinutes;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "interviewId", nullable = false)
-    private Interview interview;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "questionId", nullable = false)
+    private Question question;
+
 
 }

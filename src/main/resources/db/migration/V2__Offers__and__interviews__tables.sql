@@ -1,49 +1,63 @@
+-- drop all tables
 
--- Create offer table
+DROP TABLE IF EXISTS responses CASCADE;
+DROP TABLE IF EXISTS answers CASCADE;
+DROP TABLE IF EXISTS questions CASCADE;
+DROP TABLE IF EXISTS evaluations CASCADE;
+DROP TABLE IF EXISTS evaluation_types CASCADE;
+DROP TABLE IF EXISTS interviews CASCADE;
+DROP TABLE IF EXISTS offers CASCADE;
+
 CREATE TABLE IF NOT EXISTS offers (
     id UUID PRIMARY KEY,
-    titre VARCHAR(255) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP,
-    status VARCHAR(50),
-    type VARCHAR(50),
-    department VARCHAR(100)
+    title VARCHAR(255) NOT NULL,
+    description TEXT
 );
 
 
--- Create interview table
 CREATE TABLE IF NOT EXISTS interviews (
     id UUID PRIMARY KEY,
     offer_id UUID NOT NULL,
-    candidate_id UUID NOT NULL,
-    scheduled_date TIMESTAMP,
-    status VARCHAR(50),
-    CONSTRAINT fk_offer FOREIGN KEY (offer_id) REFERENCES offers(id) ON DELETE CASCADE,
-    CONSTRAINT fk_candidate FOREIGN KEY (candidate_id) REFERENCES candidates(id) ON DELETE CASCADE
+    candidate_id UUID,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    description TEXT,
+    link VARCHAR(255),
+    feedback_general TEXT,
+    CONSTRAINT fk_offer FOREIGN KEY (offer_id) REFERENCES offers(id) ON DELETE CASCADE
+    -- CONSTRAINT fk_candidate FOREIGN KEY (candidate_id) REFERENCES candidates(id) ON DELETE CASCADE
 );
 
--- Create question table
+
+CREATE TABLE IF NOT EXISTS evaluation_types (
+    id UUID PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    coefficient INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS evaluations (
+    id UUID PRIMARY KEY,
+    score DOUBLE PRECISION,
+    feedback TEXT,
+    interview_id UUID NOT NULL,
+    evaluation_type_id UUID NOT NULL,
+    CONSTRAINT fk_interview_evaluation FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE CASCADE,
+    CONSTRAINT fk_evaluation_type FOREIGN KEY (evaluation_type_id) REFERENCES evaluation_types(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS questions (
     id UUID PRIMARY KEY,
     description TEXT,
     interview_id UUID NOT NULL,
-    type VARCHAR(50),
-    points INTEGER,
-    question_order INTEGER,
-    created_at TIMESTAMP,
-    tags TEXT[],
-    CONSTRAINT fk_interview FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE CASCADE
+    duration_in_minutes INTEGER,
+    CONSTRAINT fk_interview_question FOREIGN KEY (interview_id) REFERENCES interviews(id) ON DELETE CASCADE
 );
 
--- Create response table
 
-
-CREATE TABLE IF NOT EXISTS responses (
+CREATE TABLE IF NOT EXISTS answers (
     id UUID PRIMARY KEY,
     description TEXT,
     question_id UUID NOT NULL,
-    created_at TIMESTAMP,
-    is_correct BOOLEAN,
-    score FLOAT,
-    CONSTRAINT fk_question FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
+    duration_in_minutes INTEGER,
+    CONSTRAINT fk_question_answer FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE
 );
