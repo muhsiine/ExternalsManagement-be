@@ -273,17 +273,17 @@ CROSS JOIN candidate_ids c
 LIMIT 20;
 
 --        evaluatio_Type
-INSERT INTO evaluation_types (id, name, coefficient)
+INSERT INTO evaluation_types (id, description, coefficient)
 SELECT
     uuid_generate_v4(),
-    name,
-    CASE name
-        WHEN 'Technical Skills' THEN 3
-        WHEN 'Communication' THEN 2
-        WHEN 'Problem Solving' THEN 3
-        WHEN 'Cultural Fit' THEN 1
-        WHEN 'Experience' THEN 2
-        WHEN 'Motivation' THEN 1
+    description,
+    CASE description
+        WHEN 'Technical Skills review handling ' THEN 3
+        WHEN 'Communication fluide and efficient during the interview' THEN 2
+        WHEN 'Problem Solving technique' THEN 3
+        WHEN 'Cultural Fit diversity in knowledge' THEN 1
+        WHEN 'Experience long in the domain' THEN 2
+        WHEN 'Motivation and high perfomanaces' THEN 1
         ELSE 1
     END
 FROM (VALUES
@@ -293,7 +293,7 @@ FROM (VALUES
     ('Cultural Fit'),
     ('Experience'),
     ('Motivation')
-) AS t(name);
+) AS t(description);
 
 -- evaluation
 WITH interview_ids AS (

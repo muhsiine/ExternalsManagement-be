@@ -34,12 +34,12 @@ public class Interview {
     @Column(name = "feedback_general")
     private String feedback_general;
 
-    @ManyToOne(fetch =  FetchType.EAGER)
-    @JoinColumn(name = "candidateId" , nullable = false)
+    @ManyToOne(fetch =  FetchType.LAZY)
+    @JoinColumn(name = "candidate_id" , nullable = false)
     private Candidate candidate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "offerId", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "offer_id", nullable = false)
     private Offer offer;
 
 }

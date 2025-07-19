@@ -21,6 +21,6 @@ public class EvaluationType {
     private String description;
 
     @Column(name="coefficient")
-    private Number coefficient;
+    private Double coefficient;
 
 }

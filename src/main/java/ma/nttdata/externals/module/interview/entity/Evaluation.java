@@ -25,11 +25,12 @@ public class Evaluation {
     private String feedback;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "interviewId", nullable = false)
+    @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
 
+
     @OneToOne(fetch =FetchType.EAGER)
-    @JoinColumn(name="evaluation_typeId" , nullable = false)
+    @JoinColumn(name="evaluation_type_id" , nullable = false)
     private EvaluationType evaluationType;
 
 

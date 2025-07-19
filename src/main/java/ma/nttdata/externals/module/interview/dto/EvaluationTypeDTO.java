@@ -6,7 +6,7 @@ public record EvaluationTypeDTO(
 
         UUID id ,
         String description ,
-        Number coefficient
+        Double coefficient
 
 )
 

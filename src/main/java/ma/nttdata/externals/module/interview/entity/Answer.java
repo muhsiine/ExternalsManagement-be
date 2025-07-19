@@ -1,4 +1,5 @@
 package  ma.nttdata.externals.module.interview.entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,7 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "responses")
+@Table(name = "answers")
 @Getter
 @Setter
 public class Answer {
@@ -25,7 +26,8 @@ public class Answer {
     private Integer durationInMinutes;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "questionId", nullable = false)
+    @JoinColumn(name = "question_id", nullable = false)
+    @JsonIgnore
     private Question question;
 
 

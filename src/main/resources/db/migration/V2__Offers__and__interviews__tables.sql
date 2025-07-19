@@ -7,7 +7,6 @@ DROP TABLE IF EXISTS evaluations CASCADE;
 DROP TABLE IF EXISTS evaluation_types CASCADE;
 DROP TABLE IF EXISTS interviews CASCADE;
 DROP TABLE IF EXISTS offers CASCADE;
-
 CREATE TABLE IF NOT EXISTS offers (
     id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -31,7 +30,7 @@ CREATE TABLE IF NOT EXISTS interviews (
 
 CREATE TABLE IF NOT EXISTS evaluation_types (
     id UUID PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    description VARCHAR(100) NOT NULL,
     coefficient INTEGER
 );
 
