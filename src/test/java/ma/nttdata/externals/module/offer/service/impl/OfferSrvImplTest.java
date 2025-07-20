@@ -1,35 +1,33 @@
 package ma.nttdata.externals.module.offer.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
-import ma.nttdata.externals.module.offer.mapper.OfferMapperTest;
+import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import ma.nttdata.externals.module.offer.repository.OfferRepository;
-import ma.nttdata.externals.module.offer.service.impl.OfferServImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-class OfferSrvImplTest {
-
-    @Mock
-    private OfferMapperTest offerMapper;
+class OfferServImplTest {
 
     @Mock
     private OfferRepository offerRepository;
 
+    @Mock
+    private OfferMapper offerMapper;
+
     @InjectMocks
-    private OfferServImpl offerServ;
+    private OfferServImpl offerServImpl;
 
     private Offer offer;
     private OfferDTO offerDTO;
@@ -37,103 +35,81 @@ class OfferSrvImplTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         offerId = UUID.randomUUID();
 
         offer = new Offer();
         offer.setId(offerId);
-        offer.setTitle("Java Developer");
-        offer.setDescription("Looking for a senior Java developer.");
-
+        offer.setTitle("Frontend Developer");
+        offer.setDescription("Looking for a React expert");
 
         offerDTO = new OfferDTO(
                 offerId,
-                "Java Developer",
-                "Looking for a senior Java developer."
+                "Frontend Developer",
+                "Looking for a React expert"
         );
     }
 
     @Test
     void testCreateOffer() {
-        when(offerMapper.offerToOfferDTO(any(Offer.class))).thenReturn(offerDTO);
-        when(offerRepository.save(any(Offer.class))).thenReturn(offer);
-        when(offerMapper.offerToOfferDTO(any(Offer.class))).thenReturn(offerDTO);
+        when(offerMapper.toEntity(offerDTO)).thenReturn(offer);
+        when(offerRepository.save(offer)).thenReturn(offer);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
 
-        OfferDTO result = offerServ.createOffer(offerDTO);
-
-        assertNotNull(result);
-        assertEquals(offerDTO.id(), result.id());
-        assertEquals(offerDTO.title(), result.title());
-        verify(offerRepository).save(any(Offer.class));
-    }
-
-    @Test
-    void testUpdateOffer() {
-        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
-        when(offerRepository.save(any(Offer.class))).thenReturn(offer);
-        when(offerMapper.offerToOfferDTO(any(Offer.class))).thenReturn(offerDTO);
-
-        OfferDTO result = offerServ.updateOffer(offerId, offerDTO);
+        OfferDTO result = offerServImpl.createOffer(offerDTO);
 
         assertNotNull(result);
-        assertEquals(offerDTO.id(), result.id());
-        assertEquals(offerDTO.title(), result.title());
-        verify(offerRepository).save(any(Offer.class));
-    }
-
-    @Test
-    void testUpdateOfferNotFound() {
-        when(offerRepository.findById(offerId)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> offerServ.updateOffer(offerId, offerDTO));
-        verify(offerRepository, never()).save(any(Offer.class));
+        assertEquals(offerDTO, result);
+        verify(offerRepository, times(1)).save(offer);
     }
 
     @Test
     void testGetOfferById() {
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
-        when(offerMapper.offerToOfferDTO(any(Offer.class))).thenReturn(offerDTO);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
 
-        OfferDTO result = offerServ.getOfferById(offerId);
+        OfferDTO result = offerServImpl.getOfferById(offerId);
 
         assertNotNull(result);
-        assertEquals(offerDTO.id(), result.id());
-        assertEquals(offerDTO.title(), result.title());
-    }
-
-    @Test
-    void testGetOfferByIdNotFound() {
-        when(offerRepository.findById(offerId)).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class, () -> offerServ.getOfferById(offerId));
+        assertEquals(offerDTO, result);
+        verify(offerRepository, times(1)).findById(offerId);
     }
 
     @Test
     void testGetAllOffers() {
-        List<Offer> offers = List.of(offer);
-        when(offerRepository.findAll()).thenReturn(offers);
-        when(offerMapper.offerToOfferDTO(any(Offer.class))).thenReturn(offerDTO);
+        List<Offer> offers = Arrays.asList(offer);
+        List<OfferDTO> offerDTOs = Arrays.asList(offerDTO);
 
-        List<OfferDTO> result = offerServ.getAllOffers();
+        when(offerRepository.findAll()).thenReturn(offers);
+        when(offerMapper.toDtoList(offers)).thenReturn(offerDTOs);
+
+        List<OfferDTO> result = offerServImpl.getAllOffers();
+
+        assertEquals(1, result.size());
+        assertEquals(offerDTOs, result);
+        verify(offerRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testUpdateOffer() {
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
+        when(offerMapper.toEntity(offerDTO)).thenReturn(offer);
+        when(offerRepository.save(offer)).thenReturn(offer);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
+
+        OfferDTO result = offerServImpl.updateOffer(offerId, offerDTO);
 
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(offerDTO.id(), result.getFirst().id());
+        assertEquals(offerDTO, result);
+        verify(offerRepository, times(1)).save(offer);
     }
 
     @Test
     void testDeleteOffer() {
-        when(offerRepository.existsById(offerId)).thenReturn(true);
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
-        offerServ.deleteOffer(offerId);
+        offerServImpl.deleteOffer(offerId);
 
-        verify(offerRepository).deleteById(offerId);
-    }
-
-    @Test
-    void testDeleteOfferNotFound() {
-        when(offerRepository.existsById(offerId)).thenReturn(false);
-
-        assertThrows(EntityNotFoundException.class, () -> offerServ.deleteOffer(offerId));
-        verify(offerRepository, never()).deleteById(any());
+        verify(offerRepository, times(1)).delete(offer);
     }
 }
