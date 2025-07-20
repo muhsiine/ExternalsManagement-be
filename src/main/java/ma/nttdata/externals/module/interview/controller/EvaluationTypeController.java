@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/evaluation-types")
+@RequestMapping("/api/v1/evaluation-types")
 @RequiredArgsConstructor
 @Tag(name = "Evaluation Types", description = "Operations related to Evaluation Types")
 public class EvaluationTypeController {

@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/questions")
+@RequestMapping("/api/v1/questions")
 @RequiredArgsConstructor
-@Tag(name = "Questions", description = "Operations related to Questions")
+@Tag(name = "Questions", description = "Operations related to Questions crud")
 public class QuestionController {
 
     private final QuestionServ questionServ;

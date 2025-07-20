@@ -20,7 +20,7 @@ public abstract class InterviewMapper {
     @Autowired
     protected OfferRepository offerRepository;
 
-    // Entity to DTO mapping
+    // Entity to dto mapping
     @Mapping(target = "candidateId", source = "candidate.id")
     @Mapping(target = "offerId", source = "offer.id")
     public abstract InterviewDTO toDto(Interview interview);

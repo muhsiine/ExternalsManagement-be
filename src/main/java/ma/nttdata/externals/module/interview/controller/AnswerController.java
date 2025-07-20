@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/answers")
+@RequestMapping("/api/v1/answers")
 @RequiredArgsConstructor
 @Tag(name = "Answers", description = "Operations related to Answers")
 public class AnswerController {
