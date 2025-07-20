@@ -20,7 +20,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: none  # Let Flyway handle all schema creation
+      ddl-auto: validate   # Use "update" for development, but "validate" for production
     show-sql: true
     properties:
       hibernate:
@@ -36,13 +36,7 @@ spring:
 
   docker:
     compose:
-      enabled: true
-
-  sql:
-    init:
-      mode: always
-      data-locations: classpath:db/insertion/V1__data.sql
-      continue-on-error: false
+      enabled: false
 
 logging:
   level:
@@ -58,4 +52,3 @@ app:
   ai:
     server:
       url: http://localhost:8080
-      
