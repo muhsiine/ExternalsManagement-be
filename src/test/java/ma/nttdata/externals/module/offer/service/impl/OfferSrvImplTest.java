@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class OfferServImplTest {
+class OfferSrvImplTest {
 
     @Mock
     private OfferRepository offerRepository;
