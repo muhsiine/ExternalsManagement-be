@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface AnswerMapper {
     AnswerMapper INSTANCE = Mappers.getMapper(AnswerMapper.class);
@@ -23,5 +25,7 @@ public interface AnswerMapper {
     @Mapping(target = "durationInMinutes" , source = "durationInMinutes")
     @Mapping(target = "question" , ignore = true)
     Answer toEntity(AnswerDTO answerDTO);
+
+    List <AnswerDTO> toDtoList(List<Answer> entities);
 
 }

@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface EvaluationRepository extends JpaRepository<Evaluation , UUID> {
     List <Evaluation> findByInterviewId(UUID interviewId);
     Optional <Evaluation> findTypeById(UUID evaluationId);
+
 }

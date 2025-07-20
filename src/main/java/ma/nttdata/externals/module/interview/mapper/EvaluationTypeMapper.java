@@ -12,5 +12,7 @@ public interface EvaluationTypeMapper {
     @Mapping(target = "description" ,source = "description")
     @Mapping(target ="coefficient" , source = "coefficient")
     EvaluationTypeDTO toDto(EvaluationType entity);
+    EvaluationType toEntity(EvaluationTypeDTO dto);
+
 
 }
