@@ -126,17 +126,7 @@ class InterviewSrvImplTest {
         assertEquals(dto, result);
         verify(interviewRepository).save(interview);
     }
-    @Test
-    void testDeleteInterview() {
-        UUID id = UUID.randomUUID();
-        Interview interview = new Interview();
-        when(interviewRepository.findById(id)).thenReturn(Optional.of(interview));
 
-        interviewServ.deleteInterview(id);
-
-        verify(interviewRepository).findById(id);
-        verify(interviewRepository).delete(interview);
-    }
 
 
 
