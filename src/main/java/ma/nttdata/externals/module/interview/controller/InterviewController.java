@@ -7,8 +7,10 @@ import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +29,7 @@ public class InterviewController  {
     )
     @PostMapping
     public ResponseEntity<InterviewDTO> createInterview(@RequestBody InterviewDTO interviewDTO) {
-        return ResponseEntity.ok(interviewServ.createInterview(interviewDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(interviewServ.createInterview(interviewDTO));
     }
 
     @Operation(
@@ -45,7 +47,11 @@ public class InterviewController  {
     )
     @GetMapping("/{id}")
     public ResponseEntity<InterviewDTO> getInterviewById(@PathVariable UUID id) {
-        return ResponseEntity.ok(interviewServ.getInterviewById(id));
+        try {
+            return ResponseEntity.ok(interviewServ.getInterviewById(id));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        }
     }
 
     @Operation(
@@ -56,7 +62,11 @@ public class InterviewController  {
     public ResponseEntity<InterviewDTO> updateInterview(
             @PathVariable UUID id,
             @RequestBody InterviewDTO interviewDTO) {
-        return ResponseEntity.ok(interviewServ.updateInterview(id, interviewDTO));
+        try {
+            return ResponseEntity.ok(interviewServ.updateInterview(id, interviewDTO));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        }
     }
 
     @Operation(
@@ -65,8 +75,12 @@ public class InterviewController  {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInterview(@PathVariable UUID id) {
-        interviewServ.deleteInterview(id);
-        return ResponseEntity.noContent().build();
+        try {
+            interviewServ.deleteInterview(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        }
     }
 
     @Operation(

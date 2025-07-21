@@ -3,7 +3,6 @@ package ma.nttdata.externals.module.offer.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.service.OfferServ;
-import ma.nttdata.externals.module.offer.controller.OfferController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -49,17 +49,36 @@ class OfferControllerTest {
                 "Looking for a senior Java developer."
         );
     }
-
     @Test
     @WithMockUser
     void testCreateOffer() throws Exception {
-        when(offerService.createOffer(any(OfferDTO.class))).thenReturn(offerDTO);
+        // Fixed UUID for consistency with createInterview()
+        UUID fixedOfferId = UUID.fromString("a12be5ab-1234-4cdf-b44c-a8210db3abcd");
 
+        // Given: input DTO without ID (for creation)
+        OfferDTO inputDto = new OfferDTO(
+                null,
+                "Java Developer",
+                "Looking for a senior Java developer."
+        );
+
+        // Expected return from service after creation (with fixed ID)
+        OfferDTO returnedDto = new OfferDTO(
+                fixedOfferId,
+                "Java Developer",
+                "Looking for a senior Java developer."
+        );
+
+        // When
+        when(offerService.createOffer(any(OfferDTO.class))).thenReturn(returnedDto);
+
+        // Then
         mockMvc.perform(post(API_URL)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(offerDTO)))
+                        .content(objectMapper.writeValueAsString(inputDto))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(offerId.toString()))
+                .andExpect(jsonPath("$.id").value(fixedOfferId.toString()))
                 .andExpect(jsonPath("$.title").value("Java Developer"))
                 .andExpect(jsonPath("$.description").value("Looking for a senior Java developer."));
 
@@ -69,8 +88,10 @@ class OfferControllerTest {
     @Test
     @WithMockUser
     void testGetOfferById() throws Exception {
+        // When
         when(offerService.getOfferById(offerId)).thenReturn(offerDTO);
 
+        // Then
         mockMvc.perform(get(API_URL + "/" + offerId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -80,46 +101,63 @@ class OfferControllerTest {
 
         verify(offerService).getOfferById(offerId);
     }
-
     @Test
     @WithMockUser
-    void testUpdateOffer() throws Exception {
-        when(offerService.updateOffer(eq(offerId), any(OfferDTO.class))).thenReturn(offerDTO);
+    void updateOffer() throws Exception {
+        // dto given
+        OfferDTO updatedDto = new OfferDTO(
+                offerId,
+                "Senior Java Developer",
+                "Looking for a senior Java developer with 5+ years experience."
+        );
 
-        mockMvc.perform(put(API_URL + "/" + offerId)
+        when(offerService.updateOffer(eq(offerId), any(OfferDTO.class))).thenReturn(updatedDto);
+
+        // then
+        mockMvc.perform(put("/api/v1/offers/{id}", offerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(offerDTO)))
+                        .content(objectMapper.writeValueAsString(updatedDto))
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(offerId.toString()))
-                .andExpect(jsonPath("$.title").value("Java Developer"))
-                .andExpect(jsonPath("$.description").value("Looking for a senior Java developer."));
+                .andExpect(jsonPath("$.title").value("Senior Java Developer"))
+                .andExpect(jsonPath("$.description").value("Looking for a senior Java developer with 5+ years experience."));
 
         verify(offerService).updateOffer(eq(offerId), any(OfferDTO.class));
     }
 
+
+
     @Test
     @WithMockUser
-    void testDeleteOffer() throws Exception {
+    void deleteOffer() throws Exception {
+
         doNothing().when(offerService).deleteOffer(offerId);
 
-        mockMvc.perform(delete(API_URL + "/" + offerId))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Offer deleted successfully"));
+        // when
+        mockMvc.perform(delete("/api/v1/offers/{id}", offerId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isNoContent()); // Expecting 204 No Content
 
+        // Then
         verify(offerService).deleteOffer(offerId);
     }
+
 
     @Test
     @WithMockUser
     void testGetAllOffers() throws Exception {
+        //w
         List<OfferDTO> offers = Arrays.asList(
                 offerDTO,
                 new OfferDTO(UUID.randomUUID(), "Python Developer", "Need a Python expert.")
         );
 
+        // When
         when(offerService.getAllOffers()).thenReturn(offers);
 
-        mockMvc.perform(get(API_URL)
+        // Then
+        mockMvc.perform(get(API_URL + "/all") // Correct endpoint is /all
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Java Developer"))
