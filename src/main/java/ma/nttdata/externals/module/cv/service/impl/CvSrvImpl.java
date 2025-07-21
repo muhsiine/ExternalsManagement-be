@@ -6,6 +6,7 @@ import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
 import ma.nttdata.externals.module.cv.service.CvSrv;
+import ma.nttdata.externals.module.prompt.repository.PromptRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,14 @@ import org.springframework.web.client.RestClient;
 public class CvSrvImpl implements CvSrv {
     private final boolean mockFlag;
     private final RestClient aiRestClient;
+    private final PromptRepository promptRepository;
 
     public CvSrvImpl(@Value("${app.mock.flag}") boolean mockFlag,
-                     @Qualifier("aiServiceClient") RestClient aiRestClient) {
+                     @Qualifier("aiServiceClient") RestClient aiRestClient,
+                     PromptRepository promptRepository) {
         this.mockFlag = mockFlag;
         this.aiRestClient = aiRestClient;
+        this.promptRepository = promptRepository;
     }
 
     @Override
@@ -39,8 +43,11 @@ public class CvSrvImpl implements CvSrv {
     }
 
     private String getExtractedData(CvFileDTO cvFileDTO) {
-        var promptText = JsonExtractionPromptConstants.text; // should be obtained from dabase (prompts table using the code)
-        var promptSchema = JsonExtractionPromptConstants.jsonSchema; // should be obtained from dabase (prompts table using the code)
+        var prompt = promptRepository.findByPromptCode("extraction prompt")
+                .orElseThrow(() -> new InternalServerException("Prompt with code 'extraction prompt' not found"));
+
+        var promptText = prompt.getPromptDesc();
+        var promptSchema = prompt.getSchema();
 
         var fileDTO = new FileDTO(promptText, cvFileDTO.b64EFile(),  promptSchema);
         return aiRestClient.post()

@@ -3,6 +3,8 @@ package ma.nttdata.externals.module.cv.service.impl;
 import ma.nttdata.externals.commons.constants.JsonExtractionPromptConstants;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
+import ma.nttdata.externals.module.prompt.entity.Prompt;
+import ma.nttdata.externals.module.prompt.repository.PromptRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +13,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestClient;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -30,18 +35,21 @@ class CvSrvImplTest {
     @Mock
     private RestClient.ResponseSpec responseSpec;
 
+    @Mock
+    private PromptRepository promptRepository;
+
     private CvSrvImpl cvSrv;
 
     @BeforeEach
     void setUp() {
         // Create the service with constructor parameters
-        cvSrv = new CvSrvImpl(false, aiRestClient);
+        cvSrv = new CvSrvImpl(false, aiRestClient, promptRepository);
     }
 
     @Test
     void testExtractCandidateInfoWithMockFlag() {
         // Create a new instance with mockFlag = true
-        cvSrv = new CvSrvImpl(true, aiRestClient);
+        cvSrv = new CvSrvImpl(true, aiRestClient, promptRepository);
 
         // Create a CV file DTO
         CvFileDTO cvFileDTO = new CvFileDTO(
@@ -74,6 +82,13 @@ class CvSrvImplTest {
                 "extracted data",
                 "path/to/file.pdf"
         );
+
+        Prompt prompt = new Prompt();
+        prompt.setPromptDesc("Prompt description");
+        prompt.setSchema("Prompt schema");
+
+        when(promptRepository.findByPromptCode("extraction prompt"))
+                .thenReturn(Optional.of(prompt));
 
         // Mock the RestClient chain
         when(aiRestClient.post()).thenReturn(requestBodyUriSpec);
