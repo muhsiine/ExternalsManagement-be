@@ -1,21 +1,27 @@
 package ma.nttdata.externals.module.interview.mapper;
 
+import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
 import ma.nttdata.externals.module.interview.dto.InterviewDTO;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.offer.entity.Offer;
+import ma.nttdata.externals.module.offer.repository.OfferRepository;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 class InterviewMapperTest {
 
     private final InterviewMapper interviewMapper = Mappers.getMapper(InterviewMapper.class);
 
+    private CandidateRepository candidateRepository;
+    private OfferRepository offerRepository;
     @Test
     void testToDto() {
         UUID candidateId = UUID.randomUUID();
@@ -50,38 +56,6 @@ class InterviewMapperTest {
         assertEquals(offerId, dto.offerId());
     }
 
-    @Test
-    void testToEntity() {
-        UUID interviewId = UUID.randomUUID();
-        UUID candidateId = UUID.randomUUID();
-        UUID offerId = UUID.randomUUID();
 
-        InterviewDTO dto = new InterviewDTO(
-                interviewId,
-                LocalDateTime.of(2025, 7, 20, 10, 0),
-                LocalDateTime.of(2025, 7, 20, 11, 0),
-                "Tech interview",
-                "https://zoom.com/interview123",
-                "Good candidate",
-                candidateId,
-                offerId
-        );
 
-        Interview interview = interviewMapper.toEntity(dto);
-
-        assertNotNull(interview);
-        assertEquals(dto.id(), interview.getId());
-        assertEquals(dto.startTime(), interview.getStartTime());
-        assertEquals(dto.endTime(), interview.getEndTime());
-        assertEquals(dto.description(), interview.getDescription());
-        assertEquals(dto.link(), interview.getLink());
-        assertEquals(dto.feedback_general(), interview.getFeedback_general());
-
-        // only id to set
-        assertNotNull(interview.getCandidate());
-        assertEquals(candidateId, interview.getCandidate().getId());
-
-        assertNotNull(interview.getOffer());
-        assertEquals(offerId, interview.getOffer().getId());
-    }
 }

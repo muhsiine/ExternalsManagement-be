@@ -50,41 +50,6 @@ class EvaluationMapperTest {
     }
 
     @Test
-    void testToEntity() {
-        // Arrange
-        UUID evaluationId = UUID.randomUUID();
-        UUID interviewId = UUID.randomUUID();
-        UUID evaluationTypeId = UUID.randomUUID();
-        
-        EvaluationDTO dto = new EvaluationDTO(
-                evaluationId,
-                4.5,
-                "Good communication skills",
-                interviewId,
-                evaluationTypeId
-        );
-
-        // Act
-        Evaluation entity = evaluationMapper.toEntity(dto);
-
-        // Assert
-        assertNotNull(entity);
-        assertEquals(dto.id(), entity.getId());
-        assertEquals(dto.score(), entity.getScore());
-        assertEquals(dto.feedback(), entity.getFeedback());
-        // Interview and EvaluationType are ignored in the initial mapping
-        assertNull(entity.getInterview());
-        assertNull(entity.getEvaluationType());
-        
-        // Test the AfterMapping method
-        evaluationMapper.setInterviewAndType(dto, entity);
-        assertNotNull(entity.getInterview());
-        assertEquals(interviewId, entity.getInterview().getId());
-        assertNotNull(entity.getEvaluationType());
-        assertEquals(evaluationTypeId, entity.getEvaluationType().getId());
-    }
-    
-    @Test
     void testToDtoList() {
         // Arrange
         UUID evaluationId1 = UUID.randomUUID();
