@@ -84,8 +84,8 @@ class CvSrvImplTest {
         );
 
         Prompt prompt = new Prompt();
-        prompt.setPromptDesc("Prompt description");
-        prompt.setSchema("Prompt schema");
+        prompt.setPromptDesc(JsonExtractionPromptConstants.text);
+        prompt.setSchema(JsonExtractionPromptConstants.jsonSchema);
 
         when(promptRepository.findByPromptCode("extraction prompt"))
                 .thenReturn(Optional.of(prompt));
