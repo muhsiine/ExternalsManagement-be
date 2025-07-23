@@ -7,6 +7,7 @@ import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.offer.entity.Offer;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -33,6 +34,12 @@ public class Interview {
 
     @Column(name = "feedback_general")
     private String feedback_general;
+
+    @Column(name = "scheduledat")
+    private LocalDateTime scheduledAt;
+
+    @Column(name = "comment")
+    private String comment;
 
     @ManyToOne(fetch =  FetchType.EAGER)
     @JoinColumn(name = "candidate_id" , nullable = false)

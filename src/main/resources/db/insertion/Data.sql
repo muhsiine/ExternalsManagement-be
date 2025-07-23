@@ -258,7 +258,18 @@ WITH offer_ids AS (
 candidate_ids AS (
     SELECT id FROM candidates ORDER BY RANDOM() LIMIT 20
 )
-INSERT INTO interviews (id, offer_id, candidate_id, start_time, end_time, description, link, feedback_general)
+INSERT INTO interviews (
+    id,
+    offer_id,
+    candidate_id,
+    start_time,
+    end_time,
+    description,
+    link,
+    feedback_general,
+    scheduledAt,
+    comment
+)
 SELECT
     uuid_generate_v4(),
     o.id,
@@ -267,7 +278,9 @@ SELECT
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL + (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute',
     'Interview for the position ' || o.title,
     'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
-    NULL
+    NULL,
+    CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL, -- scheduledAt in the next 10 days
+    'Auto-generated comment for testing'
 FROM offer_ids o
 CROSS JOIN candidate_ids c
 LIMIT 20;

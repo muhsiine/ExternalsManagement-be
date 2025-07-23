@@ -35,6 +35,12 @@ public abstract class InterviewMapper {
 
     public abstract List<Interview> toEntityList(List<InterviewDTO> interviewDTOs);
 
+    // upadte existed interview
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "candidate", ignore = true)
+    @Mapping(target = "offer", ignore = true)
+    public abstract void updateInterviewFromDto(InterviewDTO dto, @MappingTarget Interview entity);
+
     // AfterMapping to set candidate and offer manually using repository
     @AfterMapping
     protected void afterToEntity(InterviewDTO dto, @MappingTarget Interview entity) {
@@ -50,4 +56,5 @@ public abstract class InterviewMapper {
             entity.setOffer(offer);
         }
     }
+
 }
