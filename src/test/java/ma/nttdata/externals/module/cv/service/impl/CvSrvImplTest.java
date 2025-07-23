@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.cv.service.impl;
 import ma.nttdata.externals.commons.constants.JsonExtractionPromptConstants;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
+import ma.nttdata.externals.module.prompt.constants.PromptEnum;
 import ma.nttdata.externals.module.prompt.entity.Prompt;
 import ma.nttdata.externals.module.prompt.repository.PromptRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,7 +88,7 @@ class CvSrvImplTest {
         prompt.setPromptDesc(JsonExtractionPromptConstants.text);
         prompt.setSchema(JsonExtractionPromptConstants.jsonSchema);
 
-        when(promptRepository.findByPromptCode("extraction prompt"))
+        when(promptRepository.findByPromptCode(PromptEnum.CV_EXTRACTION.name()))
                 .thenReturn(Optional.of(prompt));
 
         // Mock the RestClient chain

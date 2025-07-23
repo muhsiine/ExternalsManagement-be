@@ -6,6 +6,7 @@ import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.dto.FileDTO;
 import ma.nttdata.externals.module.cv.service.CvSrv;
+import ma.nttdata.externals.module.prompt.constants.PromptEnum;
 import ma.nttdata.externals.module.prompt.repository.PromptRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,8 +44,8 @@ public class CvSrvImpl implements CvSrv {
     }
 
     private String getExtractedData(CvFileDTO cvFileDTO) {
-        var prompt = promptRepository.findByPromptCode("extraction prompt")
-                .orElseThrow(() -> new InternalServerException("Prompt with code 'extraction prompt' not found"));
+        var prompt = promptRepository.findByPromptCode(PromptEnum.CV_EXTRACTION.name())
+                .orElseThrow(() -> new InternalServerException("Prompt with code '" + PromptEnum.CV_EXTRACTION.name() + "' not found"));
 
         var promptText = prompt.getPromptDesc();
         var promptSchema = prompt.getSchema();
