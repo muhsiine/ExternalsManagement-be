@@ -1,0 +1,364 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- countries
+INSERT INTO country (id, name, english_name)
+VALUES (uuid_generate_v4(), 'Maroc', 'Morocco')
+ON CONFLICT (english_name) DO NOTHING;
+
+WITH morocco_id AS (SELECT id FROM country WHERE english_name = 'Morocco')
+INSERT INTO city (id, name, country_id)
+SELECT
+    uuid_generate_v4(),
+    city_name,
+    (SELECT id FROM morocco_id)
+FROM (VALUES
+    ('Casablanca'), ('Rabat'), ('Marrakech'), ('Fes'), ('Tangier'),
+    ('Agadir'), ('Tetouan'), ('Oujda'), ('Safi'), ('Kenitra'),
+    ('Essaouira'), ('Nador'), ('Chefchaouen'), ('Meknes'), ('Salé'),
+    ('Taza'), ('Khouribga'), ('El Jadida'), ('Beni Mellal'), ('Tiznit')
+) AS cities(city_name)
+ON CONFLICT (name) DO NOTHING;
+
+
+-- candidates
+INSERT INTO candidates (id, full_name, birth_date, years_of_experience, gender, main_tech, summary)
+SELECT
+    uuid_generate_v4(),
+    first_name || ' ' || last_name,
+    DATE '1990-01-01' - (FLOOR(RANDOM() * 365 * 25) || ' days')::INTERVAL,
+    FLOOR(RANDOM() * 15) + 1,
+    gender,
+    (ARRAY['Java','Python','JavaScript','Spring Boot','React','Angular','Node.js','PHP','Laravel','Django','Flask','.NET','AWS','Docker','Kubernetes','Android','iOS'])[FLOOR(RANDOM()*17)+1],
+    (ARRAY[
+        'Full-stack developer with strong problem-solving skills',
+        'Passionate about clean code and agile methodologies',
+        'DevOps specialist focused on automation and CI/CD',
+        'Frontend expert with UX/UI design experience',
+        'Backend engineer specializing in microservices',
+        'Data-driven developer with ML experience',
+        'Cloud infrastructure architect and developer',
+        'Mobile developer with cross-platform expertise'
+    ])[FLOOR(RANDOM()*8)+1]
+FROM (
+    VALUES
+    ('Youssef', 'Alami', 'M'), ('Fatima', 'Zahra', 'F'), ('Mehdi', 'Benjelloun', 'M'),
+    ('Nadia', 'Cherkaoui', 'F'), ('Karim', 'El Mansouri', 'M'), ('Leila', 'Bennani', 'F'),
+    ('Omar', 'Tazi', 'M'), ('Samira', 'Rahmani', 'F'), ('Bilal', 'Khalil', 'M'),
+    ('Hind', 'Daoudi', 'F'), ('Adil', 'Chraibi', 'M'), ('Soukaina', 'Idrissi', 'F'),
+    ('Anas', 'Mourad', 'M'), ('Noura', 'Belhaj', 'F'), ('Hicham', 'Lahlou', 'M'),
+    ('Asma', 'Bouzidi', 'F'), ('Rachid', 'Ouazzani', 'M'), ('Salma', 'Toumi', 'F'),
+    ('Jamal', 'Zahir', 'M'), ('Imane', 'Boutaleb', 'F'), ('Nabil', 'Amrani', 'M'),
+    ('Khadija', 'Safiani', 'F'), ('Yassine', 'Bakkal', 'M'), ('Hanane', 'El Kaddouri', 'F'),
+    ('Reda', 'Hassani', 'M'), ('Meryem', 'Berrada', 'F'), ('Said', 'Fassi', 'M'),
+    ('Najat', 'Laraki', 'F'), ('Khalid', 'Sbai', 'M'), ('Zineb', 'Mernissi', 'F'),
+    ('Amine', 'Barakat', 'M'), ('Sanaa', 'Moujtahid', 'F'), ('Hamza', 'Qasri', 'M'),
+    ('Ghita', 'Akkaoui', 'F'), ('Ayoub', 'Fahmi', 'M'), ('Rim', 'Mazini', 'F'),
+    ('Tarik', 'Rochdi', 'M'), ('Lina', 'Benaissa', 'F'), ('Fouad', 'Temsamani', 'M'),
+    ('Houda', 'Makhfi', 'F'), ('Marouane', 'Mabrouk', 'M'), ('Nihal', 'Saidi', 'F')
+) AS names(first_name, last_name, gender);
+
+-- adrss
+INSERT INTO address (id, street, postal_code, full_address, city_id, country_id, candidate_id)
+SELECT
+    uuid_generate_v4(),
+    street_type || ' ' || street_name,
+    LPAD(FLOOR(RANDOM() * 100000)::TEXT, 5, '0'),
+    street_type || ' ' || street_name || ', ' || c.name,
+    c.id,
+    (SELECT id FROM country WHERE english_name = 'Morocco'),
+    cand.id
+FROM candidates cand
+CROSS JOIN LATERAL (
+    SELECT
+        CASE
+            WHEN RANDOM() < 0.3 THEN 'Rue'
+            WHEN RANDOM() < 0.6 THEN 'Avenue'
+            ELSE 'Boulevard'
+        END AS street_type,
+        (ARRAY['Mohammed V','Hassan II','Al Massira','Moulay Ismail','Oqba Ibn Nafia',
+              'Mehdi Ben Barka','Abdelkrim Khattabi','Al Fadila','Ibn Sina','Al Maghrib Al Arabi'])[FLOOR(RANDOM()*10)+1] AS street_name
+) st
+CROSS JOIN LATERAL (
+    SELECT id, name FROM city ORDER BY RANDOM() LIMIT 1
+) c
+WHERE NOT EXISTS (
+    SELECT 1 FROM address a WHERE a.candidate_id = cand.id
+);
+
+-- contacts
+INSERT INTO contacts (id, candidate_id, contact_type, contact_value)
+SELECT uuid_generate_v4(), id, 'Email', LOWER(SPLIT_PART(full_name, ' ', 1) || '.' || SPLIT_PART(full_name, ' ', 2) || FLOOR(RANDOM()*10)::TEXT || '@domain.ma')
+FROM candidates
+UNION ALL
+SELECT uuid_generate_v4(), id, 'Phone', '+2126' || LPAD(FLOOR(RANDOM()*100000000)::TEXT, 8, '0')
+FROM candidates;
+
+-- experiences
+INSERT INTO experiences (id, candidate_id, company_name, position, start_date, end_date, description)
+SELECT
+    uuid_generate_v4(),
+    id,
+    (ARRAY[
+        'OCP Group','Attijariwafa Bank','Maroc Telecom','ONCF','Royal Air Maroc',
+        'Saham Assurance','Yazaki Morocco','Managem','SNTL','Cosumar',
+        'BMCE Bank','LafargeHolcim','Intelcia','Dell Technologies Morocco',
+        'IBM Morocco','Capgemini Morocco','HPS Morocco','Inwi','Orange Morocco'
+    ])[FLOOR(RANDOM()*19)+1],
+    (ARRAY[
+        'Software Engineer','Senior Developer','DevOps Specialist','Tech Lead',
+        'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'
+    ])[FLOOR(RANDOM()*8)+1],
+    CURRENT_DATE - (years_of_experience + FLOOR(RANDOM()*3) || ' years')::INTERVAL,
+    CASE WHEN RANDOM() > 0.3 THEN CURRENT_DATE - (FLOOR(RANDOM()*12) || ' months')::INTERVAL END,
+    (ARRAY[
+        'Developed scalable solutions for enterprise clients',
+        'Led team in agile development environment',
+        'Implemented CI/CD pipelines and cloud infrastructure',
+        'Optimized system performance and reduced costs',
+        'Created mobile applications with 100k+ downloads',
+        'Designed microservices architecture',
+        'Mentored junior developers and conducted code reviews'
+    ])[FLOOR(RANDOM()*7)+1]
+FROM candidates;
+
+-- skills
+INSERT INTO skills (id, candidate_id, skill_name, proficiency_level)
+WITH candidate_skills AS (
+    SELECT
+        id,
+        (ARRAY['Java','React','Angular','Python','JavaScript','Laravel','.NET','C#'])[FLOOR(RANDOM()*8)+1] AS skill
+    FROM candidates
+    CROSS JOIN generate_series(1, (FLOOR(RANDOM()*5)+3)::integer)
+)
+SELECT
+    uuid_generate_v4(),
+    id,
+    skill,
+    CASE
+        WHEN RANDOM() < 0.2 THEN 'BEGINNER'
+        WHEN RANDOM() < 0.6 THEN 'INTERMEDIATE'
+        ELSE 'EXPERT'
+    END
+FROM candidate_skills;
+
+-- educations
+INSERT INTO educations (id, candidate_id, institution, degree, start_date, end_date, diploma)
+SELECT
+    uuid_generate_v4(),
+    id,
+    (ARRAY[
+        'Université Mohammed V Rabat','Université Hassan II Casablanca',
+        'Université Cadi Ayyad Marrakech','Al Akhawayn University',
+        'EMI Rabat','ENSET Mohammedia','EHTP Casablanca','INPT Rabat',
+        'ENSIAS Rabat','Université Ibn Tofail Kénitra'
+    ])[FLOOR(RANDOM()*10)+1],
+    (ARRAY['Bachelor','Master','Engineering Diploma','PhD'])[FLOOR(RANDOM()*4)+1],
+    CURRENT_DATE - (6 + FLOOR(RANDOM()*5) || ' years')::INTERVAL,
+    CURRENT_DATE - (FLOOR(RANDOM()*3) || ' years')::INTERVAL,
+    (ARRAY[
+        'Computer Science','Software Engineering','Information Systems',
+        'Data Science','Electrical Engineering','AI & Machine Learning'
+    ])[FLOOR(RANDOM()*6)+1]
+FROM candidates;
+
+-- languages
+INSERT INTO languages (id, candidate_id, description, english_description, full_description, language, language_in_english, level, is_native)
+WITH language_data AS (
+    SELECT *, ROW_NUMBER() OVER () - 1 AS row_number
+    FROM (VALUES
+        ('العربية', 'Arabic', 'اللغة العربية الفصحى', 'Arabic', 'Arabic'),
+        ('Français', 'French', 'Langue Française', 'French', 'French'),
+        ('English', 'English', 'English Language', 'English', 'English'),
+        ('Español', 'Spanish', 'Idioma Español', 'Spanish', 'Spanish')
+    ) AS langs (description, english_description, full_description, language, language_in_english)
+),
+candidate_language_counts AS (
+    SELECT id AS candidate_id, (FLOOR(RANDOM() * 3) + 1)::integer AS num_languages
+    FROM candidates
+),
+candidate_english AS (
+    SELECT candidate_id, 2 AS lang_index
+    FROM candidate_language_counts
+    WHERE RANDOM() < 0.7
+),
+candidate_other_languages AS (
+    SELECT
+        c.candidate_id,
+        l.row_number AS lang_index,
+        ROW_NUMBER() OVER (PARTITION BY c.candidate_id ORDER BY RANDOM()) AS rn,
+        c.num_languages
+    FROM candidate_language_counts c
+    CROSS JOIN generate_series(1, c.num_languages) g
+    CROSS JOIN LATERAL (
+        SELECT row_number
+        FROM language_data
+        WHERE row_number != 2
+    ) l
+    WHERE NOT EXISTS (
+        SELECT 1 FROM candidate_english ce WHERE ce.candidate_id = c.candidate_id AND ce.lang_index = l.row_number
+    )
+    AND (c.num_languages > 1 OR NOT EXISTS (SELECT 1 FROM candidate_english ce WHERE ce.candidate_id = c.candidate_id))
+),
+candidate_languages AS (
+    SELECT candidate_id, lang_index
+    FROM candidate_english
+    UNION ALL
+    SELECT candidate_id, lang_index
+    FROM candidate_other_languages col
+    WHERE rn <= col.num_languages - (SELECT COUNT(*) FROM candidate_english ce WHERE ce.candidate_id = col.candidate_id)
+)
+SELECT
+    uuid_generate_v4() AS id,
+    cl.candidate_id,
+    ld.description,
+    ld.english_description,
+    ld.full_description,
+    ld.language,
+    ld.language_in_english,
+    CASE (RANDOM() * 5)::integer
+        WHEN 0 THEN 'BEGINNER'
+        WHEN 1 THEN 'LOWER_INTERMEDIATE'
+        WHEN 2 THEN 'INTERMEDIATE'
+        WHEN 3 THEN 'UPPER_INTERMEDIATE'
+        ELSE 'ADVANCED'
+    END AS level,
+    (RANDOM() < 0.5) AS is_native
+FROM candidate_languages cl
+JOIN language_data ld ON ld.row_number = cl.lang_index;
+
+-- offers
+INSERT INTO offers (id, title, description)
+SELECT
+    uuid_generate_v4(),
+    (ARRAY[
+        'Junior Java Developer',
+        'Senior Frontend Engineer',
+        'DevOps Specialist',
+        'Full Stack Developer',
+        'Data Scientist',
+        'Mobile App Developer',
+        'Cloud Solutions Architect',
+        'Backend Engineer'
+    ])[FLOOR(RANDOM() * 8) + 1],
+    (ARRAY[
+        'Work on exciting projects with international clients.',
+        'Lead frontend development teams and improve UI/UX.',
+        'Manage CI/CD pipelines and automate deployments.',
+        'Develop and maintain full stack applications.',
+        'Analyze large datasets and build ML models.',
+        'Create cross-platform mobile applications.',
+        'Design and implement scalable cloud infrastructure.',
+        'Build robust backend services and APIs.'
+    ])[FLOOR(RANDOM() * 8) + 1]
+FROM generate_series(1, 10);
+
+-- interviews
+WITH offer_ids AS (
+    SELECT id, title FROM offers ORDER BY RANDOM() LIMIT 10
+),
+candidate_ids AS (
+    SELECT id FROM candidates ORDER BY RANDOM() LIMIT 20
+)
+INSERT INTO interviews (id, offer_id, candidate_id, start_time, end_time, description, link, feedback_general)
+SELECT
+    uuid_generate_v4(),
+    o.id,
+    c.id,
+    CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
+    CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL + (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute',
+    'Interview for the position ' || o.title,
+    'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
+    NULL
+FROM offer_ids o
+CROSS JOIN candidate_ids c
+LIMIT 20;
+
+--        evaluatio_Type
+INSERT INTO evaluation_types (id, description, coefficient)
+SELECT
+    uuid_generate_v4(),
+    description,
+    CASE description
+        WHEN 'Technical Skills review handling ' THEN 3
+        WHEN 'Communication fluide and efficient during the interview' THEN 2
+        WHEN 'Problem Solving technique' THEN 3
+        WHEN 'Cultural Fit diversity in knowledge' THEN 1
+        WHEN 'Experience long in the domain' THEN 2
+        WHEN 'Motivation and high perfomanaces' THEN 1
+        ELSE 1
+    END
+FROM (VALUES
+    ('Technical Skills'),
+    ('Communication'),
+    ('Problem Solving'),
+    ('Cultural Fit'),
+    ('Experience'),
+    ('Motivation')
+) AS t(description);
+
+-- evaluation
+WITH interview_ids AS (
+    SELECT id FROM interviews ORDER BY RANDOM() LIMIT 20
+),
+evaluation_type_ids AS (
+    SELECT id FROM evaluation_types ORDER BY RANDOM() LIMIT 3
+)
+INSERT INTO evaluations (id, score, feedback, interview_id, evaluation_type_id)
+SELECT
+    uuid_generate_v4(),
+    ROUND((RANDOM() * 5)::NUMERIC, 2),
+    (ARRAY[
+        'Excellent performance',
+        'Good knowledge but lacks experience',
+        'Strong communication skills',
+        'Needs improvement in problem solving',
+        'Great cultural fit',
+        'Highly motivated and eager to learn',
+        'Average technical skills'
+    ])[FLOOR(RANDOM() * 7) + 1],
+    i.id,
+    e.id
+FROM interview_ids i
+CROSS JOIN evaluation_type_ids e
+LIMIT 40;
+
+-- question
+WITH interview_ids AS (
+    SELECT id FROM interviews ORDER BY RANDOM() LIMIT 20
+)
+INSERT INTO questions (id, description, interview_id, duration_in_minutes)
+SELECT
+    uuid_generate_v4(),
+    (ARRAY[
+        'Explain your previous project experience.',
+        'How do you handle tight deadlines?',
+        'Describe a difficult technical problem you solved.',
+        'What motivates you to work in tech?',
+        'How do you stay updated with new technologies?',
+        'Describe your experience working in a team.',
+        'How do you prioritize tasks during a project?'
+    ])[FLOOR(RANDOM() * 7) + 1],
+    i.id,
+    (ARRAY[5, 10, 15, 20])[FLOOR(RANDOM() * 4) + 1]
+FROM interview_ids i
+LIMIT 50;
+
+-- answer
+WITH question_ids AS (
+    SELECT id FROM questions ORDER BY RANDOM() LIMIT 50
+)
+INSERT INTO answers (id, description, question_id, duration_in_minutes)
+SELECT
+    uuid_generate_v4(),
+    (ARRAY[
+        'I worked on a large-scale system with a distributed architecture.',
+        'I break down tasks and communicate constantly with stakeholders.',
+        'I debugged a memory leak issue that improved performance by 30%.',
+        'I am passionate about learning and applying new skills.',
+        'I follow tech blogs, attend webinars, and take courses.',
+        'I believe teamwork and clear communication are key.',
+        'I use task management tools and set clear priorities daily.'
+    ])[FLOOR(RANDOM() * 7) + 1],
+    q.id,
+    (ARRAY[2, 3, 4, 5])[FLOOR(RANDOM() * 4) + 1]
+FROM question_ids q
+LIMIT 80;

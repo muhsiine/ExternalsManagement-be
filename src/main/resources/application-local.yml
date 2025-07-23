@@ -12,7 +12,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create   # Use "update" for development, but "validate" for production
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -22,9 +22,9 @@ spring:
             non_contextual_creation: true
   docker:
     compose:
-      enabled: true
+      enabled: false
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
 
@@ -35,6 +35,11 @@ spring:
   sql:
     init:
       mode: always
+      schema-locations:
+      - classpath:db/migration/V1__Create_user_and_candidate_tables.sql
+      - classpath:db/migration/V2__Offers__and__interviews__tables.sql
+      data-locations: classpath:db/insertion/Data.sql
+      continue-on-error: false
 
 logging:
   level:
@@ -50,3 +55,4 @@ app:
   ai:
     server:
       url: http://localhost:8080
+      

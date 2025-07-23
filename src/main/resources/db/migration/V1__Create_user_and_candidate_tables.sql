@@ -1,5 +1,18 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS candidates CASCADE;
+DROP TABLE IF EXISTS contacts;
+DROP TABLE IF EXISTS experiences;
+DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS educations;
+DROP TABLE IF EXISTS cv_files;
+DROP TABLE IF EXISTS prompts;
+DROP TABLE IF EXISTS country CASCADE;
+DROP TABLE IF EXISTS city CASCADE;
+DROP TABLE IF EXISTS address;
+DROP TABLE IF EXISTS languages;
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     id         UUID PRIMARY KEY,
     name       VARCHAR(255)        NOT NULL,
@@ -9,7 +22,7 @@ CREATE TABLE users
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE candidates
+CREATE TABLE IF NOT EXISTS candidates
 (
     id         UUID PRIMARY KEY,
     full_name  VARCHAR(255),
@@ -20,7 +33,7 @@ CREATE TABLE candidates
     summary    TEXT
 );
 
-CREATE TABLE contacts
+CREATE TABLE IF NOT EXISTS contacts
 (
     id            UUID PRIMARY KEY,
     candidate_id  UUID REFERENCES candidates (id) ON DELETE CASCADE,
@@ -28,7 +41,7 @@ CREATE TABLE contacts
     contact_value VARCHAR(50)
 );
 
-CREATE TABLE experiences
+CREATE TABLE IF NOT EXISTS experiences
 (
     id           UUID PRIMARY KEY,
     candidate_id UUID REFERENCES candidates (id) ON DELETE CASCADE,
@@ -39,7 +52,7 @@ CREATE TABLE experiences
     description  TEXT
 );
 
-CREATE TABLE skills
+CREATE TABLE IF NOT EXISTS skills
 (
     id                UUID PRIMARY KEY,
     candidate_id      UUID REFERENCES candidates (id) ON DELETE CASCADE,
@@ -47,7 +60,7 @@ CREATE TABLE skills
     proficiency_level VARCHAR(50) -- Beginner, Intermediate, Expert
 );
 
-CREATE TABLE educations
+CREATE TABLE IF NOT EXISTS educations
 (
     id           UUID PRIMARY KEY,
     candidate_id UUID REFERENCES candidates (id) ON DELETE CASCADE,
@@ -58,7 +71,7 @@ CREATE TABLE educations
     diploma      VARCHAR(255)
 );
 
-CREATE TABLE cv_files
+CREATE TABLE IF NOT EXISTS cv_files
 (
     id           UUID PRIMARY KEY,
     candidate_id UUID REFERENCES candidates (id) ON DELETE CASCADE,
@@ -67,7 +80,7 @@ CREATE TABLE cv_files
     uploaded_at  TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE prompts
+CREATE TABLE IF NOT EXISTS prompts
 (
     id          UUID PRIMARY KEY,
     prompt_code VARCHAR(255),
@@ -76,7 +89,7 @@ CREATE TABLE prompts
 );
 
 -- Create Country Table
-CREATE TABLE country
+CREATE TABLE IF NOT EXISTS country
 (
     id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name         VARCHAR(255) NOT NULL,
@@ -85,7 +98,7 @@ CREATE TABLE country
 );
 
 -- Create City Table
-CREATE TABLE city
+CREATE TABLE IF NOT EXISTS city
 (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name       VARCHAR(255) NOT NULL UNIQUE,
@@ -93,7 +106,7 @@ CREATE TABLE city
 );
 
 -- Create Address Table
-CREATE TABLE address
+CREATE TABLE IF NOT EXISTS address
 (
     id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     street       VARCHAR(255) NOT NULL,
@@ -104,7 +117,7 @@ CREATE TABLE address
     candidate_id UUID         NOT NULL UNIQUE REFERENCES candidates (id) ON DELETE CASCADE -- Link to Candidate
 );
 
-CREATE TABLE languages
+CREATE TABLE IF NOT EXISTS languages
 (
     id                  UUID PRIMARY KEY      DEFAULT uuid_generate_v4(),
     candidate_id        UUID         NOT NULL REFERENCES candidates (id) ON DELETE CASCADE, -- Link to Candidate

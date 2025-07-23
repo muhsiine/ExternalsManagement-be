@@ -33,7 +33,7 @@ springdoc:
 
 logging:
   level:
-      root: INFO
-      ma.nttdata.externals: DEBUG
-      org.springframework.web: INFO
-      org.hibernate: ERROR
+    root: INFO
+    ma.nttdata.externals: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: ERROR
