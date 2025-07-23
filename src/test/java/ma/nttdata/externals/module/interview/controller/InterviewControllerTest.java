@@ -69,6 +69,8 @@ class InterviewControllerTest {
                                 "Technical round",
                                 "https://zoom.com/meeting",
                                 "Very good performance",
+                                new Date(2025 - 1900, 6, 20, 15, 30),
+                        "Candidate showed great problem-solving skills" ,
                                 candidateId,
                                 offerId);
 
@@ -125,6 +127,8 @@ class InterviewControllerTest {
                                 "Technical Interview",
                                 "https://meet.example.com/tech",
                                 "Strong technical skills",
+                                new Date(2025 - 1900, 6, 20, 15, 30),
+                        "Candidate showed great problem-solving skills" ,
                                 UUID.randomUUID(), // offerId
                                 UUID.randomUUID() // candidateId
                 );
@@ -136,8 +140,10 @@ class InterviewControllerTest {
                                 "HR Interview",
                                 "https://meet.example.com/hr",
                                 "Good communication",
-                                UUID.randomUUID(), // offerId
-                                UUID.randomUUID() // candidateId
+                                new Date(2025 - 1900, 6, 20, 15, 30),
+                        "Candidate showed great problem-solving skills" ,
+                                UUID.randomUUID(),
+                                UUID.randomUUID()
                 );
 
                 List<InterviewDTO> interviews = Arrays.asList(interview1, interview2);
@@ -173,6 +179,8 @@ class InterviewControllerTest {
                 "Technical round",
                 "https://zoom.com/meeting",
                 "Very good performance",
+                new Date(2025 - 1900, 6, 20, 15, 30),
+                "Candidate showed great problem-solving skills",
                 offerId,
                 candidateId
         );
@@ -211,6 +219,8 @@ class InterviewControllerTest {
                 "Technical round",
                 "https://meet.example.com/tech",
                 "Great candidate",
+                new Date(2025 - 1900, 6, 20, 15, 30),
+                "Candidate showed great problem-solving skills",
                 fixedOfferId,
                 fixedCandidateId
         );
@@ -222,6 +232,8 @@ class InterviewControllerTest {
                 savedInterviewDTO.description(),
                 savedInterviewDTO.link(),
                 savedInterviewDTO.feedback_general(),
+                savedInterviewDTO.scheduledAt(),
+                savedInterviewDTO.comment(),
                 savedInterviewDTO.offerId(),
                 savedInterviewDTO.candidateId()
         );
@@ -258,6 +270,8 @@ class InterviewControllerTest {
                 "Updated description",
                 "https://meet.example.com/interview",
                 "Updated feedback",
+                new Date(2025 - 1900, 6, 20, 15, 30),
+                "Candidate showed great problem-solving skills" ,
                 fixedOfferId,
                 fixedCandidateId
         );

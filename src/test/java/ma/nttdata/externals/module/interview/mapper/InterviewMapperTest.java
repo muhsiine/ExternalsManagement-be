@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,6 +51,8 @@ class InterviewMapperTest {
         assertEquals(interview.getDescription(), dto.description());
         assertEquals(interview.getLink(), dto.link());
         assertEquals(interview.getFeedback_general(), dto.feedback_general());
+        assertEquals(interview.getScheduledAt() , dto.scheduledAt());
+        assertEquals(interview.getComment() , dto.comment());
         assertEquals(candidateId, dto.candidateId());
         assertEquals(offerId, dto.offerId());
     }

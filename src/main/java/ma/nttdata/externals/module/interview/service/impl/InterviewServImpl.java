@@ -107,6 +107,8 @@ public class InterviewServImpl implements InterviewServ {
         existingInterview.setLink(interviewDTO.link());
         existingInterview.setDescription(interviewDTO.description());
         existingInterview.setFeedback_general(interviewDTO.feedback_general());
+        existingInterview.setScheduledAt(interviewDTO.scheduledAt());
+        existingInterview.setComment(interviewDTO.comment());
         existingInterview.setCandidate(interviewMapper.toEntity(interviewDTO).getCandidate());
         existingInterview.setOffer(interviewMapper.toEntity(interviewDTO).getOffer());
 
