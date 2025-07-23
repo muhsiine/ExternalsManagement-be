@@ -96,25 +96,17 @@ public class InterviewServImpl implements InterviewServ {
         return interviewMapper.toDto(interview);
     }
 
-    // update
     @Override
     public InterviewDTO updateInterview(UUID id, InterviewDTO interviewDTO) {
         Interview existingInterview = interviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Interview not found with Id" + id));
+                .orElseThrow(() -> new RuntimeException("Interview not found with Id " + id));
 
-        existingInterview.setStartTime(interviewDTO.startTime());
-        existingInterview.setEndTime(interviewDTO.endTime());
-        existingInterview.setLink(interviewDTO.link());
-        existingInterview.setDescription(interviewDTO.description());
-        existingInterview.setFeedback_general(interviewDTO.feedback_general());
-        existingInterview.setScheduledAt(interviewDTO.scheduledAt());
-        existingInterview.setComment(interviewDTO.comment());
-        existingInterview.setCandidate(interviewMapper.toEntity(interviewDTO).getCandidate());
-        existingInterview.setOffer(interviewMapper.toEntity(interviewDTO).getOffer());
+        interviewMapper.updateInterviewFromDto(interviewDTO, existingInterview);
 
         Interview updatedInterview = interviewRepository.save(existingInterview);
         return interviewMapper.toDto(updatedInterview);
     }
+
 
     // delete
     @Override
