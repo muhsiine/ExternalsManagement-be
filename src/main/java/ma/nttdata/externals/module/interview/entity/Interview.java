@@ -36,7 +36,7 @@ public class Interview {
     private String feedback_general;
 
     @Column(name = "scheduledat")
-    private Date scheduledAt;
+    private LocalDateTime scheduledAt;
 
     @Column(name = "comment")
     private String comment;

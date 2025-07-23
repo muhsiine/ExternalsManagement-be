@@ -12,7 +12,7 @@ public record InterviewDTO(
         String description ,
         String link  ,
         String feedback_general ,
-        Date scheduledAt ,
+        LocalDateTime scheduledAt ,
         String comment,
         UUID offerId,
         UUID candidateId

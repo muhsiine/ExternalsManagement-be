@@ -53,7 +53,7 @@ class InterviewSrvImplTest {
         UUID offerId = UUID.randomUUID();
         UUID candidateId = UUID.randomUUID();
 
-        InterviewDTO dto = new InterviewDTO(null, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "desc", "link", "feedback", new Date() ,  "Good comminunation during the meeting " ,offerId, candidateId);
+        InterviewDTO dto = new InterviewDTO(null, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "desc", "link", "feedback", LocalDateTime.now().plusDays(2) ,  "Good comminunation during the meeting " ,offerId, candidateId);
         Interview interview = new Interview();
         interview.setId(UUID.randomUUID());
 
@@ -107,7 +107,7 @@ class InterviewSrvImplTest {
         Interview interview = new Interview();
         interview.setId(id);
 
-        InterviewDTO dto = new InterviewDTO(id, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "desc", "link", "feedback",new Date(), "interview in genral passed smoothly ", offerId, candidateId);
+        InterviewDTO dto = new InterviewDTO(id, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "desc", "link", "feedback",LocalDateTime.now().plusDays(2), "interview in genral passed smoothly ", offerId, candidateId);
 
         Offer offer = new Offer();
         offer.setId(offerId);

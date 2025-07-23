@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS interviews (
     description TEXT,
     link VARCHAR(255),
     feedback_general TEXT,
-    scheduledAt DATE ,
+    scheduledAt TIMESTAMP ,
     comment VARCHAR(255),
     CONSTRAINT fk_offer FOREIGN KEY (offer_id) REFERENCES offers(id) ON DELETE CASCADE
     -- CONSTRAINT fk_candidate FOREIGN KEY (candidate_id) REFERENCES candidates(id) ON DELETE CASCADE
