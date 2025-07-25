@@ -2,20 +2,25 @@ package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -28,7 +33,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(InterviewController.class) // Use WebMvcTest to test only the controller
+@WebMvcTest(InterviewController.class)// Use WebMvcTest to test only the controller
 class InterviewControllerTest {
 
         @Autowired
@@ -36,6 +41,12 @@ class InterviewControllerTest {
 
         @MockBean
         private InterviewServ interviewServ;
+
+        @MockitoBean
+        private InterviewTokenServ interviewTokenServ;
+
+         @MockitoBean
+         private EmailService emailService;
 
         @Autowired
         private ObjectMapper objectMapper;
