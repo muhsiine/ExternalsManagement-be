@@ -2,7 +2,10 @@ package ma.nttdata.externals.module.interview.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import ma.nttdata.externals.commons.services.EmailContentBuilder;
+import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
@@ -13,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +29,7 @@ public class InterviewController  {
 
     private final InterviewServ interviewServ;
     private final InterviewTokenServ interviewTokenServ;
+    private final EmailService emailService;
 
     @Operation(
             summary = "Create a new interview",
@@ -151,4 +157,22 @@ public class InterviewController  {
         String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
         return ResponseEntity.ok(interviewLink);
     }
+
+    @Operation(
+            summary = "Generate and save interview link",
+            description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
+    )
+    @PostMapping("/sendEmail")
+    public ResponseEntity<String> sendEmail(@RequestBody SendEmailDTO sendEmailDTO){
+
+            String html = EmailContentBuilder.buildInterviewEmail(
+                    sendEmailDTO.candidateFullName(),
+                    sendEmailDTO.offerTitle(),
+                    sendEmailDTO.link(),
+                    sendEmailDTO.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
+            );
+            emailService.sendEmail("bouraouiyoussef12@gmail.com", "Your Interview at NTT DATA", html);
+            return ResponseEntity.ok("Email sent successfully!");
+    }
+
 }
