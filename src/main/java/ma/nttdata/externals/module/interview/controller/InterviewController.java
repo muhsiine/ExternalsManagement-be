@@ -145,10 +145,10 @@ public class InterviewController  {
             description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
     )
     @PostMapping("/{interviewId}/generateAndSaveLink")
-    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId
-           ){
+    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId,
+           @RequestBody GenerateInterviewLinkDTO generateInterviewLinkDTO){
         String token = interviewTokenServ.generateToken();
-        //String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
-        return ResponseEntity.ok(token);
+        String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
+        return ResponseEntity.ok(interviewLink);
     }
 }
