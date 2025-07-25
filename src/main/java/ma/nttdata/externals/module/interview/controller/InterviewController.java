@@ -146,9 +146,9 @@ public class InterviewController  {
     )
     @PostMapping("/{interviewId}/generateAndSaveLink")
     public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId
-            ,@RequestBody GenerateInterviewLinkDTO generateInterviewLinkDTO){
+           ){
         String token = interviewTokenServ.generateToken();
-        String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
-        return ResponseEntity.ok(interviewLink);
+        //String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
+        return ResponseEntity.ok(token);
     }
 }
