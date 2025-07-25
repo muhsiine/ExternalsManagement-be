@@ -55,4 +55,8 @@ app:
   ai:
     server:
       url: http://localhost:8080
-      
+
+interview:
+  token:
+    expirationMillis: 86400000
+    secret: my-very-secure-secret-key

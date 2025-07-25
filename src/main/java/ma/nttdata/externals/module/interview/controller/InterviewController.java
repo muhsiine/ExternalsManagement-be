@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class InterviewController  {
 
     private final InterviewServ interviewServ;
+    private final InterviewTokenServ interviewTokenServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -136,5 +138,17 @@ public class InterviewController  {
     @GetMapping("/{id}/type")
     public ResponseEntity<EvaluationTypeDTO> getEvaluationType(@PathVariable UUID id) {
         return ResponseEntity.ok(interviewServ.getEvaluationTypeOfEvaluation(id));
+    }
+
+    @Operation(
+            summary = "Generate and save interview link",
+            description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
+    )
+    @PostMapping("/{interviewId}/generateAndSaveLink")
+    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId
+            ,@RequestBody GenerateInterviewLinkDTO generateInterviewLinkDTO){
+        String token = interviewTokenServ.generateToken();
+        String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
+        return ResponseEntity.ok(interviewLink);
     }
 }

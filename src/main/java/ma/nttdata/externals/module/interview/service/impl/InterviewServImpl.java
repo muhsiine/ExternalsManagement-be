@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
@@ -173,6 +174,17 @@ public class InterviewServImpl implements InterviewServ {
         return evaluationTypeMapper.toDto(evaluationType);
     }
 
+    @Override
+    public String saveInterviewLink(String token, UUID interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));
+
+        String baseLink = "http://localhost:4200/interviews/";
+        String interviewLink = baseLink+token;
+        interview.setLink(interviewLink);
+        interviewRepository.save(interview);
+        return interviewLink;
+    }
 
 
 
