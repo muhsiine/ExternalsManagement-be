@@ -45,7 +45,7 @@ class InterviewControllerTest {
         @MockitoBean
         private InterviewTokenServ interviewTokenServ;
 
-         @MockBean
+         @MockitoBean
          private EmailService emailService;
 
         @Autowired
