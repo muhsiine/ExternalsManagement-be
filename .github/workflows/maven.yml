@@ -33,4 +33,4 @@ jobs:
       - name: Build with Maven
         run: mvn clean install -DskipTests=true # skip tests during build
       - name: Run Tests with Maven
-        run: mvn test
+        run: mvn test -e -X #to see why the test are working in local but not in github
