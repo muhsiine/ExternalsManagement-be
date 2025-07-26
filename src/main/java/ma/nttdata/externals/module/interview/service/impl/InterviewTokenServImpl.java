@@ -16,7 +16,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class InterviewTokenServImpl implements InterviewTokenServ {
 
-    @Value("${app.jwtSecret}")
+    @Value("${interview.token.secret}")
     private String secretKey;
 
     @Value("${interview.token.expirationMillis:86400000}")
