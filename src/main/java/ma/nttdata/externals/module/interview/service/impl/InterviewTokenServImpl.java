@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Service
@@ -30,6 +31,7 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
         return Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
+                .setId(UUID.randomUUID().toString())  // I added this to make the token unique because if two tokens are generated at the same time they will be the same
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -49,8 +51,15 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
 
     @Override
     public boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (JwtException e) {
+            return true;
+        }
     }
+
 
     @Override
     public Date getIssuedAt(String token) {

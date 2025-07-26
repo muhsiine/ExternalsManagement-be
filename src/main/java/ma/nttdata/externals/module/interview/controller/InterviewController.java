@@ -159,8 +159,8 @@ public class InterviewController  {
     }
 
     @Operation(
-            summary = "Generate and save interview link",
-            description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
+            summary = "Send interview invitation email",
+            description = "Sends an email to the candidate containing the interview link and scheduled date."
     )
     @PostMapping("/sendEmail")
     public ResponseEntity<String> sendEmail(@RequestBody SendEmailDTO sendEmailDTO){

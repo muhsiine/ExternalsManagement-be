@@ -33,9 +33,4 @@ jobs:
       - name: Build with Maven
         run: mvn clean install -DskipTests=true # skip tests during build
       - name: Run Tests with Maven
-        run: mvn test -e -X #to see why the test are working in local but not in github
-      - name: Show Surefire test report
-        if: always()
-        run: |
-          echo "==== SUREFIRE TEST REPORT ===="
-          find target/surefire-reports -name "*.txt" -exec cat {} \; || echo "No test reports found"
+        run: mvn test
