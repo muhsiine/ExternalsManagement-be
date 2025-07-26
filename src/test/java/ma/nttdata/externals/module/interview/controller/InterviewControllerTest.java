@@ -34,7 +34,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(InterviewController.class)// Use WebMvcTest to test only the controller
-@Import(TestConfig.class)
 class InterviewControllerTest {
 
         @Autowired
