@@ -29,7 +29,6 @@ class AnswerMapperTest {
         answer.setId(answerId);
         answer.setDescription("This is a test answer");
         answer.setDurationInMinutes(15);
-        answer.setQuestion(question);
 
         // Act
         AnswerDTO dto = answerMapper.toDto(answer);
@@ -39,7 +38,6 @@ class AnswerMapperTest {
         assertEquals(answer.getId(), dto.id());
         assertEquals(answer.getDescription(), dto.description());
         assertEquals(answer.getDurationInMinutes(), dto.durationInMinutes());
-        assertEquals(questionId, dto.questionId());
     }
 
     @Test
@@ -51,8 +49,7 @@ class AnswerMapperTest {
         AnswerDTO dto = new AnswerDTO(
                 answerId,
                 "This is a test answer",
-                15,
-                questionId
+                15
         );
 
         // Act
@@ -64,7 +61,7 @@ class AnswerMapperTest {
         assertEquals(dto.description(), entity.getDescription());
         assertEquals(dto.durationInMinutes(), entity.getDurationInMinutes());
         // Question is ignored in the mapper, so it should be null
-        assertNull(entity.getQuestion());
+
     }
     
     @Test
@@ -81,13 +78,11 @@ class AnswerMapperTest {
         answer1.setId(answerId1);
         answer1.setDescription("Answer 1");
         answer1.setDurationInMinutes(10);
-        answer1.setQuestion(question);
         
         Answer answer2 = new Answer();
         answer2.setId(answerId2);
         answer2.setDescription("Answer 2");
         answer2.setDurationInMinutes(20);
-        answer2.setQuestion(question);
         
         List<Answer> answers = new ArrayList<>();
         answers.add(answer1);
@@ -102,11 +97,9 @@ class AnswerMapperTest {
         assertEquals(answer1.getId(), dtos.get(0).id());
         assertEquals(answer1.getDescription(), dtos.get(0).description());
         assertEquals(answer1.getDurationInMinutes(), dtos.get(0).durationInMinutes());
-        assertEquals(questionId, dtos.get(0).questionId());
         
         assertEquals(answer2.getId(), dtos.get(1).id());
         assertEquals(answer2.getDescription(), dtos.get(1).description());
         assertEquals(answer2.getDurationInMinutes(), dtos.get(1).durationInMinutes());
-        assertEquals(questionId, dtos.get(1).questionId());
     }
 }

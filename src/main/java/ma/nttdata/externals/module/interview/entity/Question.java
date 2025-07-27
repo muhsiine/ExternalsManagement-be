@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.interview.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +26,12 @@ public class Question {
     private Integer durationInMinutes;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "interviewId", nullable = false)
+    @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "answer_id", nullable = false)
+    @JsonIgnore
+    private Answer answer;
 
 }

@@ -17,6 +17,7 @@ public interface QuestionMapper{
     @Mapping(target = "description"  , source = "description")
     @Mapping(target = "durationInMinutes" , source = "durationInMinutes")
     @Mapping(target = "interviewId" , source = "interview.id")
+    @Mapping(target = "answerId" , source = "answer.id")
     QuestionDTO toDto(Question question);
 
 
@@ -25,6 +26,7 @@ public interface QuestionMapper{
     @Mapping(target = "description"  , source = "description")
     @Mapping(target = "durationInMinutes" , source = "durationInMinutes")
     @Mapping(target = "interview" , ignore = true)
+    @Mapping(target = "answer" , ignore = true)
     Question toEntity(QuestionDTO questionDTO);
 
     List<QuestionDTO> toDtoList(List<Question> questions);

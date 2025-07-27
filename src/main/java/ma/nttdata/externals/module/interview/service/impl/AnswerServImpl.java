@@ -38,11 +38,6 @@ public class AnswerServImpl implements AnswerServ {
     public AnswerDTO createAnswer(AnswerDTO answerDTO) {
         Answer answer = answerMapper.toEntity(answerDTO);
 
-        // find  a question id
-        Question question = questionRepository.findById(answerDTO.questionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + answerDTO.questionId()));
-        answer.setQuestion(question);
-
         Answer saved = answerRepository.save(answer);
         return answerMapper.toDto(saved);
     }
@@ -54,10 +49,6 @@ public class AnswerServImpl implements AnswerServ {
 
         existing.setDescription(answerDTO.description());
         existing.setDurationInMinutes(answerDTO.durationInMinutes());
-
-        Question question = questionRepository.findById(answerDTO.questionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + answerDTO.questionId()));
-        existing.setQuestion(question);
 
         Answer updated = answerRepository.save(existing);
         return answerMapper.toDto(updated);

@@ -1,8 +1,11 @@
 package ma.nttdata.externals.module.interview.dto;
 
+import ma.nttdata.externals.module.interview.entity.Evaluation;
+
 import java.security.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public record InterviewDTO(
@@ -15,5 +18,7 @@ public record InterviewDTO(
         LocalDateTime scheduledAt ,
         String comment,
         UUID offerId,
-        UUID candidateId
+        UUID candidateId ,
+        List<EvaluationDTO> evaluations ,
+        List<QuestionDTO> questions
 ) {}
