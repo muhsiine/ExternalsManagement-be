@@ -162,16 +162,19 @@ public class InterviewController  {
             summary = "Send interview invitation email",
             description = "Sends an email to the candidate containing the interview link and scheduled date."
     )
-    @PostMapping("/sendEmail")
-    public ResponseEntity<String> sendEmail(@RequestBody SendEmailDTO sendEmailDTO){
+    @PostMapping("/{interviewId}/sendEmail")
+    public ResponseEntity<String> sendEmail(@PathVariable UUID interviewId){
+
+           SendEmailDTO payload = interviewServ.getEmailInfo(interviewId);
 
             String html = EmailContentBuilder.buildInterviewEmail(
-                    sendEmailDTO.candidateFullName(),
-                    sendEmailDTO.offerTitle(),
-                    sendEmailDTO.link(),
-                    sendEmailDTO.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
+                    payload.candidateFullName(),
+                    payload.offerTitle(),
+                    payload.link(),
+                    payload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
             );
-            emailService.sendEmail("bouraouiyoussef12@gmail.com", "Your Interview at NTT DATA", html);
+
+            emailService.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
             return ResponseEntity.ok("Email sent successfully!");
     }
 
