@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
@@ -24,9 +27,10 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
     private long tokenExpirationMillis;
 
     @Override
-    public String generateToken() {
+    public String generateToken(LocalDateTime scheduledAt) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + tokenExpirationMillis);
+        Instant instant = scheduledAt.atZone(ZoneId.systemDefault()).toInstant();
+        Date expiryDate = Date.from(instant.plusMillis(tokenExpirationMillis));
 
         return Jwts.builder()
                 .setIssuedAt(now)

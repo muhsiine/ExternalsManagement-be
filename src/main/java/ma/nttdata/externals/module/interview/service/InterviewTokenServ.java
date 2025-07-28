@@ -2,11 +2,12 @@ package ma.nttdata.externals.module.interview.service;
 
 import io.jsonwebtoken.Claims;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public interface InterviewTokenServ {
 
-    String generateToken();
+    String generateToken(LocalDateTime scheduledAt);
 
     boolean validateToken(String token);
 

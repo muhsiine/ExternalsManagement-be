@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
+import net.bytebuddy.asm.Advice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.crypto.SecretKey;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Date;
 
@@ -37,7 +40,8 @@ class InterviewTokenServImplTest {
 
     @Test
     void generateToken_ShouldReturnValidJwtToken() {
-        String token = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String token = tokenService.generateToken(scheduledAt);
 
         assertNotNull(token);
         assertFalse(token.isEmpty());
@@ -46,7 +50,8 @@ class InterviewTokenServImplTest {
 
     @Test
     void validateToken_WithValidToken_ShouldReturnTrue() {
-        String token = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String token = tokenService.generateToken(scheduledAt);
 
         boolean isValid = tokenService.validateToken(token);
 
@@ -78,7 +83,8 @@ class InterviewTokenServImplTest {
 
     @Test
     void validateToken_WithTamperedToken_ShouldReturnFalse() {
-        String validToken = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String validToken = tokenService.generateToken(scheduledAt);
         String tamperedToken = validToken.substring(0, validToken.length() - 1) + "X";
 
         boolean isValid = tokenService.validateToken(tamperedToken);
@@ -88,7 +94,8 @@ class InterviewTokenServImplTest {
 
     @Test
     void isTokenExpired_WithFreshToken_ShouldReturnFalse() {
-        String token = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String token = tokenService.generateToken(scheduledAt);
 
         boolean isExpired = tokenService.isTokenExpired(token);
 
@@ -98,7 +105,8 @@ class InterviewTokenServImplTest {
     @Test
     void isTokenExpired_WithExpiredToken_ShouldReturnTrue() {
         ReflectionTestUtils.setField(tokenService, "tokenExpirationMillis", 1L);
-        String token = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String token = tokenService.generateToken(scheduledAt);
 
         try {
             Thread.sleep(10);
@@ -117,7 +125,8 @@ class InterviewTokenServImplTest {
         // Convert to seconds because JWT 'iat' (issued at) is stored with second-level precision,
         // and Date.getTime() returns milliseconds. Comparing in milliseconds would be inaccurate.
         long before = System.currentTimeMillis() / 1000;
-        String token = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String token = tokenService.generateToken(scheduledAt);
         long after = System.currentTimeMillis() / 1000;
 
         Date issuedAt = tokenService.getIssuedAt(token);
@@ -133,7 +142,8 @@ class InterviewTokenServImplTest {
 
     @Test
     void extractExpiration_ShouldReturnCorrectExpirationDate() {
-        String token = tokenService.generateToken();
+        LocalDateTime scheduledAt = LocalDateTime.now();
+        String token = tokenService.generateToken(scheduledAt);
         Date issuedAt = tokenService.getIssuedAt(token);
 
         Date expiration = tokenService.extractExpiration(token);
@@ -144,7 +154,8 @@ class InterviewTokenServImplTest {
 
     @Test
     void extractClaims_ShouldReturnValidClaims() {
-        String token = tokenService.generateToken();
+        LocalDateTime date = LocalDateTime.now();
+        String token = tokenService.generateToken(date);
 
         Claims claims = tokenService.extractClaims(token);
 
@@ -163,8 +174,8 @@ class InterviewTokenServImplTest {
     @Test
     void tokenWorkflow_GenerateValidateAndExtract_ShouldWorkCorrectly() {
         long beforeGeneration = System.currentTimeMillis() / 1000;
-
-        String token = tokenService.generateToken();
+        LocalDateTime date = LocalDateTime.now();
+        String token = tokenService.generateToken(date);
 
         assertTrue(tokenService.validateToken(token));
 
@@ -188,8 +199,9 @@ class InterviewTokenServImplTest {
     void generateToken_WithDifferentExpirationTime_ShouldRespectConfiguration() {
         long customExpiration = 7200000;
         ReflectionTestUtils.setField(tokenService, "tokenExpirationMillis", customExpiration);
+        LocalDateTime date = LocalDateTime.now();
 
-        String token = tokenService.generateToken();
+        String token = tokenService.generateToken(date);
 
         Date issuedAt = tokenService.getIssuedAt(token);
         Date expiration = tokenService.extractExpiration(token);
@@ -199,8 +211,10 @@ class InterviewTokenServImplTest {
 
     @Test
     void multipleTokenGeneration_ShouldProduceDifferentTokens() {
-        String token1 = tokenService.generateToken();
-        String token2 = tokenService.generateToken();
+        LocalDateTime date1 = LocalDateTime.now();
+        LocalDateTime date2 = LocalDateTime.now();
+        String token1 = tokenService.generateToken(date1);
+        String token2 = tokenService.generateToken(date2);
 
         assertNotEquals(token1, token2);
         assertTrue(tokenService.validateToken(token1));
