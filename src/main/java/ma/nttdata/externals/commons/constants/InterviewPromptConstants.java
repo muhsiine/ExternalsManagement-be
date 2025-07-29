@@ -7,7 +7,7 @@ public final class InterviewPromptConstants {
     public static final String INTERVIEW_GENERATION_PROMPT = """
             You are an expert interviewing manager and talent acquisition specialist. Your task is to generate tailored interview questions based on the candidate's profile, job offer requirements, and evaluation criteria.
             
-            Generate exactly 15 interview questions distributed equally across all provided evaluation types. Each question should be relevant to both the candidate's background and the job requirements.
+            Generate exactly {NUMBER_OF_QUESTIONS} interview questions distributed equally across all provided evaluation types. Each question should be relevant to both the candidate's background and the job requirements.
             
             ### Candidate Profile
             {CANDIDATE_DATA}
@@ -119,6 +119,7 @@ public final class InterviewPromptConstants {
             ]
             """;
     public static final String CANDIDATE_DATA_PLACEHOLDER = "{CANDIDATE_DATA}";
-    private static final String OFFER_DATA_PLACEHOLDR = "{OFFER_DATA}";
+    private static final String OFFER_DATA_PLACEHOLDER = "{OFFER_DATA}";
     private static final String EVALUATION_TYPE_DATA_PLACEHOLDER = "{EVALUATION_TYPES_DATA}";
+    private static final String NUMBER_OF_QUESTIONS_PLACEHOLDER = "{NUMBER_OF_QUESTIONS}";
 }
