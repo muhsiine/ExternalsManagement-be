@@ -225,7 +225,9 @@ SELECT
 FROM candidate_languages cl
 JOIN language_data ld ON ld.row_number = cl.lang_index;
 
--- offers
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- OFFERS
 INSERT INTO offers (id, title, description)
 SELECT
     uuid_generate_v4(),
@@ -251,9 +253,9 @@ SELECT
     ])[FLOOR(RANDOM() * 8) + 1]
 FROM generate_series(1, 10);
 
--- interviews
+-- INTERVIEWS
 WITH offer_ids AS (
-    SELECT id, title FROM offers ORDER BY RANDOM() LIMIT 10
+    SELECT id FROM offers ORDER BY RANDOM() LIMIT 10
 ),
 candidate_ids AS (
     SELECT id FROM candidates ORDER BY RANDOM() LIMIT 20
@@ -262,12 +264,12 @@ INSERT INTO interviews (
     id,
     offer_id,
     candidate_id,
-    start_time,
-    end_time,
+    starttime,
+    endtime,
     description,
     link,
     feedback_general,
-    scheduledAt,
+    scheduled_at,
     comment
 )
 SELECT
@@ -276,27 +278,27 @@ SELECT
     c.id,
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL + (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute',
-    'Interview for the position ' || o.title,
+    'Interview for the position',
     'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
     NULL,
-    CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL, -- scheduledAt in the next 10 days
+    CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
     'Auto-generated comment for testing'
 FROM offer_ids o
 CROSS JOIN candidate_ids c
 LIMIT 20;
 
---        evaluatio_Type
+-- EVALUATION_TYPES
 INSERT INTO evaluation_types (id, description, coefficient)
 SELECT
     uuid_generate_v4(),
     description,
     CASE description
-        WHEN 'Technical Skills review handling ' THEN 3
-        WHEN 'Communication fluide and efficient during the interview' THEN 2
-        WHEN 'Problem Solving technique' THEN 3
-        WHEN 'Cultural Fit diversity in knowledge' THEN 1
-        WHEN 'Experience long in the domain' THEN 2
-        WHEN 'Motivation and high perfomanaces' THEN 1
+        WHEN 'Technical Skills' THEN 3
+        WHEN 'Communication' THEN 2
+        WHEN 'Problem Solving' THEN 3
+        WHEN 'Cultural Fit' THEN 1
+        WHEN 'Experience' THEN 2
+        WHEN 'Motivation' THEN 1
         ELSE 1
     END
 FROM (VALUES
@@ -308,7 +310,7 @@ FROM (VALUES
     ('Motivation')
 ) AS t(description);
 
--- evaluation
+-- EVALUATIONS
 WITH interview_ids AS (
     SELECT id FROM interviews ORDER BY RANDOM() LIMIT 20
 ),
@@ -334,44 +336,42 @@ FROM interview_ids i
 CROSS JOIN evaluation_type_ids e
 LIMIT 40;
 
--- question
-WITH interview_ids AS (
-    SELECT id FROM interviews ORDER BY RANDOM() LIMIT 20
-)
-INSERT INTO questions (id, description, interview_id, duration_in_minutes)
-SELECT
+-- ANSWERS and QUESTIONS seeding together with FK links fixed
+WITH inserted_answers AS (
+  INSERT INTO answers (id, description, duration_in_minutes)
+  SELECT
     uuid_generate_v4(),
     (ARRAY[
-        'Explain your previous project experience.',
-        'How do you handle tight deadlines?',
-        'Describe a difficult technical problem you solved.',
-        'What motivates you to work in tech?',
-        'How do you stay updated with new technologies?',
-        'Describe your experience working in a team.',
-        'How do you prioritize tasks during a project?'
+      'I worked on a large-scale system with a distributed architecture.',
+      'I break down tasks and communicate constantly with stakeholders.',
+      'I debugged a memory leak issue that improved performance by 30%.',
+      'I am passionate about learning and applying new skills.',
+      'I follow tech blogs, attend webinars, and take courses.',
+      'I believe teamwork and clear communication are key.',
+      'I use task management tools and set clear priorities daily.'
     ])[FLOOR(RANDOM() * 7) + 1],
-    i.id,
-    (ARRAY[5, 10, 15, 20])[FLOOR(RANDOM() * 4) + 1]
-FROM interview_ids i
-LIMIT 50;
-
--- answer
-WITH question_ids AS (
-    SELECT id FROM questions ORDER BY RANDOM() LIMIT 50
-)
-INSERT INTO answers (id, description, question_id, duration_in_minutes)
-SELECT
-    uuid_generate_v4(),
-    (ARRAY[
-        'I worked on a large-scale system with a distributed architecture.',
-        'I break down tasks and communicate constantly with stakeholders.',
-        'I debugged a memory leak issue that improved performance by 30%.',
-        'I am passionate about learning and applying new skills.',
-        'I follow tech blogs, attend webinars, and take courses.',
-        'I believe teamwork and clear communication are key.',
-        'I use task management tools and set clear priorities daily.'
-    ])[FLOOR(RANDOM() * 7) + 1],
-    q.id,
     (ARRAY[2, 3, 4, 5])[FLOOR(RANDOM() * 4) + 1]
-FROM question_ids q
-LIMIT 80;
+  FROM generate_series(1, 50)
+  RETURNING id
+),
+random_interviews AS (
+  SELECT id FROM interviews ORDER BY RANDOM() LIMIT 50
+)
+INSERT INTO questions (id, description, duration_in_minutes, interview_id, answer_id)
+SELECT
+  uuid_generate_v4(),
+  (ARRAY[
+    'Explain your previous project experience.',
+    'How do you handle tight deadlines?',
+    'Describe a difficult technical problem you solved.',
+    'What motivates you to work in tech?',
+    'How do you stay updated with new technologies?',
+    'Describe your experience working in a team.',
+    'How do you prioritize tasks during a project?'
+  ])[FLOOR(RANDOM() * 7) + 1],
+  (ARRAY[5, 10, 15, 20])[FLOOR(RANDOM() * 4) + 1],
+  ri.id,
+  ia.id
+FROM random_interviews ri
+JOIN inserted_answers ia ON TRUE
+LIMIT 50;

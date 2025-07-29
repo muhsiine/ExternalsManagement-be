@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -130,13 +129,16 @@ public class InterviewServImpl implements InterviewServ {
     }
 
 
+
     // get the answer of question id
     @Override
-    public List<AnswerDTO> getAnswersByQuestionId(UUID questionId) {
-        List<Answer> answers = answerRepository.findByQuestionId(questionId);
-        return answers.stream()
-                .map(answerMapper::toDto)
-                .collect(Collectors.toList());
+    public  AnswerDTO getAnswerByQuestionId(UUID questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Question not found with ID: " + questionId));
+
+        Answer answer = question.getAnswer();
+
+        return answerMapper.toDto(answer);
     }
     @Override
     public CandidateDTO getCandidateByInterviewId(UUID interviewId) throws ChangeSetPersister.NotFoundException {

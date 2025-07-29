@@ -53,7 +53,21 @@ class InterviewSrvImplTest {
         UUID offerId = UUID.randomUUID();
         UUID candidateId = UUID.randomUUID();
 
-        InterviewDTO dto = new InterviewDTO(null, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "desc", "link", "feedback", LocalDateTime.now().plusDays(2) ,  "Good comminunation during the meeting " ,offerId, candidateId);
+        InterviewDTO dto = new InterviewDTO(
+                null,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1),
+                "desc",
+                "link",
+                "feedback",
+                LocalDateTime.now().plusDays(2),
+                "Good communication during the meeting",
+                offerId,
+                candidateId,
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
+
         Interview interview = new Interview();
         interview.setId(UUID.randomUUID());
 
@@ -78,7 +92,9 @@ class InterviewSrvImplTest {
     void testGetAllInterviews() {
         List<Interview> interviews = List.of(new Interview());
         when(interviewRepository.findAll()).thenReturn(interviews);
-        when(interviewMapper.toDtoList(interviews)).thenReturn(List.of(new InterviewDTO(null, null, null, null, null, null, null, null , null , null)));
+        when(interviewMapper.toDtoList(interviews)).thenReturn(List.of(
+                new InterviewDTO(null, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>())
+        ));
 
         List<InterviewDTO> result = interviewServ.getAllInterviews();
 
@@ -90,7 +106,9 @@ class InterviewSrvImplTest {
         UUID id = UUID.randomUUID();
         Interview interview = new Interview();
         when(interviewRepository.findById(id)).thenReturn(Optional.of(interview));
-        when(interviewMapper.toDto(interview)).thenReturn(new InterviewDTO(id, null, null, null, null, null, null, null , null , null));
+        when(interviewMapper.toDto(interview)).thenReturn(
+                new InterviewDTO(id, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>())
+        );
 
         InterviewDTO result = interviewServ.getInterviewById(id);
 
@@ -107,7 +125,20 @@ class InterviewSrvImplTest {
         Interview interview = new Interview();
         interview.setId(id);
 
-        InterviewDTO dto = new InterviewDTO(id, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "desc", "link", "feedback",LocalDateTime.now().plusDays(2), "interview in genral passed smoothly ", offerId, candidateId);
+        InterviewDTO dto = new InterviewDTO(
+                id,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1),
+                "desc",
+                "link",
+                "feedback",
+                LocalDateTime.now().plusDays(2),
+                "Interview in general passed smoothly",
+                offerId,
+                candidateId,
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
 
         Offer offer = new Offer();
         offer.setId(offerId);
@@ -127,15 +158,14 @@ class InterviewSrvImplTest {
         verify(interviewRepository).save(interview);
     }
 
-
-
-
     @Test
     void testGetInterviewsByOfferId() {
         UUID offerId = UUID.randomUUID();
         List<Interview> list = List.of(new Interview());
         when(interviewRepository.findByOfferId(offerId)).thenReturn(list);
-        when(interviewMapper.toDtoList(list)).thenReturn(List.of(new InterviewDTO(null, null, null, null, null, null,null  , null, offerId, null)));
+        when(interviewMapper.toDtoList(list)).thenReturn(List.of(
+                new InterviewDTO(null, null, null, null, null, null, null, null, offerId, null, new ArrayList<>(), new ArrayList<>())
+        ));
 
         List<InterviewDTO> result = interviewServ.getInterviewsByOfferId(offerId);
 
@@ -147,7 +177,9 @@ class InterviewSrvImplTest {
         UUID interviewId = UUID.randomUUID();
         List<Question> list = List.of(new Question());
         when(questionRepository.findByInterviewId(interviewId)).thenReturn(list);
-        when(questionMapper.toDtoList(list)).thenReturn(List.of(new QuestionDTO(null, "", 0, null)));
+        when(questionMapper.toDtoList(list)).thenReturn(List.of(
+                new QuestionDTO(null, "", 0, null, null)
+        ));
 
         List<QuestionDTO> result = interviewServ.getQuestionsByInterviewId(interviewId);
 
@@ -155,17 +187,6 @@ class InterviewSrvImplTest {
     }
 
 
-    @Test
-    void testGetAnswersByQuestionId() {
-        UUID questionId = UUID.randomUUID();
-        List<Answer> list = List.of(new Answer());
-        when(answerRepository.findByQuestionId(questionId)).thenReturn(list);
-        when(answerMapper.toDtoList(list)).thenReturn(List.of(new AnswerDTO(null, "", 0, null)));
-
-        List<AnswerDTO> result = interviewServ.getAnswersByQuestionId(questionId);
-
-        assertEquals(1, result.size());
-    }
 
     @Test
     void testGetCandidateByInterviewId() {
@@ -176,8 +197,9 @@ class InterviewSrvImplTest {
         interview.setCandidate(candidate);
 
         when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
-        when(candidateMapper.candidateToCandidateDTO(candidate))
-                .thenReturn(new CandidateDTO(candidate.getId(), null, null, 0, null, null, null, null, null, null, null, null, null, null));
+        when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(
+                new CandidateDTO(candidate.getId(), null, null, 0, null, null, null, null, null, null, null, null, null, null , null)
+        );
 
         CandidateDTO result = null;
         try {
@@ -194,7 +216,9 @@ class InterviewSrvImplTest {
         UUID interviewId = UUID.randomUUID();
         List<Evaluation> evaluations = List.of(new Evaluation());
         when(evaluationRepository.findByInterviewId(interviewId)).thenReturn(evaluations);
-        when(evaluationMapper.toDtoList(evaluations)).thenReturn(List.of(new EvaluationDTO(null, 0.0, "", null, null)));
+        when(evaluationMapper.toDtoList(evaluations)).thenReturn(List.of(
+                new EvaluationDTO(null, 0.0, "", null, null)
+        ));
 
         List<EvaluationDTO> result = interviewServ.getEvaluationsOfInterview(interviewId);
 

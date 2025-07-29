@@ -10,10 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+
 
 class InterviewMapperTest {
 
@@ -39,8 +40,14 @@ class InterviewMapperTest {
         interview.setDescription("Tech interview");
         interview.setLink("https://zoom.com/interview123");
         interview.setFeedback_general("Very good candidate");
+        interview.setScheduledAt(LocalDateTime.of(2025, 8, 3, 6, 0));
+        interview.setComment("Excellent communication skills");
         interview.setCandidate(candidate);
         interview.setOffer(offer);
+
+        // Optionally, set empty lists for evaluations and questions if not null by default
+        interview.setEvaluations(List.of()); // Or mock if you have Evaluation entity
+        interview.setQuestions(List.of());   // Or mock if you have Question entity
 
         InterviewDTO dto = interviewMapper.toDto(interview);
 
@@ -51,11 +58,18 @@ class InterviewMapperTest {
         assertEquals(interview.getDescription(), dto.description());
         assertEquals(interview.getLink(), dto.link());
         assertEquals(interview.getFeedback_general(), dto.feedback_general());
-        assertEquals(interview.getScheduledAt() , dto.scheduledAt());
-        assertEquals(interview.getComment() , dto.comment());
+        assertEquals(interview.getScheduledAt(), dto.scheduledAt());
+        assertEquals(interview.getComment(), dto.comment());
         assertEquals(candidateId, dto.candidateId());
         assertEquals(offerId, dto.offerId());
+
+        assertNotNull(dto.evaluations());
+        assertTrue(dto.evaluations().isEmpty());
+
+        assertNotNull(dto.questions());
+        assertTrue(dto.questions().isEmpty());
     }
+
 
 
 

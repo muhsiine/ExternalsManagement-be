@@ -25,10 +25,7 @@ public class Answer {
     @Column(name = "duration_in_minutes")
     private Integer durationInMinutes;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "question_id", nullable = false)
-    @JsonIgnore
-    private Question question;
+
 
 
 }

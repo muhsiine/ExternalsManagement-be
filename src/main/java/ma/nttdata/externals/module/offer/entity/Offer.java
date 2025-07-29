@@ -4,7 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import ma.nttdata.externals.module.interview.entity.Interview;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -22,6 +24,10 @@ public class Offer {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    // offer have many inter
+    @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Interview> interviews;
 
 
 }
