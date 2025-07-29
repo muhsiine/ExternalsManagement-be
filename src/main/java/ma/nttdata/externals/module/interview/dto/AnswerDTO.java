@@ -5,6 +5,5 @@ import java.util.UUID;
 public record AnswerDTO(
         UUID id,
         String description,
-        Integer durationInMinutes,
-        UUID questionId
+        Integer durationInMinutes
 ) {}

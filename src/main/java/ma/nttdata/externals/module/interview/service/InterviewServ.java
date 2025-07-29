@@ -34,7 +34,10 @@ public interface InterviewServ {
     AnswerDTO getAnswerOfQuestion(UUID questionId);
 
     // get the answer of question id
-    List<AnswerDTO> getAnswersByQuestionId(UUID questionId);
+
+
+    // get the answer of question id
+    AnswerDTO getAnswerByQuestionId(UUID questionId);
 
     // get candidate passed interview id
     CandidateDTO getCandidateByInterviewId(UUID interviewId) throws ChangeSetPersister.NotFoundException;

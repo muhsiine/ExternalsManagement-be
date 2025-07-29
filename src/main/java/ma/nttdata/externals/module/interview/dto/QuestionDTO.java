@@ -7,6 +7,7 @@ public record QuestionDTO(
         UUID id,
         String description,
         Integer  durationInMinutes ,
-        UUID interviewId
+        UUID interviewId ,
+        UUID answerId
 
 ) {}

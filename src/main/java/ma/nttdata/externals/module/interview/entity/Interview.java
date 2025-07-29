@@ -7,7 +7,7 @@ import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.offer.entity.Offer;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,7 +35,7 @@ public class Interview {
     @Column(name = "feedback_general")
     private String feedback_general;
 
-    @Column(name = "scheduledat")
+    @Column(name = "scheduled_at")
     private LocalDateTime scheduledAt;
 
     @Column(name = "comment")
@@ -48,5 +48,12 @@ public class Interview {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "offer_id", nullable = false)
     private Offer offer;
+
+    @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Evaluation> evaluations;
+
+    @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions;
+
 
 }

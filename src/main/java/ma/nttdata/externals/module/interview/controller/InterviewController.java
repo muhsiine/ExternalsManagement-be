@@ -114,9 +114,9 @@ public class InterviewController  {
             description = "Returns the answer associated with a given question ID"
     )
     @GetMapping("/questions/{questionId}/answer")
-    public ResponseEntity<List<AnswerDTO>> getAnswersByQuestion(@PathVariable UUID questionId) {
-        List<AnswerDTO> answers = interviewServ.getAnswersByQuestionId(questionId);
-        return ResponseEntity.ok(answers);
+    public ResponseEntity<AnswerDTO> getAnswerByQuestion(@PathVariable UUID questionId) {
+        AnswerDTO answer = interviewServ.getAnswerByQuestionId(questionId);
+        return ResponseEntity.ok(answer);
     }
 
     @Operation(

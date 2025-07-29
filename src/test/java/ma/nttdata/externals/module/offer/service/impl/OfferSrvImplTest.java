@@ -10,10 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -46,7 +43,8 @@ class OfferSrvImplTest {
         offerDTO = new OfferDTO(
                 offerId,
                 "Frontend Developer",
-                "Looking for a React expert"
+                "Looking for a React expert" ,
+                Collections.emptyList()
         );
     }
 
