@@ -3,7 +3,7 @@ package ma.nttdata.externals.module.interview.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
-import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -28,163 +27,154 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(InterviewController.class) // Use WebMvcTest to test only the controller
+@WebMvcTest(InterviewController.class)
 class InterviewControllerTest {
 
-        @Autowired
-        private MockMvc mockMvc;
+    @Autowired
+    private MockMvc mockMvc;
 
-        @MockBean
-        private InterviewServ interviewServ;
+    @MockBean
+    private InterviewServ interviewServ;
 
-        @Autowired
-        private ObjectMapper objectMapper;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-        private UUID interviewId;
-        private UUID candidateId;
-        private UUID offerId;
-        private UUID questionId;
-        private UUID evaluationId;
-        private UUID evaluationTypeId;
-        private InterviewDTO interviewDTO;
-        private QuestionDTO questionDTO;
-        private AnswerDTO answerDTO;
-        private CandidateDTO candidateDTO;
-        private EvaluationDTO evaluationDTO;
-        private EvaluationTypeDTO evaluationTypeDTO;
+    private UUID interviewId;
+    private UUID candidateId;
+    private UUID offerId;
+    private UUID questionId;
+    private UUID evaluationId;
+    private UUID evaluationTypeId;
+    private UUID answerId;
+    private InterviewDTO interviewDTO;
+    private QuestionDTO questionDTO;
+    private AnswerDTO answerDTO;
+    private CandidateDTO candidateDTO;
+    private EvaluationDTO evaluationDTO;
+    private EvaluationTypeDTO evaluationTypeDTO;
 
-        @BeforeEach
-        void setUp() {
-                interviewId = UUID.randomUUID();
-                candidateId = UUID.randomUUID();
-                offerId = UUID.randomUUID();
-                questionId = UUID.randomUUID();
-                evaluationId = UUID.randomUUID();
-                evaluationTypeId = UUID.randomUUID();
+    @BeforeEach
+    void setUp() {
+        interviewId = UUID.randomUUID();
+        candidateId = UUID.randomUUID();
+        offerId = UUID.randomUUID();
+        questionId = UUID.randomUUID();
+        evaluationId = UUID.randomUUID();
+        evaluationTypeId = UUID.randomUUID();
+        answerId = UUID.randomUUID();
 
-                interviewDTO = new InterviewDTO(
-                                interviewId,
-                                LocalDateTime.of(2025, 7, 21, 9, 0),
-                                LocalDateTime.of(2025, 7, 21, 10, 0),
-                                "Technical round",
-                                "https://zoom.com/meeting",
-                                "Very good performance",
-                                 LocalDateTime.of(2025, 8, 3, 6, 0),
-                        "Candidate showed great problem-solving skills" ,
-                                candidateId,
-                                offerId);
-
-                questionDTO = new QuestionDTO(
-                                questionId,
-                                "What is your experience with Java?",
-                                15,
-                                interviewId);
-
-                answerDTO = new AnswerDTO(
-                                UUID.randomUUID(),
-                                "I have 5 years of experience with Java",
-                                5,
-                                questionId);
-
-                candidateDTO = new CandidateDTO(
-                                candidateId,
-                                "John",
-                                LocalDate.now(),
-                                3,
-                                GenderEnum.M,
-                                "Software Engineer",
-                                "Hardworking and detail-oriented.",
-                                new ArrayList<>(), // contacts
-                                new ArrayList<>(), // experiences
-                                new ArrayList<>(), // skills
-                                new ArrayList<>(), // educations
-                                new ArrayList<>(), // cvFiles
-                                null, // address
-                                new ArrayList<>() // naturalLanguages
-                );
-
-                evaluationDTO = new EvaluationDTO(
-                                evaluationId,
-                                4.5,
-                                "Good technical skills",
-                                interviewId,
-                                evaluationTypeId);
-
-                evaluationTypeDTO = new EvaluationTypeDTO(
-                                evaluationTypeId,
-                                "Technical Skills",
-                                2.0);
-        }
-
-        @Test
-        @WithMockUser
-        void testGetAllInterviews() throws Exception {
-                // Given
-                InterviewDTO interview1 = new InterviewDTO(
-                                UUID.randomUUID(),
-                                LocalDateTime.of(2025, 7, 21, 10, 0),
-                                LocalDateTime.of(2025, 7, 21, 11, 0),
-                                "Technical Interview",
-                                "https://meet.example.com/tech",
-                                "Strong technical skills",
-                                LocalDateTime.of(2025, 8, 3, 6, 0),
-                        "Candidate showed great problem-solving skills" ,
-                                UUID.randomUUID(), // offerId
-                                UUID.randomUUID() // candidateId
-                );
-
-                InterviewDTO interview2 = new InterviewDTO(
-                                UUID.randomUUID(),
-                                LocalDateTime.of(2025, 7, 22, 14, 0),
-                                LocalDateTime.of(2025, 7, 22, 14, 45),
-                                "HR Interview",
-                                "https://meet.example.com/hr",
-                                "Good communication",
-                                LocalDateTime.of(2025, 8, 3, 6, 0),
-                        "Candidate showed great problem-solving skills" ,
-                                UUID.randomUUID(),
-                                UUID.randomUUID()
-                );
-
-                List<InterviewDTO> interviews = Arrays.asList(interview1, interview2);
-
-                // When
-                when(interviewServ.getAllInterviews()).thenReturn(interviews);
-
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/all")
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$[0].description").value("Technical Interview"))
-                                .andExpect(jsonPath("$[0].link").value("https://meet.example.com/tech"))
-                                .andExpect(jsonPath("$[0].feedback_general").value("Strong technical skills"))
-                                .andExpect(jsonPath("$[1].description").value("HR Interview"))
-                                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"))
-                                .andExpect(jsonPath("$[1].feedback_general").value("Good communication"));
-                verify(interviewServ).getAllInterviews();
-        }
-
-    @Test
-    @WithMockUser
-    void getInterviewById() throws Exception {
-        // Arrange
-        UUID interviewId = UUID.randomUUID();
-        UUID candidateId = UUID.randomUUID();
-        UUID offerId = UUID.randomUUID();
-
-        InterviewDTO interviewDTO = new InterviewDTO(
+        evaluationDTO = new EvaluationDTO(
+                evaluationId,
+                4.5,
+                "Good technical skills",
                 interviewId,
-                LocalDateTime.of(2025, 7, 22, 14, 0),
-                LocalDateTime.of(2025, 7, 22, 15, 0),
+                evaluationTypeId);
+
+        evaluationTypeDTO = new EvaluationTypeDTO(
+                evaluationTypeId,
+                "Technical Skills",
+                2.0);
+
+        questionDTO = new QuestionDTO(
+                questionId,
+                "What is your experience with Java?",
+                15,
+                interviewId,
+                answerId);
+
+        answerDTO = new AnswerDTO(
+                answerId,
+                "I have 5 years of experience with Java",
+                5);
+
+        interviewDTO = new InterviewDTO(
+                interviewId,
+                LocalDateTime.of(2025, 7, 21, 9, 0),
+                LocalDateTime.of(2025, 7, 21, 10, 0),
                 "Technical round",
                 "https://zoom.com/meeting",
                 "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                candidateId,
                 offerId,
-                candidateId
+                List.of(evaluationDTO),
+                List.of(questionDTO));
+
+        candidateDTO = new CandidateDTO(
+                candidateId,
+                "John",
+                LocalDate.of(1990, 5, 15),
+                3,
+                GenderEnum.M,
+                "Java",
+                "Hardworking and detail-oriented.",
+                Collections.emptyList(), // contacts
+                Collections.emptyList(), // experiences
+                Collections.emptyList(), // skills
+                Collections.emptyList(), // educations
+                Collections.emptyList(), // cvFiles
+                null, // address
+                Collections.emptyList(), // naturalLanguages
+                List.of(interviewDTO) // interviews
+        );
+    }
+
+    @Test
+    @WithMockUser
+    void testGetAllInterviews() throws Exception {
+        // Given
+        InterviewDTO interview1 = new InterviewDTO(
+                UUID.randomUUID(),
+                LocalDateTime.of(2025, 7, 21, 10, 0),
+                LocalDateTime.of(2025, 7, 21, 11, 0),
+                "Technical Interview",
+                "https://meet.example.com/tech",
+                "Strong technical skills",
+                LocalDateTime.of(2025, 8, 3, 6, 0),
+                "Candidate showed great problem-solving skills",
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Collections.emptyList(),
+                Collections.emptyList()
         );
 
+        InterviewDTO interview2 = new InterviewDTO(
+                UUID.randomUUID(),
+                LocalDateTime.of(2025, 7, 22, 14, 0),
+                LocalDateTime.of(2025, 7, 22, 14, 45),
+                "HR Interview",
+                "https://meet.example.com/hr",
+                "Good communication",
+                LocalDateTime.of(2025, 8, 3, 6, 0),
+                "Candidate showed great problem-solving skills",
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Collections.emptyList(),
+                Collections.emptyList()
+        );
+
+        List<InterviewDTO> interviews = Arrays.asList(interview1, interview2);
+
+        // When
+        when(interviewServ.getAllInterviews()).thenReturn(interviews);
+
+        // Then
+        mockMvc.perform(get("/api/v1/interviews/all")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].description").value("Technical Interview"))
+                .andExpect(jsonPath("$[0].link").value("https://meet.example.com/tech"))
+                .andExpect(jsonPath("$[0].feedback_general").value("Strong technical skills"))
+                .andExpect(jsonPath("$[1].description").value("HR Interview"))
+                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"))
+                .andExpect(jsonPath("$[1].feedback_general").value("Good communication"));
+        verify(interviewServ).getAllInterviews();
+    }
+    @Test
+    @WithMockUser
+    void getInterviewById() throws Exception {
+        // Arrange
         when(interviewServ.getInterviewById(interviewId)).thenReturn(interviewDTO);
 
         // Act & Assert
@@ -197,23 +187,21 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").value("https://zoom.com/meeting"))
                 .andExpect(jsonPath("$.feedback_general").value("Very good performance"))
-                .andExpect(jsonPath("$.candidateId").value(candidateId.toString()))
-                .andExpect(jsonPath("$.offerId").value(offerId.toString()));
+                .andExpect(jsonPath("$.candidateId").value(interviewDTO.candidateId().toString()))
+                .andExpect(jsonPath("$.offerId").value(interviewDTO.offerId().toString())); // Fixed to use interviewDTO.offerId()
 
         verify(interviewServ).getInterviewById(interviewId);
     }
-
-
     @Test
     @WithMockUser
     void createInterview() throws Exception {
-        // Define fixed UUIDs
+        // Arrange
         UUID fixedCandidateId = UUID.fromString("b73be5db-5d04-4be5-b65b-a8210db3db07");
         UUID fixedOfferId = UUID.fromString("a12be5ab-1234-4cdf-b44c-a8210db3abcd");
         UUID fixedInterviewId = UUID.fromString("f99fbb6f-983a-4c89-bf65-589a2926fc01");
 
-        InterviewDTO savedInterviewDTO = new InterviewDTO(
-                fixedInterviewId,
+        InterviewDTO inputDto = new InterviewDTO(
+                null,
                 LocalDateTime.of(2025, 7, 22, 14, 0),
                 LocalDateTime.of(2025, 7, 22, 15, 0),
                 "Technical round",
@@ -221,25 +209,30 @@ class InterviewControllerTest {
                 "Great candidate",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                fixedCandidateId,
                 fixedOfferId,
-                fixedCandidateId
+                Collections.emptyList(),
+                Collections.emptyList()
         );
 
-        InterviewDTO inputDto = new InterviewDTO(
-                null,
-                savedInterviewDTO.startTime(),
-                savedInterviewDTO.endTime(),
-                savedInterviewDTO.description(),
-                savedInterviewDTO.link(),
-                savedInterviewDTO.feedback_general(),
-                savedInterviewDTO.scheduledAt(),
-                savedInterviewDTO.comment(),
-                savedInterviewDTO.offerId(),
-                savedInterviewDTO.candidateId()
+        InterviewDTO savedInterviewDTO = new InterviewDTO(
+                fixedInterviewId,
+                inputDto.startTime(),
+                inputDto.endTime(),
+                inputDto.description(),
+                inputDto.link(),
+                inputDto.feedback_general(),
+                inputDto.scheduledAt(),
+                inputDto.comment(),
+                inputDto.candidateId(),
+                inputDto.offerId(),
+                Collections.emptyList(),
+                Collections.emptyList()
         );
 
         when(interviewServ.createInterview(any())).thenReturn(savedInterviewDTO);
 
+        // Act & Assert
         mockMvc.perform(post("/api/v1/interviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto))
@@ -260,6 +253,7 @@ class InterviewControllerTest {
     @Test
     @WithMockUser
     void updateInterview() throws Exception {
+        // Arrange
         UUID fixedCandidateId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID fixedOfferId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
@@ -271,13 +265,16 @@ class InterviewControllerTest {
                 "https://meet.example.com/interview",
                 "Updated feedback",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
-                "Candidate showed great problem-solving skills" ,
+                "Candidate showed great problem-solving skills",
+                fixedCandidateId,
                 fixedOfferId,
-                fixedCandidateId
+                Collections.emptyList(),
+                Collections.emptyList()
         );
 
         when(interviewServ.updateInterview(eq(interviewId), any())).thenReturn(updatedDto);
 
+        // Act & Assert
         mockMvc.perform(put("/api/v1/interviews/{id}", interviewId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedDto))
@@ -289,128 +286,123 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").exists())
-                .andExpect(jsonPath("$.candidateId").value(fixedCandidateId.toString()))
-                .andExpect(jsonPath("$.offerId").value(fixedOfferId.toString()));
+                .andExpect(jsonPath("$.candidateId").value(updatedDto.candidateId().toString())) // Fixed to use updatedDto.candidateId()
+                .andExpect(jsonPath("$.offerId").value(updatedDto.offerId().toString())); // Updated to use updatedDto.offerId() for consistency
 
         verify(interviewServ).updateInterview(eq(interviewId), any());
     }
 
+    @Test
+    @WithMockUser
+    void deleteInterview() throws Exception {
+        // Arrange
+        doNothing().when(interviewServ).deleteInterview(interviewId);
 
+        // Act & Assert
+        mockMvc.perform(delete("/api/v1/interviews/{id}", interviewId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isNoContent());
+
+        verify(interviewServ).deleteInterview(interviewId);
+    }
 
     @Test
-        @WithMockUser
-        void deleteInterview() throws Exception {
-                doNothing().when(interviewServ).deleteInterview(interviewId);
+    @WithMockUser
+    void getInterviewsByOfferId() throws Exception {
+        // Arrange
+        List<InterviewDTO> interviews = List.of(interviewDTO);
 
-                mockMvc.perform(delete("/api/v1/interviews/{id}", interviewId)
-                                .with(SecurityMockMvcRequestPostProcessors.csrf()))
-                                .andExpect(status().isNoContent());
+        // When
+        when(interviewServ.getInterviewsByOfferId(offerId)).thenReturn(interviews);
 
-                verify(interviewServ).deleteInterview(interviewId);
-        }
+        // Then
+        mockMvc.perform(get("/api/v1/interviews/offer/{offerId}", offerId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(interviewId.toString()))
+                .andExpect(jsonPath("$[0].description").value("Technical round"));
+    }
 
+    @Test
+    @WithMockUser
+    void getQuestionsByInterviewId() throws Exception {
+        // Arrange
+        List<QuestionDTO> questions = List.of(questionDTO);
 
+        // When
+        when(interviewServ.getQuestionsByInterviewId(interviewId)).thenReturn(questions);
 
-        @Test
-        @WithMockUser
-        void getInterviewsByOfferId() throws Exception {
-                // Given
-                List<InterviewDTO> interviews = List.of(interviewDTO);
+        // Then
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/questions", interviewId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(questionId.toString()))
+                .andExpect(jsonPath("$[0].description").value("What is your experience with Java?"))
+                .andExpect(jsonPath("$[0].durationInMinutes").value(15));
+    }
 
-                // When
-                when(interviewServ.getInterviewsByOfferId(offerId)).thenReturn(interviews);
+    @Test
+    @WithMockUser
+    void getAnswersByQuestion() throws Exception {
+        // Arrange
+        when(interviewServ.getAnswerByQuestionId(questionId)).thenReturn(answerDTO);
 
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/offer/{offerId}", offerId)
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
-                                .andExpect(jsonPath("$[0].id").value(interviewId.toString()))
-                                .andExpect(jsonPath("$[0].description").value("Technical round"));
-        }
+        // Then
+        mockMvc.perform(get("/api/v1/interviews/questions/{questionId}/answer", questionId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.description").value("I have 5 years of experience with Java"))
+                .andExpect(jsonPath("$.durationInMinutes").value(5));
+    }
+    @Test
+    @WithMockUser
+    void getCandidateByInterviewId() throws Exception {
+        // Arrange
+        when(interviewServ.getCandidateByInterviewId(interviewId)).thenReturn(candidateDTO);
 
-        @Test
-        @WithMockUser
-        void getQuestionsByInterviewId() throws Exception {
-                // Given
-                List<QuestionDTO> questions = List.of(questionDTO);
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/candidate", interviewId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(candidateId.toString()))
+                .andExpect(jsonPath("$.fullName").value("John"))
+                .andExpect(jsonPath("$.mainTech").value("Java"))
+                .andExpect(jsonPath("$.summary").value("Hardworking and detail-oriented."));
+    }
 
-                // When
-                when(interviewServ.getQuestionsByInterviewId(interviewId)).thenReturn(questions);
+    @Test
+    @WithMockUser
+    void getEvaluationsOfInterview() throws Exception {
+        // Arrange
+        List<EvaluationDTO> evaluations = List.of(evaluationDTO);
 
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/{interviewId}/questions", interviewId)
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
-                                .andExpect(jsonPath("$[0].id").value(questionId.toString()))
-                                .andExpect(jsonPath("$[0].description").value("What is your experience with Java?"))
-                                .andExpect(jsonPath("$[0].durationInMinutes").value(15));
-        }
+        // When
+        when(interviewServ.getEvaluationsOfInterview(interviewId)).thenReturn(evaluations);
 
-        @Test
-        @WithMockUser
-        void getAnswersByQuestion() throws Exception {
-                // Given
-                List<AnswerDTO> answers = List.of(answerDTO);
+        // Then
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$[0].id").value(evaluationId.toString()))
+                .andExpect(jsonPath("$[0].score").value(4.5))
+                .andExpect(jsonPath("$[0].feedback").value("Good technical skills"));
+    }
 
-                // When
-                when(interviewServ.getAnswersByQuestionId(questionId)).thenReturn(answers);
+    @Test
+    @WithMockUser
+    void getEvaluationType() throws Exception {
+        // Arrange
+        when(interviewServ.getEvaluationTypeOfEvaluation(evaluationId)).thenReturn(evaluationTypeDTO);
 
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/questions/{questionId}/answer", questionId)
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
-                                .andExpect(jsonPath("$[0].description").value("I have 5 years of experience with Java"))
-                                .andExpect(jsonPath("$[0].durationInMinutes").value(5));
-        }
-
-        @Test
-        @WithMockUser
-        void getCandidateByInterviewId() throws Exception {
-                // When
-                when(interviewServ.getCandidateByInterviewId(interviewId)).thenReturn(candidateDTO);
-
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/{interviewId}/candidate", interviewId)
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.id").value(candidateId.toString()))
-                                .andExpect(jsonPath("$.fullName").value("John"));
-        }
-
-        @Test
-        @WithMockUser
-        void getEvaluationsOfInterview() throws Exception {
-                // Given
-                List<EvaluationDTO> evaluations = List.of(evaluationDTO);
-
-                // When
-                when(interviewServ.getEvaluationsOfInterview(interviewId)).thenReturn(evaluations);
-
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
-                                .andExpect(jsonPath("$[0].id").value(evaluationId.toString()))
-                                .andExpect(jsonPath("$[0].score").value(4.5))
-                                .andExpect(jsonPath("$[0].feedback").value("Good technical skills"));
-        }
-
-        @Test
-        @WithMockUser
-        void getEvaluationType() throws Exception {
-                // When
-                when(interviewServ.getEvaluationTypeOfEvaluation(evaluationId)).thenReturn(evaluationTypeDTO);
-
-                // Then
-                mockMvc.perform(get("/api/v1/interviews/{id}/type", evaluationId)
-                                .accept(MediaType.APPLICATION_JSON))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.id").value(evaluationTypeId.toString()))
-                                .andExpect(jsonPath("$.description").value("Technical Skills"))
-                                .andExpect(jsonPath("$.coefficient").value(2.0));
-        }
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/interviews/{id}/type", evaluationId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(evaluationTypeId.toString()))
+                .andExpect(jsonPath("$.description").value("Technical Skills"))
+                .andExpect(jsonPath("$.coefficient").value(2.0));
+    }
 }

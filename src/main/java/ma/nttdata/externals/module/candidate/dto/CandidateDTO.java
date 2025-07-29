@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.candidate.dto;
 
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewDTO;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +23,7 @@ public record CandidateDTO(
         List<EducationDTO> educations,
         List<CvFileDTO> cvFiles,
         AddressDTO address,
-        List<LanguageDTO> naturalLanguages
+        List<LanguageDTO> naturalLanguages,
+        List<InterviewDTO> interviews
 
 ) {}

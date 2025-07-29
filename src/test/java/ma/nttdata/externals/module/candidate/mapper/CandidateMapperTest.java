@@ -13,6 +13,7 @@ import org.mapstruct.factory.Mappers;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,7 +59,8 @@ class CandidateMapperTest {
                 GenderEnum.F,
                 "Python",
                 "Skilled Python developer",
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null,
+                Collections.emptyList()
         );
 
         // Map to entity
@@ -165,7 +167,8 @@ class CandidateMapperTest {
                 GenderEnum.F,
                 "Python",
                 "Skilled Python developer",
-                contacts, experiences, skills, null, null, null, null
+                contacts, experiences, skills, null, null, null, null,
+                Collections.emptyList()
         );
 
         // Map to entity

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.cv.entity.CvFile;
+import ma.nttdata.externals.module.interview.entity.Interview;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -57,4 +58,7 @@ public class Candidate {
 
     @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Language> languages;
+
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Interview> interviews;
 }

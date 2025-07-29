@@ -101,7 +101,8 @@ class CandidateSrvImplTest {
                 GenderEnum.M,
                 "Java",
                 "Experienced Java developer",
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null,
+                Collections.emptyList()
         );
     }
 

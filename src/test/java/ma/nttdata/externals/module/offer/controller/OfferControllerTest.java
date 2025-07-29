@@ -14,6 +14,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,7 +47,8 @@ class OfferControllerTest {
         offerDTO = new OfferDTO(
                 offerId,
                 "Java Developer",
-                "Looking for a senior Java developer."
+                "Looking for a senior Java developer.",
+                Collections.emptyList()
         );
     }
     @Test
@@ -59,14 +61,16 @@ class OfferControllerTest {
         OfferDTO inputDto = new OfferDTO(
                 null,
                 "Java Developer",
-                "Looking for a senior Java developer."
+                "Looking for a senior Java developer.",
+                Collections.emptyList()
         );
 
         // Expected return from service after creation (with fixed ID)
         OfferDTO returnedDto = new OfferDTO(
                 fixedOfferId,
                 "Java Developer",
-                "Looking for a senior Java developer."
+                "Looking for a senior Java developer.",
+                Collections.emptyList()
         );
 
         // When
@@ -108,7 +112,8 @@ class OfferControllerTest {
         OfferDTO updatedDto = new OfferDTO(
                 offerId,
                 "Senior Java Developer",
-                "Looking for a senior Java developer with 5+ years experience."
+                "Looking for a senior Java developer with 5+ years experience.",
+                Collections.emptyList()
         );
 
         when(offerService.updateOffer(eq(offerId), any(OfferDTO.class))).thenReturn(updatedDto);
@@ -150,7 +155,8 @@ class OfferControllerTest {
         //w
         List<OfferDTO> offers = Arrays.asList(
                 offerDTO,
-                new OfferDTO(UUID.randomUUID(), "Python Developer", "Need a Python expert.")
+                new OfferDTO(UUID.randomUUID(), "Python Developer", "Need a Python expert." ,     Collections.emptyList())
+
         );
 
         // When

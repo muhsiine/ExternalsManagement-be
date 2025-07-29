@@ -28,7 +28,6 @@ public class Evaluation {
     @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
 
-
     @OneToOne(fetch =FetchType.EAGER)
     @JoinColumn(name="evaluation_type_id" , nullable = false)
     private EvaluationType evaluationType;
