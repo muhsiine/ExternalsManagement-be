@@ -20,6 +20,8 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   docker:
     compose:
       enabled: false

@@ -198,7 +198,7 @@ public class InterviewServImpl implements InterviewServ {
 
     @Override
     public SendEmailDTO getEmailInfo(UUID interviewId){
-        Interview interview = interviewRepository.getCandidateContactsAndOfferByInterviewId(interviewId)
+        Interview interview = interviewRepository.findWithCandidateAndOfferById(interviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));;
 
         Candidate candidate = interview.getCandidate();
