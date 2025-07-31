@@ -462,8 +462,8 @@ class InterviewControllerTest {
         when(questionServ.generateQuestions(generateQuestionsInfo, numberOfQuestions))
                 .thenReturn(generatedQuestions);
 
-        mockMvc.perform(get("/api/v1/interviews/{interviewId}/generateQuestions/{numberOfQuestions}",
-                interviewId,numberOfQuestions)
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/generateQuestions/questions", interviewId)
+                        .param("count", String.valueOf(numberOfQuestions))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))

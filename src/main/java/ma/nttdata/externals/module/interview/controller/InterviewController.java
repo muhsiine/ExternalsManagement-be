@@ -144,8 +144,9 @@ public class InterviewController  {
             summary = "Get interview questions by interview Id",
             description = "Return the questions adapted to that exact interview"
     )
-    @GetMapping("/{interviewId}/generateQuestions/{numberOfQuestions}")
-    public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId,@PathVariable Integer numberOfQuestions) {
+    @GetMapping("/{interviewId}/generateQuestions/questions")
+    public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId,
+                                                                   @RequestParam(name = "count", defaultValue = "10") Integer numberOfQuestions) {
         GenerateQuestionsInfoDTO generateQuestionsInfo = interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
         return ResponseEntity.ok(questionServ.generateQuestions(generateQuestionsInfo,
                 numberOfQuestions));
