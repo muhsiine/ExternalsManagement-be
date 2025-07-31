@@ -8,7 +8,9 @@ import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.*;
 import ma.nttdata.externals.module.interview.mapper.*;
 import ma.nttdata.externals.module.interview.repository.*;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
+import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import ma.nttdata.externals.module.offer.repository.OfferRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,7 @@ class InterviewSrvImplTest {
     @Mock private EvaluationMapper evaluationMapper;
     @Mock private EvaluationTypeMapper evaluationTypeMapper;
     @Mock private CandidateMapper candidateMapper;
+    @Mock private OfferMapper offerMapper;
 
     @InjectMocks
     private InterviewServImpl interviewServ;
@@ -240,5 +243,54 @@ class InterviewSrvImplTest {
         EvaluationTypeDTO result = interviewServ.getEvaluationTypeOfEvaluation(evaluationId);
 
         assertNotNull(result);
+    }
+
+    @Test
+    void getInterviewCandidateAndOfferAndEvaluationTypes_should_return_interview_candidate_and_offer_and_evaluation_types() {
+
+        UUID interviewId = UUID.randomUUID();
+
+        Candidate candidate = new Candidate();
+        candidate.setId(UUID.randomUUID());
+
+        Offer offer = new Offer();
+        offer.setId(UUID.randomUUID());
+
+        EvaluationType evalType1 = new EvaluationType();
+        evalType1.setId(UUID.randomUUID());
+
+        Evaluation evaluation1 = new Evaluation();
+        evaluation1.setEvaluationType(evalType1);
+
+        List<Evaluation> evaluations = List.of(evaluation1);
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+        interview.setEvaluations(evaluations);
+
+        CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(offer.getId(), null, null, null);
+        EvaluationTypeDTO evalTypeDTO = new EvaluationTypeDTO(evalType1.getId(), "Soft Skills", 10.0);
+
+        when(interviewRepository.findWithCandidateAndOfferAndEvaluationTypesById(interviewId)).thenReturn(Optional.of(interview));
+        when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
+        when(evaluationTypeMapper.toDto(evalType1)).thenReturn(evalTypeDTO);
+
+        GenerateQuestionsInfoDTO result = interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
+
+        assertNotNull(result);
+        assertEquals(candidateDTO, result.candidate());
+        assertEquals(offerDTO, result.offer());
+        assertEquals(1, result.evaluationTypes().size());
+        assertEquals(evalTypeDTO, result.evaluationTypes().get(0));
+
+        verify(interviewRepository).findWithCandidateAndOfferAndEvaluationTypesById(interviewId);
+        verify(candidateMapper).candidateToCandidateDTO(candidate);
+        verify(offerMapper).toDto(offer);
+        verify(evaluationTypeMapper).toDto(evalType1);
+
     }
 }

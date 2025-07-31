@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.QuestionServ;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.UUID;
 public class InterviewController  {
 
     private final InterviewServ interviewServ;
+    private final QuestionServ questionServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -142,9 +144,10 @@ public class InterviewController  {
             summary = "Get interview questions by interview Id",
             description = "Return the questions adapted to that exact interview"
     )
-    @GetMapping("/{interviewId}/generateQuestions")
-    public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId) {
-        GenerateQuestionsInfoDTO generateQuestionsInfo = interviewServ.generateQuestionsByInterviewId(interviewId);
-        return ResponseEntity.ok(interviewServ.getQuestionsByInterviewId(interviewId));
+    @GetMapping("/{interviewId}/generateQuestions/{numberOfQuestions}")
+    public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId,@PathVariable Integer numberOfQuestions) {
+        GenerateQuestionsInfoDTO generateQuestionsInfo = interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
+        return ResponseEntity.ok(questionServ.generateQuestions(generateQuestionsInfo,
+                numberOfQuestions));
     }
 }

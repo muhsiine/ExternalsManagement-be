@@ -18,5 +18,7 @@ public interface QuestionServ {
 
     void deleteQuestion(UUID id);
 
-    List<QuestionDTO> generateQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo,int numberOfQuestions);
+    List<QuestionDTO> generateQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo, int numberOfQuestions);
+
+    String getGeneratedQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo,int numberOfQuestions);
 }

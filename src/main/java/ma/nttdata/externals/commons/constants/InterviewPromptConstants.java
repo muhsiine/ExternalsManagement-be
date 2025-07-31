@@ -39,7 +39,7 @@ public final class InterviewPromptConstants {
             ]
             """;
 
-    public static final String JSON_MOCK_EXAMPLE = """
+    public static final String JSON_MOCK = """
             [
               {
                 "description": "Given your 8 years of experience with Java and Spring Boot, can you walk me through how you would design a microservices architecture for a high-traffic e-commerce platform? Focus on service decomposition and inter-service communication strategies.",

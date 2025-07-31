@@ -9,6 +9,6 @@ import java.util.List;
 public record GenerateQuestionsInfoDTO(
         CandidateDTO candidate,
         OfferDTO offer,
-        List<EvaluationTypeDTO> evaluationType
+        List<EvaluationTypeDTO> evaluationTypes
 ) {
 }

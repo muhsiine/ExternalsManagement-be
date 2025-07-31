@@ -6,6 +6,8 @@ import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -36,6 +39,9 @@ class InterviewControllerTest {
     @MockBean
     private InterviewServ interviewServ;
 
+    @MockitoBean
+    private QuestionServ questionServ;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -46,12 +52,14 @@ class InterviewControllerTest {
     private UUID evaluationId;
     private UUID evaluationTypeId;
     private UUID answerId;
+    private UUID offerID;
     private InterviewDTO interviewDTO;
     private QuestionDTO questionDTO;
     private AnswerDTO answerDTO;
     private CandidateDTO candidateDTO;
     private EvaluationDTO evaluationDTO;
     private EvaluationTypeDTO evaluationTypeDTO;
+    private OfferDTO offerDTO;
 
     @BeforeEach
     void setUp() {
@@ -62,6 +70,7 @@ class InterviewControllerTest {
         evaluationId = UUID.randomUUID();
         evaluationTypeId = UUID.randomUUID();
         answerId = UUID.randomUUID();
+        offerId = UUID.randomUUID();
 
         evaluationDTO = new EvaluationDTO(
                 evaluationId,
@@ -117,6 +126,13 @@ class InterviewControllerTest {
                 null, // address
                 Collections.emptyList(), // naturalLanguages
                 List.of(interviewDTO) // interviews
+        );
+
+        offerDTO = new OfferDTO(
+                offerId,
+                "Backend Engineer",
+                "We need a backend engineer with solid experience in Node js and spring boot",
+                List.of(interviewDTO)
         );
     }
 
@@ -404,5 +420,61 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.id").value(evaluationTypeId.toString()))
                 .andExpect(jsonPath("$.description").value("Technical Skills"))
                 .andExpect(jsonPath("$.coefficient").value(2.0));
+    }
+
+    @Test
+    @WithMockUser
+    void getInterviewQuestions() throws Exception {
+        int numberOfQuestions = 5;
+
+        GenerateQuestionsInfoDTO generateQuestionsInfo = new GenerateQuestionsInfoDTO(
+                candidateDTO,
+                offerDTO,
+                List.of(evaluationTypeDTO)
+        );
+
+        List<QuestionDTO> generatedQuestions = Arrays.asList(
+                new QuestionDTO(
+                        UUID.randomUUID(),
+                        "What is your experience with Spring Boot?",
+                        5,
+                        interviewId,
+                        null
+                ),
+                new QuestionDTO(
+                        UUID.randomUUID(),
+                        "How do you handle database transactions?",
+                        4,
+                        interviewId,
+                        null
+                ),
+                new QuestionDTO(
+                        UUID.randomUUID(),
+                        "Explain microservices architecture.",
+                        6,
+                        interviewId,
+                        null
+                )
+        );
+
+        when(interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId))
+                .thenReturn(generateQuestionsInfo);
+        when(questionServ.generateQuestions(generateQuestionsInfo, numberOfQuestions))
+                .thenReturn(generatedQuestions);
+
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/generateQuestions/{numberOfQuestions}",
+                interviewId,numberOfQuestions)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
+                .andExpect(jsonPath("$[0].description").value("What is your experience with Spring Boot?"))
+                .andExpect(jsonPath("$[0].durationInMinutes").value(5))
+                .andExpect(jsonPath("$[0].interviewId").value(interviewId.toString()))
+                .andExpect(jsonPath("$[1].description").value("How do you handle database transactions?"))
+                .andExpect(jsonPath("$[1].durationInMinutes").value(4))
+                .andExpect(jsonPath("$[2].description").value("Explain microservices architecture."))
+                .andExpect(jsonPath("$[2].durationInMinutes").value(6));
+        verify(interviewServ).getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
+        verify(questionServ).generateQuestions(generateQuestionsInfo, numberOfQuestions);
     }
 }

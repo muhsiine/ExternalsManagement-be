@@ -184,7 +184,7 @@ public class InterviewServImpl implements InterviewServ {
 
 
     @Override
-    public GenerateQuestionsInfoDTO generateQuestionsByInterviewId(UUID interviewId){
+    public GenerateQuestionsInfoDTO getInterviewCandidateAndOfferAndEvaluationTypes(UUID interviewId){
         Interview interview = interviewRepository.findWithCandidateAndOfferAndEvaluationTypesById(interviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview not found with ID: " + interviewId));
 
