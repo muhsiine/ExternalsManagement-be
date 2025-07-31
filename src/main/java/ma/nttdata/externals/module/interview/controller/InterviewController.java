@@ -137,4 +137,5 @@ public class InterviewController  {
     public ResponseEntity<EvaluationTypeDTO> getEvaluationType(@PathVariable UUID id) {
         return ResponseEntity.ok(interviewServ.getEvaluationTypeOfEvaluation(id));
     }
+
 }
