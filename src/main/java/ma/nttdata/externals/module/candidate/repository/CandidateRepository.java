@@ -1,13 +1,14 @@
 package ma.nttdata.externals.module.candidate.repository;
 
 import ma.nttdata.externals.module.candidate.entity.Candidate;
-import org.springframework.data.repository.ListCrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.UUID;
 
-@Repository
-public interface CandidateRepository extends ListCrudRepository<Candidate, UUID> {
-//  Candidate findByFullName(String name);
-///query method sprigng jpa
+public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
+
+    @Query("SELECT DISTINCT c.mainTech FROM Candidate c WHERE c.mainTech IS NOT NULL")
+    List<String> findDistinctMainTechs();
 }
