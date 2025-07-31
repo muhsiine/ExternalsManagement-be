@@ -66,3 +66,4 @@ interview:
   email:
     template:
       path: templates/interviewsInvitation.html
+  baseLink: http://localhost:4200/interviews/

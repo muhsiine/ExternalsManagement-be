@@ -18,6 +18,7 @@ import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 
 import ma.nttdata.externals.module.offer.entity.Offer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,9 @@ public class InterviewServImpl implements InterviewServ {
 
     private final CandidateMapper candidateMapper ;
 
+
+    private final String interviewBaseLink;
+
     public InterviewServImpl(
             InterviewMapper interviewMapper,
             InterviewRepository interviewRepository ,
@@ -55,7 +59,8 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationRepository evaluationRepository ,
             EvaluationMapper evaluationMapper ,
             EvaluationTypeMapper evaluationTypeMapper ,
-            CandidateMapper candidateMapper
+            CandidateMapper candidateMapper,
+            @Value("${interview.baseLink}") String interviewBaseLink
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -67,6 +72,7 @@ public class InterviewServImpl implements InterviewServ {
         this.evaluationRepository = evaluationRepository;
         this.evaluationTypeMapper= evaluationTypeMapper;
         this.candidateMapper = candidateMapper;
+        this.interviewBaseLink = interviewBaseLink;
     }
 
     // new interview
@@ -183,8 +189,8 @@ public class InterviewServImpl implements InterviewServ {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));
 
-        String baseLink = "http://localhost:4200/interviews/";
-        String interviewLink = baseLink+token;
+
+        String interviewLink = interviewBaseLink+token;
         interview.setLink(interviewLink);
         interviewRepository.save(interview);
         return interviewLink;
