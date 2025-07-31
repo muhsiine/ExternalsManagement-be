@@ -18,7 +18,7 @@ public class CvController {
     private final cvSrv cvSrv;
     private final CandidateSrv candidateSrv;
 
-    public CvController(cvSrv cvSrv) {
+    public CvController(cvSrv cvSrv , CandidateSrv candidateSrv) {
         this.cvSrv = cvSrv;
         this.candidateSrv = candidateSrv;
     }
