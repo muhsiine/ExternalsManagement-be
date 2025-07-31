@@ -94,7 +94,7 @@ public class QuestionServImpl implements QuestionServ {
     }
 
     @Override
-    public List<QuestionDTO> generateQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo, int numberOfQuestions) {
+    public List<QuestionDTO> extractGeneratedQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo, int numberOfQuestions) {
         try {
             String jsonResponse = mockFlag ?
                     InterviewPromptConstants.JSON_MOCK:

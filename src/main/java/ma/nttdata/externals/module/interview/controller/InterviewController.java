@@ -148,7 +148,7 @@ public class InterviewController  {
     public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId,
                                                                    @RequestParam(name = "count", defaultValue = "10") Integer numberOfQuestions) {
         GenerateQuestionsInfoDTO generateQuestionsInfo = interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
-        return ResponseEntity.ok(questionServ.generateQuestions(generateQuestionsInfo,
+        return ResponseEntity.ok(questionServ.extractGeneratedQuestions(generateQuestionsInfo,
                 numberOfQuestions));
     }
 }

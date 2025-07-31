@@ -459,7 +459,7 @@ class InterviewControllerTest {
 
         when(interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId))
                 .thenReturn(generateQuestionsInfo);
-        when(questionServ.generateQuestions(generateQuestionsInfo, numberOfQuestions))
+        when(questionServ.extractGeneratedQuestions(generateQuestionsInfo, numberOfQuestions))
                 .thenReturn(generatedQuestions);
 
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/generateQuestions/questions", interviewId)
@@ -475,6 +475,6 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$[2].description").value("Explain microservices architecture."))
                 .andExpect(jsonPath("$[2].durationInMinutes").value(6));
         verify(interviewServ).getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
-        verify(questionServ).generateQuestions(generateQuestionsInfo, numberOfQuestions);
+        verify(questionServ).extractGeneratedQuestions(generateQuestionsInfo, numberOfQuestions);
     }
 }
