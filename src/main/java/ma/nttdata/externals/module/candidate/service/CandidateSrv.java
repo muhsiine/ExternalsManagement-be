@@ -18,4 +18,6 @@ public interface CandidateSrv {
     Map<String, Long> getCandidatesByLanguage();
     Map<String, Long> getCandidatesBySkill();
     Long getTotalCandidates();
+    List<String> getDistinctMainTechs();
+
 }
