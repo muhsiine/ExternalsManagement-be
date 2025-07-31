@@ -16,4 +16,7 @@ public interface OfferServ {
     OfferDTO updateOffer(UUID id, OfferDTO offerDTO);
 
     void deleteOffer(UUID id);
+
+    List<String> getDistinctTitles();
+
 }

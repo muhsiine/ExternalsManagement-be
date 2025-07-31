@@ -259,4 +259,13 @@ public class CandidateController {
         log.info("Retrieved statistics for {} languages", languageStats.size());
         return ResponseEntity.ok(languageStats);
     }
+    @GetMapping("/main-techs")
+    @Operation(summary = "Get all distinct main technologies from candidates",
+            description = "Returns a list of unique 'mainTech' values from the candidate table")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved main techs")
+    public ResponseEntity<List<String>> getAllMainTechs() {
+        List<String> mainTechs = candidateSrv.getDistinctMainTechs();
+        return ResponseEntity.ok(mainTechs);
+    }
+
 }

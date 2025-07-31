@@ -204,4 +204,9 @@ public class CandidateSrvImpl implements CandidateSrv {
             throw new InternalServerException("Error retrieving total candidates count", e);
         }
     }
+    @Override
+    public List<String> getDistinctMainTechs() {
+        return candidateRepository.findDistinctMainTechs();
+    }
+
 }
