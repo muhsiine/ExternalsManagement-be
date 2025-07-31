@@ -92,4 +92,12 @@ public class OfferController {
         offerServ.deleteOffer(id);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/titles")
+    @Operation(summary = "Get all distinct offer titles", description = "Retrieves a list of unique offer titles from the system")
+    @ApiResponse(responseCode = "200", description = "List of distinct titles retrieved successfully")
+    public ResponseEntity<List<String>> getDistinctOfferTitles() {
+        List<String> titles = offerServ.getDistinctTitles();
+        return ResponseEntity.ok(titles);
+    }
+
 }

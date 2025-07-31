@@ -63,5 +63,10 @@ public class OfferServImpl implements OfferServ {
         offerRepository.delete(offer);
 
     }
+    @Override
+    public List<String> getDistinctTitles() {
+        return offerRepository.findDistinctTitles();
+    }
+
 
 }
