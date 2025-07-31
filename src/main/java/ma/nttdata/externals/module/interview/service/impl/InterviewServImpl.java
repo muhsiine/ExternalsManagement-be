@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
@@ -15,6 +16,8 @@ import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +45,8 @@ public class InterviewServImpl implements InterviewServ {
 
     private final CandidateMapper candidateMapper ;
 
+    private final OfferMapper offerMapper;
+
     public InterviewServImpl(
             InterviewMapper interviewMapper,
             InterviewRepository interviewRepository ,
@@ -52,7 +57,8 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationRepository evaluationRepository ,
             EvaluationMapper evaluationMapper ,
             EvaluationTypeMapper evaluationTypeMapper ,
-            CandidateMapper candidateMapper
+            CandidateMapper candidateMapper,
+            OfferMapper offerMapper
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -64,6 +70,7 @@ public class InterviewServImpl implements InterviewServ {
         this.evaluationRepository = evaluationRepository;
         this.evaluationTypeMapper= evaluationTypeMapper;
         this.candidateMapper = candidateMapper;
+        this.offerMapper = offerMapper;
     }
 
     // new interview
@@ -176,6 +183,29 @@ public class InterviewServImpl implements InterviewServ {
     }
 
 
+    @Override
+    public GenerateQuestionsInfoDTO generateQuestionsByInterviewId(UUID interviewId){
+        Interview interview = interviewRepository.findWithCandidateAndOfferAndEvaluationTypesById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found with ID: " + interviewId));
+
+        CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
+
+        OfferDTO offer = offerMapper.toDto(interview.getOffer());
+
+        List<EvaluationTypeDTO> evaluationTypes = interview.getEvaluations()
+                .stream().map(Evaluation::getEvaluationType)
+                .distinct()
+                .map(evaluationTypeMapper::toDto)
+                .toList();
+
+        GenerateQuestionsInfoDTO generateQuestionsInfo = new GenerateQuestionsInfoDTO(
+                candidate,
+                offer,
+                evaluationTypes
+        );
+
+        return generateQuestionsInfo;
+    }
 
 
 }

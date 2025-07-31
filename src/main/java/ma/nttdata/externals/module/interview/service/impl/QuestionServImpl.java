@@ -1,7 +1,9 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import ma.nttdata.externals.commons.constants.InterviewPromptConstants;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
+import ma.nttdata.externals.module.interview.dto.GenerateQuestionsInfoDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.entity.Question;
@@ -9,7 +11,9 @@ import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +25,9 @@ public class QuestionServImpl implements QuestionServ {
     private final QuestionRepository questionRepository;
     private final QuestionMapper questionMapper;
     private final InterviewRepository interviewRepository;
+
+    @Qualifier("aiServiceClient")
+    private final RestClient aiRestClient;
 
     @Override
     public List<QuestionDTO> getAllQuestions() {
@@ -70,4 +77,20 @@ public class QuestionServImpl implements QuestionServ {
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + id));
         questionRepository.delete(existing);
     }
+
+    @Override
+    public List<QuestionDTO> generateQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo,int numberOfQuestions){
+        String prompt = InterviewPromptConstants.INTERVIEW_GENERATION_PROMPT;
+
+        prompt = prompt.replace(InterviewPromptConstants.CANDIDATE_DATA_PLACEHOLDER, generateQuestionsInfo.candidate().toString())
+                .replace(InterviewPromptConstants.OFFER_DATA_PLACEHOLDER, generateQuestionsInfo.offer().toString())
+                .replace(InterviewPromptConstants.EVALUATION_TYPE_DATA_PLACEHOLDER,generateQuestionsInfo.evaluationType().toString())
+                .replace(InterviewPromptConstants.NUMBER_OF_QUESTIONS_PLACEHOLDER,String.valueOf(numberOfQuestions));
+
+        return aiRestClient.post()
+                .uri("/generateQuestions")
+                .body(prompt)
+                .retrieve()
+                .body()
+    };
 }

@@ -139,10 +139,12 @@ public class InterviewController  {
     }
 
     @Operation(
-
+            summary = "Get interview questions by interview Id",
+            description = "Return the questions adapted to that exact interview"
     )
     @GetMapping("/{interviewId}/generateQuestions")
     public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId) {
+        GenerateQuestionsInfoDTO generateQuestionsInfo = interviewServ.generateQuestionsByInterviewId(interviewId);
         return ResponseEntity.ok(interviewServ.getQuestionsByInterviewId(interviewId));
     }
 }

@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.interview.service;
 
+import ma.nttdata.externals.module.interview.dto.GenerateQuestionsInfoDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public interface QuestionServ {
     QuestionDTO updateQuestion(UUID id, QuestionDTO questionDTO);
 
     void deleteQuestion(UUID id);
+
+    List<QuestionDTO> generateQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo,int numberOfQuestions);
 }

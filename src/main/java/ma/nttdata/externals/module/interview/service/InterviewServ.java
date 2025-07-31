@@ -47,4 +47,6 @@ public interface InterviewServ {
 
 
     EvaluationTypeDTO getEvaluationTypeOfEvaluation(UUID evaluationId);
+
+    GenerateQuestionsInfoDTO generateQuestionsByInterviewId(UUID interviewId);
 }

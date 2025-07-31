@@ -119,7 +119,8 @@ public final class InterviewPromptConstants {
             ]
             """;
     public static final String CANDIDATE_DATA_PLACEHOLDER = "{CANDIDATE_DATA}";
-    private static final String OFFER_DATA_PLACEHOLDER = "{OFFER_DATA}";
-    private static final String EVALUATION_TYPE_DATA_PLACEHOLDER = "{EVALUATION_TYPES_DATA}";
-    private static final String NUMBER_OF_QUESTIONS_PLACEHOLDER = "{NUMBER_OF_QUESTIONS}";
+    public static final String OFFER_DATA_PLACEHOLDER = "{OFFER_DATA}";
+    public static final String EVALUATION_TYPE_DATA_PLACEHOLDER = "{EVALUATION_TYPES_DATA}";
+    public static final String NUMBER_OF_QUESTIONS_PLACEHOLDER = "{NUMBER_OF_QUESTIONS}";
+
 }
