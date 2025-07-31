@@ -41,10 +41,10 @@ spring:
       data-locations: classpath:db/insertion/Data.sql
       continue-on-error: false
   mail:
-    host: smtp.gmail.com
+    host: smtp-mail.outlook.com
     port: 587
-    username: tt6677798@gmail.com
-    password: keod mywh dhnt vudr
+    username: mohamedtaha.elyakoubi@nttdata.com
+    password: dT5A6H5A6@
     properties:
       mail:
         smtp:
@@ -67,8 +67,13 @@ app:
   ai:
     server:
       url: http://localhost:8080
+  mail:
+    from: mohamedtaha.elyakoubi@nttdata.com
 
 interview:
   token:
     expirationMillis: 86400000
     secret: OWSJytPLVnDkgwLd7NbZKaxIA63VOE+R8suNr8n7bIqvGzUvHTZLOlqX4x6fBmw6udTuBENk6plQwY+fg/5ZGw==
+  email:
+    template:
+      path: templates/interviewsInvitation.html

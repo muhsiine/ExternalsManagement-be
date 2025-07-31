@@ -30,6 +30,7 @@ public class InterviewController  {
     private final InterviewServ interviewServ;
     private final InterviewTokenServ interviewTokenServ;
     private final EmailService emailService;
+    private final EmailContentBuilder emailContentBuilder;
 
     @Operation(
             summary = "Create a new interview",
@@ -167,7 +168,7 @@ public class InterviewController  {
 
            SendEmailDTO payload = interviewServ.getEmailInfo(interviewId);
 
-            String html = EmailContentBuilder.buildInterviewEmail(
+            String html = emailContentBuilder.buildInterviewEmail(
                     payload.candidateFullName(),
                     payload.offerTitle(),
                     payload.link(),

@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
@@ -44,6 +45,9 @@ class InterviewControllerTest {
 
     @MockitoBean
     private EmailService emailService;
+
+    @MockitoBean
+    private EmailContentBuilder emailContentBuilder;
 
     @Autowired
     private ObjectMapper objectMapper;
