@@ -31,16 +31,16 @@ spring:
     init:
       mode: always
   mail:
-    host: localhost
-    port: 1025
-    username: test
-    password: test
+    host: smtp-mail.outlook.com
+    port: 587
+    username: mohamedtaha.elyakoubi@nttdata.com
+    password: dT5A6H5A6@
     properties:
       mail:
         smtp:
-          auth: false
+          auth: true
           starttls:
-            enable: false
+            enable: true
 
 logging:
   level:
@@ -56,8 +56,13 @@ app:
   ai:
     server:
       url: http://localhost:8080
+  mail:
+    from: mohamedtaha.elyakoubi@nttdata.com
 
 interview:
   token:
     expirationMillis: 86400000
     secret: dGVzdC1zZWNyZXQtbXVzdC1iZS0zMi1ieXRlcy1sb25nLg== #don't be scared you will not get my secret it is just for test
+  email:
+    template:
+      path: templates/interviewsInvitation.html

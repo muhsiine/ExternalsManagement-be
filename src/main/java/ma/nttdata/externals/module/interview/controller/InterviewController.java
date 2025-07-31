@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -152,9 +153,9 @@ public class InterviewController  {
             description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
     )
     @PostMapping("/{interviewId}/generateAndSaveLink")
-    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId,
-           @RequestBody GenerateInterviewLinkDTO generateInterviewLinkDTO){
-        String token = interviewTokenServ.generateToken(generateInterviewLinkDTO.scheduledAt());
+    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId){
+        LocalDateTime scheduledAt = interviewServ.getInterviewById(interviewId).scheduledAt();
+        String token = interviewTokenServ.generateToken(scheduledAt);
         String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
         return ResponseEntity.ok(interviewLink);
     }

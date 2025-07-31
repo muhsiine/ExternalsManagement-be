@@ -15,5 +15,5 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
             "candidate.contacts",
             "offer"
     })
-    Optional<Interview> findWithCandidateAndOfferById(UUID id);
+    Optional<Interview> getCandidateContactsAndOfferByInterviewId(UUID interviewId);
 }
