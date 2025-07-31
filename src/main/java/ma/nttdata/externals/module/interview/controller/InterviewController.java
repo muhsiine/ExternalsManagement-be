@@ -137,4 +137,12 @@ public class InterviewController  {
     public ResponseEntity<EvaluationTypeDTO> getEvaluationType(@PathVariable UUID id) {
         return ResponseEntity.ok(interviewServ.getEvaluationTypeOfEvaluation(id));
     }
+
+    @Operation(
+
+    )
+    @GetMapping("/{interviewId}/generateQuestions")
+    public ResponseEntity<List<QuestionDTO>> getInterviewQuestions(@PathVariable UUID interviewId) {
+        return ResponseEntity.ok(interviewServ.getQuestionsByInterviewId(interviewId));
+    }
 }
