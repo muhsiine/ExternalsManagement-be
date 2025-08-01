@@ -43,10 +43,10 @@ spring:
       data-locations: classpath:db/insertion/Data.sql
       continue-on-error: false
   mail:
-    host: smtp-mail.outlook.com
+    host: smtp.gmail.com
     port: 587
-    username: mohamedtaha.elyakoubi@nttdata.com
-    password: dT5A6H5A6@
+    username: tt6677798@gmail.com
+    password: keod mywh dhnt vudr
     properties:
       mail:
         smtp:
