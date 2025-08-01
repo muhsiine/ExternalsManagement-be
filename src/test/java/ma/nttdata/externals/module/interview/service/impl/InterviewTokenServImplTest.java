@@ -94,6 +94,7 @@ class InterviewTokenServImplTest {
 
     @Test
     void isTokenExpired_WithFreshToken_ShouldReturnFalse() {
+
         LocalDateTime scheduledAt = LocalDateTime.now();
         String token = tokenService.generateToken(scheduledAt);
 
