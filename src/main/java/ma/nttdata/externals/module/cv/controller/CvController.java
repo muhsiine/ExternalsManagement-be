@@ -1,9 +1,11 @@
 package ma.nttdata.externals.module.cv.controller;
 
+import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.service.CvSrv;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,20 +16,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/cv")
 public class CvController {
 
-    private static final Logger logger = LoggerFactory.getLogger(CvController.class);
-
     private final CvSrv cvSrv;
+    private final CandidateSrv candidateSrv ;
 
-    public CvController(CvSrv cvSrv) {
+    public CvController(CvSrv cvSrv , CandidateSrv candidateSrv) {
         this.cvSrv = cvSrv;
+        this.candidateSrv = candidateSrv;
     }
 
     @PostMapping("/extract")
     public ResponseEntity<?> extractCandidateInfo(@RequestBody CvFileDTO cvFileDTO) {
-        logger.info("Extracting candidate information from CV");
-
-        var extractedData = cvSrv.extractCandidateInfo(cvFileDTO);
-        logger.info("Successfully extracted candidate information from CV");
+        var  extractedData = cvSrv.extractCandidateInfo(cvFileDTO);
         return ResponseEntity.ok(extractedData);
     }
+
+    @PostMapping("/save")
+    public ResponseEntity<?> saveCandidateFromCv(@RequestBody CandidateDTO candidateDTO) {
+        try {
+            CandidateDTO savedCandidate = candidateSrv.save(candidateDTO);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(savedCandidate);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error saving candidate: " + e.getMessage());
+        }
+    }
+
 }
