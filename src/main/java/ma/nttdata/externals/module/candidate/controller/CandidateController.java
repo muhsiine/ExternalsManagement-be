@@ -102,7 +102,7 @@ public class CandidateController {
             @ApiResponse(responseCode = "404", description = "No candidates found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<CandidateDTO>> getAllCandidates() {
         log.info("Retrieving all candidates");
         List<CandidateDTO> candidates = candidateSrv.getAllCandidates();
