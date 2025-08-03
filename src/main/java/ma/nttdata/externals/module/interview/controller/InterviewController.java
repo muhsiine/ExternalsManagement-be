@@ -2,16 +2,23 @@ package ma.nttdata.externals.module.interview.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import ma.nttdata.externals.commons.services.EmailContentBuilder;
+import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,6 +29,9 @@ import java.util.UUID;
 public class InterviewController  {
 
     private final InterviewServ interviewServ;
+    private final InterviewTokenServ interviewTokenServ;
+    private final EmailService emailService;
+    private final EmailContentBuilder emailContentBuilder;
 
     @Operation(
             summary = "Create a new interview",
@@ -137,4 +147,37 @@ public class InterviewController  {
     public ResponseEntity<EvaluationTypeDTO> getEvaluationType(@PathVariable UUID id) {
         return ResponseEntity.ok(interviewServ.getEvaluationTypeOfEvaluation(id));
     }
+
+    @Operation(
+            summary = "Generate and save interview link",
+            description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
+    )
+    @PostMapping("/{interviewId}/generateAndSaveLink")
+    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId){
+        LocalDateTime scheduledAt = interviewServ.getInterviewById(interviewId).scheduledAt();
+        String token = interviewTokenServ.generateToken(scheduledAt);
+        String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
+        return ResponseEntity.ok(interviewLink);
+    }
+
+    @Operation(
+            summary = "Send interview invitation email",
+            description = "Sends an email to the candidate containing the interview link and scheduled date."
+    )
+    @PostMapping("/{interviewId}/sendEmail")
+    public ResponseEntity<String> sendEmail(@PathVariable UUID interviewId){
+
+           SendEmailDTO payload = interviewServ.getEmailInfo(interviewId);
+
+            String html = emailContentBuilder.buildInterviewEmail(
+                    payload.candidateFullName(),
+                    payload.offerTitle(),
+                    payload.link(),
+                    payload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
+            );
+
+            emailService.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
+            return ResponseEntity.ok("Email sent successfully!");
+    }
+
 }

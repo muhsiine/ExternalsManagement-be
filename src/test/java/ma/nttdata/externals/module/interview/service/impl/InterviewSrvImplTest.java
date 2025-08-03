@@ -40,12 +40,26 @@ class InterviewSrvImplTest {
     @Mock private EvaluationTypeMapper evaluationTypeMapper;
     @Mock private CandidateMapper candidateMapper;
 
-    @InjectMocks
     private InterviewServImpl interviewServ;
+
+    private static final String TEST_BASE_LINK = "http://localhost:8080/interview/";
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        interviewServ = new InterviewServImpl(
+                interviewMapper,
+                interviewRepository,
+                questionRepository,
+                questionMapper,
+                answerRepository,
+                answerMapper,
+                evaluationRepository,
+                evaluationMapper,
+                evaluationTypeMapper,
+                candidateMapper,
+                TEST_BASE_LINK
+        );
     }
 
     @Test

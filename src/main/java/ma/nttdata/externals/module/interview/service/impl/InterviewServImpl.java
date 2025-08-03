@@ -2,8 +2,10 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
+import ma.nttdata.externals.module.candidate.entity.Contact;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.*;
@@ -15,6 +17,8 @@ import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 
+import ma.nttdata.externals.module.offer.entity.Offer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +46,9 @@ public class InterviewServImpl implements InterviewServ {
 
     private final CandidateMapper candidateMapper ;
 
+
+    private final String interviewBaseLink;
+
     public InterviewServImpl(
             InterviewMapper interviewMapper,
             InterviewRepository interviewRepository ,
@@ -52,7 +59,8 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationRepository evaluationRepository ,
             EvaluationMapper evaluationMapper ,
             EvaluationTypeMapper evaluationTypeMapper ,
-            CandidateMapper candidateMapper
+            CandidateMapper candidateMapper,
+            @Value("${interview.baseLink}") String interviewBaseLink
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -64,6 +72,7 @@ public class InterviewServImpl implements InterviewServ {
         this.evaluationRepository = evaluationRepository;
         this.evaluationTypeMapper= evaluationTypeMapper;
         this.candidateMapper = candidateMapper;
+        this.interviewBaseLink = interviewBaseLink;
     }
 
     // new interview
@@ -175,9 +184,43 @@ public class InterviewServImpl implements InterviewServ {
         return evaluationTypeMapper.toDto(evaluationType);
     }
 
+    @Override
+    public String saveInterviewLink(String token, UUID interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));
 
 
+        String interviewLink = interviewBaseLink+token;
+        interview.setLink(interviewLink);
+        interviewRepository.save(interview);
+        return interviewLink;
+    }
 
+    @Override
+    public SendEmailDTO getEmailInfo(UUID interviewId){
+        Interview interview = interviewRepository.findWithCandidateAndOfferById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));;
+
+        Candidate candidate = interview.getCandidate();
+        Offer offer = interview.getOffer();
+
+        String email = candidate.getContacts().stream()
+                .filter(c -> {
+                    String type = c.getContactType();
+                    return type != null && (type.equalsIgnoreCase("email") || type.equalsIgnoreCase("mail"));
+                })
+                .map(Contact::getContactValue)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Candidate email not found"));
+
+        return new SendEmailDTO(
+                candidate.getFullName(),
+                offer.getTitle(),
+                email,
+                interview.getScheduledAt(),
+                interview.getLink()
+        );
+    }
 }
 
 

@@ -47,4 +47,8 @@ public interface InterviewServ {
 
 
     EvaluationTypeDTO getEvaluationTypeOfEvaluation(UUID evaluationId);
+
+    String saveInterviewLink(String token, UUID interviewId);
+
+    SendEmailDTO getEmailInfo(UUID interviewId);
 }
