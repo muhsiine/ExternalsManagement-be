@@ -38,6 +38,18 @@ spring:
     compose:
       enabled: false
 
+  mail:
+    host: smtp-mail.outlook.com
+    port: 587
+    username: mohamedtaha.elyakoubi@nttdata.com
+    password: dT5A6H5A6@
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 logging:
   level:
     org:
@@ -52,3 +64,14 @@ app:
   ai:
     server:
       url: http://localhost:8080
+  mail:
+    from: mohamedtaha.elyakoubi@nttdata.com
+
+interview:
+  token:
+    expirationMillis: 86400000
+    secret: OWSJytPLVnDkgwLd7NbZKaxIA63VOE+R8suNr8n7bIqvGzUvHTZLOlqX4x6fBmw6udTuBENk6plQwY+fg/5ZGw==
+  email:
+    template:
+      path: templates/interviewsInvitation.html
+  baseLink: http://localhost:4200/interviews/

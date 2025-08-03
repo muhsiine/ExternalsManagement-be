@@ -2,12 +2,15 @@ package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import ma.nttdata.externals.commons.services.EmailContentBuilder;
+import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -38,6 +41,15 @@ class InterviewControllerTest {
 
     @MockBean
     private InterviewServ interviewServ;
+
+    @MockitoBean
+    private InterviewTokenServ interviewTokenServ;
+
+    @MockitoBean
+    private EmailService emailService;
+
+    @MockitoBean
+    private EmailContentBuilder emailContentBuilder;
 
     @MockitoBean
     private QuestionServ questionServ;

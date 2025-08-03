@@ -20,6 +20,8 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
   docker:
     compose:
       enabled: false
@@ -40,6 +42,18 @@ spring:
       - classpath:db/migration/V2__Offers__and__interviews__tables.sql
       data-locations: classpath:db/insertion/Data.sql
       continue-on-error: false
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: tt6677798@gmail.com
+    password: keod mywh dhnt vudr
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 
 logging:
   level:
@@ -55,4 +69,14 @@ app:
   ai:
     server:
       url: http://localhost:8080
-      
+  mail:
+    from: mohamedtaha.elyakoubi@nttdata.com
+
+interview:
+  token:
+    expirationMillis: 86400000
+    secret: OWSJytPLVnDkgwLd7NbZKaxIA63VOE+R8suNr8n7bIqvGzUvHTZLOlqX4x6fBmw6udTuBENk6plQwY+fg/5ZGw==
+  email:
+    template:
+      path: templates/interviewsInvitation.html
+  baseLink: http://localhost:4200/interviews/

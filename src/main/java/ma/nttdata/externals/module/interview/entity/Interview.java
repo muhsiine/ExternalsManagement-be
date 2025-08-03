@@ -20,10 +20,10 @@ public class Interview {
     @Column(columnDefinition = "UUID")
     private UUID id;
 
-    @Column(name = "startTime")
+    @Column(name = "starttime")
     private LocalDateTime startTime;
 
-    @Column(name = "endTime")
+    @Column(name = "endtime")
     private LocalDateTime endTime;
 
     @Column(columnDefinition = "TEXT")
