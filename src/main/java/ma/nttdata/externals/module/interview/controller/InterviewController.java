@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -64,6 +65,17 @@ public class InterviewController  {
             @RequestBody InterviewDTO interviewDTO) {
         try {
             return ResponseEntity.ok(interviewServ.updateInterview(id, interviewDTO));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        }
+    }
+    @PutMapping("/{id}/add-comment")
+    public ResponseEntity<InterviewDTO> addComment(
+            @PathVariable UUID id,
+            @RequestBody Map<String, String> payload) {
+        try {
+            String comment = payload.get("comment");
+            return ResponseEntity.ok(interviewServ.addComment(id, comment));
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
         }
