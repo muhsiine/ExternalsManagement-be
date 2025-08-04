@@ -52,5 +52,5 @@ public interface InterviewServ {
 
     SendEmailDTO getEmailInfo(UUID interviewId);
 
-    GenerateQuestionsInfoDTO getInterviewCandidateAndOfferAndEvaluationTypes(UUID interviewId);
+    InterviewQuestionsPromptPlaceholdersDTO getInterviewCandidateAndOffer(UUID interviewId);
 }

@@ -14,7 +14,6 @@ import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import ma.nttdata.externals.module.offer.repository.OfferRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -261,7 +260,7 @@ class InterviewSrvImplTest {
     }
 
     @Test
-    void getInterviewCandidateAndOfferAndEvaluationTypes_should_return_interview_candidate_and_offer_and_evaluation_types() {
+    void getInterviewCandidateWithoutContactsAndOffer_should_return_interview_candidate_and_offer() {
 
         UUID interviewId = UUID.randomUUID();
 
@@ -287,25 +286,21 @@ class InterviewSrvImplTest {
 
         CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
         OfferDTO offerDTO = new OfferDTO(offer.getId(), null, null, null);
-        EvaluationTypeDTO evalTypeDTO = new EvaluationTypeDTO(evalType1.getId(), "Soft Skills", 10.0);
 
-        when(interviewRepository.findWithCandidateAndOfferAndEvaluationTypesById(interviewId)).thenReturn(Optional.of(interview));
+        when(interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)).thenReturn(Optional.of(interview));
         when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
         when(offerMapper.toDto(offer)).thenReturn(offerDTO);
-        when(evaluationTypeMapper.toDto(evalType1)).thenReturn(evalTypeDTO);
 
-        GenerateQuestionsInfoDTO result = interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
+        InterviewQuestionsPromptPlaceholdersDTO result = interviewServ.getInterviewCandidateAndOffer(interviewId);
 
         assertNotNull(result);
         assertEquals(candidateDTO, result.candidate());
         assertEquals(offerDTO, result.offer());
-        assertEquals(1, result.evaluationTypes().size());
-        assertEquals(evalTypeDTO, result.evaluationTypes().get(0));
 
-        verify(interviewRepository).findWithCandidateAndOfferAndEvaluationTypesById(interviewId);
+
+        verify(interviewRepository).findWithCandidateWithoutContactsAndOfferById(interviewId);
         verify(candidateMapper).candidateToCandidateDTO(candidate);
         verify(offerMapper).toDto(offer);
-        verify(evaluationTypeMapper).toDto(evalType1);
 
     }
 }

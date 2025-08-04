@@ -4,29 +4,23 @@ public final class InterviewPromptConstants {
 
     private InterviewPromptConstants() {}
 
-    public static final String INTERVIEW_GENERATION_PROMPT = """
-            You are an expert interviewing manager and talent acquisition specialist. Your task is to generate tailored interview questions based on the candidate's profile, job offer requirements, and evaluation criteria.
-            
-            Generate exactly {NUMBER_OF_QUESTIONS} interview questions distributed equally across all provided evaluation types. Each question should be relevant to both the candidate's background and the job requirements.
-            
-            ### Candidate Profile
-            {CANDIDATE_DATA}
-            
-            ### Job Offer
-            {OFFER_DATA}
-            
-            ### Evaluation Types
-            {EVALUATION_TYPES_DATA}
-            
-            ### Instructions
-            1. **Question Distribution**: Distribute the 15 questions equally across all evaluation types
-            2. **Relevance**: Ensure questions align with the candidate's experience level, main technology, and the job requirements
-            3. **Duration**: Assign realistic time durations (typically 2-5 minutes per question)
-            4. **Difficulty**: Match question complexity to the candidate's years of experience
-            5. **Specificity**: Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant
-            
-            ### Output Requirements
-            Return ONLY a valid JSON array with exactly this structure, no additional text or formatting:
+    public static final String INTERVIEW_QUESTION_GENERATION_PROMPT = """
+            You are an expert interviewing manager and talent acquisition specialist. We need to prepare a list of interview Questions for candidates according to the candidates' profile, Job Offer details, and the provided evaluation types .
+            I will give you the information for the candidate's profile, job offer requirements, and evaluation types criteria, generate tailored interview questions based on it.
+            Generate exactly {NUMBER_OF_QUESTIONS} interview questions.
+            Take these Instructions into consideration:
+            - Distribute the {NUMBER_OF_QUESTIONS} questions across all evaluation types based on their coefficient weights. Higher coefficient evaluation types should receive proportionally more questions.
+            - Ensure questions align with the candidate's experience level, main technology, and the job requirements.
+            - Each question should be relevant to both candidate's background and job requirements.
+            - Assign realistic time durations (typically 2-5 minutes per question), taking into account that the duration estimated for the interview is {ESTIMATED_DURATION}.
+            - Match question complexity to the candidate's years of experience
+            - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
+            - Use simple language: A2-B1-B2
+            - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting:"{JSON_SCHEMA}", here you have a mock example:"{JSON_MOCK}".
+            Here below I provide the needed information:
+            #Candidate Profile: "{CANDIDATE_DATA}",
+            #Job Offer requirements: "{OFFER_DATA}",
+            #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".
             """;
 
     public static final String JSON_SCHEMA = """
@@ -106,5 +100,7 @@ public final class InterviewPromptConstants {
     public static final String OFFER_DATA_PLACEHOLDER = "{OFFER_DATA}";
     public static final String EVALUATION_TYPE_DATA_PLACEHOLDER = "{EVALUATION_TYPES_DATA}";
     public static final String NUMBER_OF_QUESTIONS_PLACEHOLDER = "{NUMBER_OF_QUESTIONS}";
+    public static final String ESTIMATED_DURATION_PLACEHOLDER = "{ESTIMATED_DURATION}";
+    public static final String JSON_SCHEMA_PLACEHOLDER = "{JSON_SCHEMA}";
 
 }

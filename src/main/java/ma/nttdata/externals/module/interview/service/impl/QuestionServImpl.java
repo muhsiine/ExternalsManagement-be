@@ -2,13 +2,13 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.constants.InterviewPromptConstants;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
-import ma.nttdata.externals.module.interview.dto.GenerateInterviewQuestionsAiRequest;
-import ma.nttdata.externals.module.interview.dto.GenerateQuestionsInfoDTO;
+import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewQuestionsPromptPlaceholdersDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
+import ma.nttdata.externals.module.interview.dto.QuestionResponseFromAI;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
@@ -22,6 +22,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionServImpl implements QuestionServ {
@@ -93,15 +94,29 @@ public class QuestionServImpl implements QuestionServ {
         questionRepository.delete(existing);
     }
 
+
     @Override
-    public List<QuestionDTO> extractGeneratedQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo, int numberOfQuestions) {
+    public List<QuestionDTO> prepareQuestionsFromAIResponse(InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes) {
         try {
             String jsonResponse = mockFlag ?
                     InterviewPromptConstants.JSON_MOCK:
-                    getGeneratedQuestions(generateQuestionsInfo, numberOfQuestions);
+                    generateInterviewQuestionsByPrompt(generateQuestionsInfo, evaluationTypes);
 
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(jsonResponse, new TypeReference<List<QuestionDTO>>() {});
+
+            List<QuestionResponseFromAI> questions = objectMapper.readValue(jsonResponse, new TypeReference<List<QuestionResponseFromAI>>() {});
+
+            return questions.stream()
+                    .map(raw -> new QuestionDTO(
+                            null,
+                            raw.description(),
+                            (raw.durationInMinutes() != null && !raw.durationInMinutes().replaceAll("\\D+", "").isEmpty())
+                                    ? Integer.parseInt(raw.durationInMinutes().replaceAll("\\D+", ""))
+                                    : null,
+                            null,
+                            null
+                    ))
+                    .collect(Collectors.toList());
 
         } catch (Exception e) {
             throw new InternalServerException("Failed to parse questions JSON", e);
@@ -109,22 +124,41 @@ public class QuestionServImpl implements QuestionServ {
     }
 
     @Override
-    public String getGeneratedQuestions(GenerateQuestionsInfoDTO generateQuestionsInfo,int numberOfQuestions){
-        String prompt = InterviewPromptConstants.INTERVIEW_GENERATION_PROMPT;
+    public String generateInterviewQuestionsByPrompt(InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes){
+        String prompt = InterviewPromptConstants.INTERVIEW_QUESTION_GENERATION_PROMPT;
 
         prompt = prompt.replace(InterviewPromptConstants.CANDIDATE_DATA_PLACEHOLDER, generateQuestionsInfo.candidate().toString())
                 .replace(InterviewPromptConstants.OFFER_DATA_PLACEHOLDER, generateQuestionsInfo.offer().toString())
-                .replace(InterviewPromptConstants.EVALUATION_TYPE_DATA_PLACEHOLDER,generateQuestionsInfo.evaluationTypes().toString())
-                .replace(InterviewPromptConstants.NUMBER_OF_QUESTIONS_PLACEHOLDER,String.valueOf(numberOfQuestions));
+                .replace(InterviewPromptConstants.EVALUATION_TYPE_DATA_PLACEHOLDER,evaluationTypes.toString())
+                .replace(InterviewPromptConstants.NUMBER_OF_QUESTIONS_PLACEHOLDER,String.valueOf(generateQuestionsInfo.numberOfQuestions()))
+                .replace(InterviewPromptConstants.ESTIMATED_DURATION_PLACEHOLDER,String.valueOf(generateQuestionsInfo.estimatedDuration()))
+                .replace(InterviewPromptConstants.JSON_SCHEMA_PLACEHOLDER,InterviewPromptConstants.JSON_SCHEMA);
 
-        GenerateInterviewQuestionsAiRequest generateInterviewQuestionsAiRequest =
-                new GenerateInterviewQuestionsAiRequest(prompt,InterviewPromptConstants.JSON_SCHEMA);
+
 
         return aiRestClient.post()
-                .uri("/generateQuestions")
-                .body(generateInterviewQuestionsAiRequest)
+                .uri("/generateInterviewQuestions")
+                .body(prompt)
                 .retrieve()
                 .body(String.class);
 
     };
+
+    public List<QuestionDTO> saveAllQuestions(List<QuestionDTO> questionsDTO){
+        List<Question> questions = questionsDTO.stream()
+                .map(questionMapper::toEntity).collect(Collectors.toList());
+
+        List<Question> savedQuestions = questionRepository.saveAll(questions);
+
+        return questionMapper.toDtoList(savedQuestions);
+    }
+
+    public List<Question> findAllQuestionsByInterviewId(UUID interviewId){
+        return questionRepository.findByInterviewId(interviewId);
+    }
+
+    public List<QuestionDTO> findAllQuestionsDTOSByInterviewId(UUID interviewId){
+        List<Question> questions = questionRepository.findByInterviewId(interviewId);
+        return questionMapper.toDtoList(questions);
+    }
 }

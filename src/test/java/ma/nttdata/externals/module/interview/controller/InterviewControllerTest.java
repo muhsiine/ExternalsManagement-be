@@ -1,19 +1,18 @@
 package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -53,6 +52,9 @@ class InterviewControllerTest {
 
     @MockitoBean
     private QuestionServ questionServ;
+
+    @MockitoBean
+    private EvaluationTypeServ evaluationTypeServ;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -436,13 +438,15 @@ class InterviewControllerTest {
 
     @Test
     @WithMockUser
-    void getInterviewQuestions() throws Exception {
+    void generateInterviewQuestions() throws Exception {
         int numberOfQuestions = 5;
+        int estimatedDuration = 30;
 
-        GenerateQuestionsInfoDTO generateQuestionsInfo = new GenerateQuestionsInfoDTO(
+        InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo = new InterviewQuestionsPromptPlaceholdersDTO(
                 candidateDTO,
                 offerDTO,
-                List.of(evaluationTypeDTO)
+                numberOfQuestions,
+                estimatedDuration
         );
 
         List<QuestionDTO> generatedQuestions = Arrays.asList(
@@ -469,15 +473,45 @@ class InterviewControllerTest {
                 )
         );
 
-        when(interviewServ.getInterviewCandidateAndOfferAndEvaluationTypes(interviewId))
+        List<EvaluationTypeDTO> evaluationTypeDTOS = List.of(
+                new EvaluationTypeDTO(UUID.randomUUID(), "Technical Skills", 1.5),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Communication", 1.0),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Problem Solving", 2.0),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Teamwork", 1.2),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Creativity", 0.8)
+        );
+
+        when(interviewServ.getInterviewCandidateAndOffer(interviewId))
                 .thenReturn(generateQuestionsInfo);
-        when(questionServ.extractGeneratedQuestions(generateQuestionsInfo, numberOfQuestions))
+        when(evaluationTypeServ.findAllById(anyList()))
+                .thenReturn(evaluationTypeDTOS);
+        when(questionServ.prepareQuestionsFromAIResponse(generateQuestionsInfo,evaluationTypeDTOS))
+                .thenReturn(generatedQuestions);
+        when(questionServ.saveAllQuestions(anyList()))
                 .thenReturn(generatedQuestions);
 
-        mockMvc.perform(get("/api/v1/interviews/{interviewId}/generateQuestions/questions", interviewId)
-                        .param("count", String.valueOf(numberOfQuestions))
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+
+        String requestBody = """
+        {
+          "evaluationTypesIds": ["%s", "%s","%s","%s"],
+          "numberOfQuestions": %d,
+          "estimatedInterviewDuration": %d
+        }
+        """.formatted(
+                evaluationTypeDTOS.get(0).id(),
+                evaluationTypeDTOS.get(1).id(),
+                evaluationTypeDTOS.get(2).id(),
+                evaluationTypeDTOS.get(3).id(),
+                numberOfQuestions,
+                estimatedDuration
+        );
+
+        mockMvc.perform(post("/api/v1/interviews/{interviewId}/generateQuestions", interviewId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
                 .andExpect(jsonPath("$[0].description").value("What is your experience with Spring Boot?"))
                 .andExpect(jsonPath("$[0].durationInMinutes").value(5))
@@ -486,7 +520,12 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$[1].durationInMinutes").value(4))
                 .andExpect(jsonPath("$[2].description").value("Explain microservices architecture."))
                 .andExpect(jsonPath("$[2].durationInMinutes").value(6));
-        verify(interviewServ).getInterviewCandidateAndOfferAndEvaluationTypes(interviewId);
-        verify(questionServ).extractGeneratedQuestions(generateQuestionsInfo, numberOfQuestions);
+        verify(interviewServ).getInterviewCandidateAndOffer(interviewId);
+        verify(evaluationTypeServ).findAllById(anyList());
+        verify(questionServ).prepareQuestionsFromAIResponse(
+                eq(generateQuestionsInfo),
+                eq(evaluationTypeDTOS)
+        );
+        verify(questionServ).saveAllQuestions(anyList());
     }
 }

@@ -1,14 +1,12 @@
 package ma.nttdata.externals.module.interview.dto;
 
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
-import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 
-import java.util.List;
-
-public record GenerateQuestionsInfoDTO(
+public record InterviewQuestionsPromptPlaceholdersDTO(
         CandidateDTO candidate,
         OfferDTO offer,
-        List<EvaluationTypeDTO> evaluationTypes
+        int numberOfQuestions,
+        int estimatedDuration
 ) {
 }

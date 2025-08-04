@@ -202,24 +202,19 @@ public class InterviewServImpl implements InterviewServ {
         return interviewLink;
     }
     @Override
-    public GenerateQuestionsInfoDTO getInterviewCandidateAndOfferAndEvaluationTypes(UUID interviewId){
-        Interview interview = interviewRepository.findWithCandidateAndOfferAndEvaluationTypesById(interviewId)
+    public InterviewQuestionsPromptPlaceholdersDTO getInterviewCandidateAndOffer(UUID interviewId){
+        Interview interview = interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview not found with ID: " + interviewId));
 
         CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
 
         OfferDTO offer = offerMapper.toDto(interview.getOffer());
 
-        List<EvaluationTypeDTO> evaluationTypes = interview.getEvaluations()
-                .stream().map(Evaluation::getEvaluationType)
-                .distinct()
-                .map(evaluationTypeMapper::toDto)
-                .toList();
-
-        GenerateQuestionsInfoDTO generateQuestionsInfo = new GenerateQuestionsInfoDTO(
+        InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo = new InterviewQuestionsPromptPlaceholdersDTO(
                 candidate,
                 offer,
-                evaluationTypes
+                interview.getNumberOfQuestions(),
+                interview.getEstimatedDuration()
         );
 
         return generateQuestionsInfo;
