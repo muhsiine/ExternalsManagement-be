@@ -1,8 +1,7 @@
 package ma.nttdata.externals.module.interview.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -10,7 +9,9 @@ import java.util.UUID;
 @Table(name = "evaluation_types")
 @Getter
 @Setter
-
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class EvaluationType {
     @Id
     @GeneratedValue

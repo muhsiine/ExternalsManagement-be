@@ -2,19 +2,17 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.AiEvaluationResponseDTO;
 import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
-import ma.nttdata.externals.module.interview.dto.InterviewEvaluationPlaceholders;
+import ma.nttdata.externals.module.interview.dto.InterviewEvaluationPlaceholdersDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionsAndAnswersForEvaluationDTO;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
-import ma.nttdata.externals.module.interview.mapper.EvaluationTypeMapper;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
@@ -26,7 +24,6 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class EvaluationServImpl implements EvaluationServ {
@@ -108,7 +105,7 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public List<AiEvaluationResponseDTO> prepareEvaluationResponseFromAi(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholders placeholders){
+    public List<AiEvaluationResponseDTO> prepareEvaluationResponseFromAi(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholdersDTO placeholders){
         try{
             String generatedEvaluation = mockFlag ? InterviewEvaluationPromptConstants.JSON_MOCK
             :getInterviewsEvaluationsFromAiByPrompt(questionsAndAnswers,placeholders);
@@ -124,7 +121,7 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public String getInterviewsEvaluationsFromAiByPrompt(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholders placeholders){
+    public String getInterviewsEvaluationsFromAiByPrompt(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholdersDTO placeholders){
         String prompt  = InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT;
 
         prompt.replace(InterviewEvaluationPromptConstants.CANDIDATE_PLACEHOLDER,placeholders.candidate().toString())
@@ -143,7 +140,7 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public List<Evaluation> saveAIEvaluationResponse(List<AiEvaluationResponseDTO> aiEvaluationResponse,InterviewEvaluationPlaceholders placeholders){
+    public List<Evaluation> saveAIEvaluationResponse(List<AiEvaluationResponseDTO> aiEvaluationResponse, InterviewEvaluationPlaceholdersDTO placeholders){
           List<Evaluation> evaluations = placeholders.evaluations();
 
 
@@ -161,11 +158,23 @@ public class EvaluationServImpl implements EvaluationServ {
                 if(evaluationResponse.description().equals(evaluationTypeDescription)){
                     evaluation.setFeedback(evaluationResponse.feedback());
                     evaluation.setScore(evaluationResponse.score());
+                    break;
                 }
             }
 
         }
 
         return evaluationRepository.saveAll(evaluations);
+    }
+
+    @Override
+    public List<Evaluation> getAllEvaluationsByInterviewID(UUID interviewId){
+
+        return evaluationRepository.findByInterviewId(interviewId);
+    }
+
+    @Override
+    public List<EvaluationDTO> getAllEvaluationsDTOByInterviewID(UUID interviewId){
+        return evaluationMapper.toDtoList(evaluationRepository.findByInterviewId(interviewId));
     }
 }

@@ -7,7 +7,7 @@ import ma.nttdata.externals.module.offer.dto.OfferDTO;
 
 import java.util.List;
 
-public record InterviewEvaluationPlaceholders(
+public record InterviewEvaluationPlaceholdersDTO(
         CandidateDTO candidate,
         OfferDTO offer,
         int numberOfQuestion,

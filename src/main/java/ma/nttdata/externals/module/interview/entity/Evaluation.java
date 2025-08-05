@@ -2,8 +2,7 @@ package ma.nttdata.externals.module.interview.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -11,6 +10,7 @@ import java.util.UUID;
 @Table(name = "evaluations")
 @Getter
 @Setter
+@AllArgsConstructor@NoArgsConstructor@Builder
 public class Evaluation {
 
     @Id

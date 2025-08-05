@@ -1,7 +1,9 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
+import ma.nttdata.externals.module.candidate.entity.Contact;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
 import ma.nttdata.externals.module.interview.dto.*;
@@ -17,10 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.test.util.ReflectionTestUtils;
+import static org.mockito.BDDMockito.given;
+
 
 import java.time.LocalDateTime;
 import java.util.*;
 
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -264,6 +271,133 @@ class InterviewSrvImplTest {
     }
 
     @Test
+    void should_save_interview_link_successfully() {
+        UUID interviewId = UUID.randomUUID();
+        String token = "secureToken123";
+        String interviewBaseLink = "https://interviews.example.com/";
+
+        ReflectionTestUtils.setField(interviewServ, "interviewBaseLink", interviewBaseLink);
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
+
+        String result = interviewServ.saveInterviewLink(token, interviewId);
+
+        String expectedLink = interviewBaseLink + token;
+        assertEquals(expectedLink, result);
+        assertEquals(expectedLink, interview.getLink());
+
+        verify(interviewRepository).findById(interviewId);
+        verify(interviewRepository).save(interview);
+    }
+
+    @Test
+    void should_throw_not_found_Exception_when_saving_link() {
+        UUID interviewId = UUID.randomUUID();
+        String token = "dummyToken";
+
+        when(interviewRepository.findById(interviewId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> interviewServ.saveInterviewLink(token, interviewId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Interview not found with id: " + interviewId);
+
+        verify(interviewRepository).findById(interviewId);
+        verify(interviewRepository, never()).save(any());
+    }
+
+    @Test
+    void should_return_email_info_successfully() {
+        UUID interviewId = UUID.randomUUID();
+        String emailValue = "candidate@example.com";
+
+        Candidate candidate = new Candidate();
+        candidate.setFullName("John Doe");
+
+        Contact emailContact = new Contact();
+        emailContact.setContactType("email");
+        emailContact.setContactValue(emailValue);
+        candidate.setContacts(List.of(emailContact));
+
+        Offer offer = new Offer();
+        offer.setTitle("Java Developer");
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+        interview.setScheduledAt(LocalDateTime.of(2025, 8, 1, 14, 0));
+        interview.setLink("https://interviews.com/abc123");
+
+        given(interviewRepository.findWithCandidateAndOfferById(interviewId))
+                .willReturn(Optional.of(interview));
+
+        SendEmailDTO result = interviewServ.getEmailInfo(interviewId);
+
+        assertNotNull(result);
+        assertEquals("John Doe", result.candidateFullName());
+        assertEquals("Java Developer", result.offerTitle());
+        assertEquals(emailValue, result.email());
+        assertEquals(interview.getScheduledAt(), result.scheduledDate());
+        assertEquals(interview.getLink(), result.link());
+
+        verify(interviewRepository).findWithCandidateAndOfferById(interviewId);
+    }
+
+    @Test
+    void should_throw_not_found_Exception_when_interview_missing() {
+        UUID interviewId = UUID.randomUUID();
+
+        when(interviewRepository.findWithCandidateAndOfferById(interviewId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> interviewServ.getEmailInfo(interviewId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Interview not found with id: " + interviewId);
+
+        verify(interviewRepository).findWithCandidateAndOfferById(interviewId);
+    }
+
+    @Test
+    void should_throw_illegal_state_when_email_not_found() {
+        UUID interviewId = UUID.randomUUID();
+
+        Candidate candidate = new Candidate();
+        candidate.setFullName("Jane Doe");
+
+
+        Contact phoneContact = new Contact();
+        phoneContact.setContactType("phone");
+        phoneContact.setContactValue("123456789");
+        candidate.setContacts(List.of(phoneContact));
+
+        Offer offer = new Offer();
+        offer.setTitle("DevOps Engineer");
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+        interview.setScheduledAt(LocalDateTime.of(2025, 8, 3, 10, 30));
+        interview.setLink("https://interviews.com/link456");
+
+        when(interviewRepository.findWithCandidateAndOfferById(interviewId))
+                .thenReturn(Optional.of(interview));
+
+        assertThatThrownBy(() -> interviewServ.getEmailInfo(interviewId))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Candidate email not found");
+
+        verify(interviewRepository).findWithCandidateAndOfferById(interviewId);
+    }
+
+
+
+
+    @Test
     void getInterviewCandidateWithoutContactsAndOffer_should_return_interview_candidate_and_offer() {
 
         UUID interviewId = UUID.randomUUID();
@@ -305,6 +439,76 @@ class InterviewSrvImplTest {
         verify(interviewRepository).findWithCandidateWithoutContactsAndOfferById(interviewId);
         verify(candidateMapper).candidateToCandidateDTO(candidate);
         verify(offerMapper).toDto(offer);
+
+    }
+
+    @Test
+    void should_fetch_Interview_Evaluation_placeholders(){
+        UUID interviewId = UUID.randomUUID();
+
+        Candidate candidate = new Candidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("habib");
+
+        Offer offer = new Offer();
+        offer.setId(UUID.randomUUID());
+        offer.setTitle("Backend Engineer");
+
+        EvaluationType evalType1 = new EvaluationType();
+        evalType1.setId(UUID.randomUUID());
+        String description = "communication Skills";
+        evalType1.setDescription(description);
+
+        Evaluation evaluation1 = new Evaluation();
+        evaluation1.setEvaluationType(evalType1);
+
+        List<Evaluation> evaluations = List.of(evaluation1);
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+        interview.setEvaluations(evaluations);
+        interview.setEstimatedDuration(30);
+        interview.setNumberOfQuestions(15);
+        CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), "habib", null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(offer.getId(), "Backend Engineer", null, null);
+
+        when(interviewRepository.findWithCandidateOfferEvaluationsAndTypesById(interviewId)).thenReturn(Optional.of(interview));
+        when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
+
+        InterviewEvaluationPlaceholdersDTO placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
+
+        assertNotNull(placeholders );
+        assertEquals(candidateDTO, placeholders.candidate());
+        assertEquals(offerDTO, placeholders.offer());
+        assertEquals(interview.getNumberOfQuestions(),placeholders.numberOfQuestion());
+        assertEquals(interview.getEstimatedDuration(),placeholders.estimatedDuration());
+        assertEquals(interview.getEvaluations(),placeholders.evaluations());
+        assertEquals(List.of(evaluation1.getEvaluationType()), placeholders.evaluationType());
+        assertEquals(List.of(description),placeholders.evaluationsDescription());
+
+        verify(interviewRepository).findWithCandidateOfferEvaluationsAndTypesById(interviewId);
+        verify(candidateMapper).candidateToCandidateDTO(candidate);
+        verify(offerMapper).toDto(offer);
+    }
+
+    @Test
+    void should_throw_not_found_Exception(){
+
+        UUID interviewId = UUID.randomUUID();
+
+        when(interviewRepository.findWithCandidateOfferEvaluationsAndTypesById(interviewId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(()->interviewServ.getInterviewEvaluationPlaceholders(interviewId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Interview not found with id: "+interviewId);
+
+        verify(interviewRepository).findWithCandidateOfferEvaluationsAndTypesById(interviewId);
+        verify(candidateMapper,never()).candidateToCandidateDTO(any());
+        verify(offerMapper,never()).toDto(any());
 
     }
 }

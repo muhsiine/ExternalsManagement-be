@@ -226,13 +226,44 @@ public class InterviewController  {
         return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
     }
 
+    @Operation(
+            summary = "Generates interview evaluations using AI ",
+            description = """
+        This endpoint receives a list of questions and candidate answers for a specific interview, 
+        and calls an AI service to generate evaluations based on multiple criteria 
+        (e.g., time management, technical accuracy, job alignment).
+
+        The AI returns scores and feedback for each evaluation type defined in the interview context. 
+        These evaluations are then persisted to the database.
+
+        It returns the list of AI-generated evaluation responses.
+        """
+    )
     @PostMapping("/{interviewId}/evaluation")
     public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswersForEvaluation){
-        InterviewEvaluationPlaceholders placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
+        InterviewEvaluationPlaceholdersDTO placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
         List<AiEvaluationResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationResponseFromAi(questionsAndAnswersForEvaluation,placeholders);
         List< Evaluation> evaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,placeholders);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(aiEvaluationResponse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(evaluations);
+    }
+
+    @Operation(
+            summary = "Get all the evaluations of an interview",
+            description = "Return the evaluations of an interview alongside with their evaluationTypes"
+    )
+    @GetMapping("/{interviewId}/evaluation")
+    public ResponseEntity<List<Evaluation>> getInterviewEvaluations(@PathVariable UUID interviewId){
+        return ResponseEntity.ok(evaluationServ.getAllEvaluationsByInterviewID(interviewId));
+    }
+
+    @Operation(
+            summary = "Get all the evaluations of an interview",
+            description = "Return the evaluations of an interview alongside with their evaluationTypes"
+    )
+    @GetMapping("/{interviewId}/evaluationDTO")
+    public ResponseEntity<List<EvaluationDTO>> getInterviewEvaluationsDTO(@PathVariable UUID interviewId){
+        return ResponseEntity.ok(evaluationServ.getAllEvaluationsDTOByInterviewID(interviewId));
     }
 
 }

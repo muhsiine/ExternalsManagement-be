@@ -6,11 +6,10 @@ import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
-import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
-import ma.nttdata.externals.module.interview.service.InterviewServ;
-import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
+import ma.nttdata.externals.module.interview.entity.EvaluationType;
+import ma.nttdata.externals.module.interview.service.*;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
-import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +20,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -56,6 +57,9 @@ class InterviewControllerTest {
     @MockitoBean
     private EvaluationTypeServ evaluationTypeServ;
 
+    @MockitoBean
+    private EvaluationServ evaluationServ;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -74,6 +78,8 @@ class InterviewControllerTest {
     private EvaluationDTO evaluationDTO;
     private EvaluationTypeDTO evaluationTypeDTO;
     private OfferDTO offerDTO;
+    private InterviewEvaluationPlaceholdersDTO placeholders;
+
 
     @BeforeEach
     void setUp() {
@@ -150,6 +156,7 @@ class InterviewControllerTest {
                 "We need a backend engineer with solid experience in Node js and spring boot",
                 List.of(interviewDTO)
         );
+
     }
 
     @Test
@@ -361,7 +368,7 @@ class InterviewControllerTest {
         mockMvc.perform(get("/api/v1/interviews/offer/{offerId}", offerId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(interviewId.toString()))
                 .andExpect(jsonPath("$[0].description").value("Technical round"));
     }
@@ -379,7 +386,7 @@ class InterviewControllerTest {
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/questions", interviewId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(questionId.toString()))
                 .andExpect(jsonPath("$[0].description").value("What is your experience with Java?"))
                 .andExpect(jsonPath("$[0].durationInMinutes").value(15));
@@ -427,7 +434,7 @@ class InterviewControllerTest {
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)))
+                .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(evaluationId.toString()))
                 .andExpect(jsonPath("$[0].score").value(4.5))
                 .andExpect(jsonPath("$[0].feedback").value("Good technical skills"));
@@ -524,7 +531,7 @@ class InterviewControllerTest {
                         .accept(MediaType.APPLICATION_JSON)
                         .with(SecurityMockMvcRequestPostProcessors.csrf()))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
+                .andExpect(jsonPath("$", hasSize(3)))
                 .andExpect(jsonPath("$[0].description").value("What is your experience with Spring Boot?"))
                 .andExpect(jsonPath("$[0].durationInMinutes").value(5))
                 .andExpect(jsonPath("$[0].interviewId").value(interviewId.toString()))
@@ -540,4 +547,187 @@ class InterviewControllerTest {
         );
         verify(questionServ).saveAllQuestions(anyList());
     }
+
+
+
+    @Test
+    @WithMockUser
+    void shouldPrepareAndSaveEvaluation() throws Exception {
+        List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswersForEvaluation = List.of(
+                new QuestionsAndAnswersForEvaluationDTO(
+                        "Explain how Java handles memory management.",
+                        "Java uses automatic garbage collection to manage memory, freeing unused objects.",
+                        5,
+                        6
+                ),
+                new QuestionsAndAnswersForEvaluationDTO(
+                        "Describe the difference between REST and GraphQL.",
+                        "REST uses multiple endpoints, GraphQL uses a single endpoint and allows querying specific fields.",
+                        6,
+                        5
+                ),
+                new QuestionsAndAnswersForEvaluationDTO(
+                        "What are React Hooks and how do you use them?",
+                        "React Hooks let you use state and lifecycle features in functional components like useState and useEffect.",
+                        4,
+                        5
+                )
+        );
+
+        List<AiEvaluationResponseDTO> aiEvaluationResponseDTOS = List.of(
+                new AiEvaluationResponseDTO(
+                        85.5,
+                        "Strong understanding of memory concepts. Slightly over time, but accurate and clear.",
+                        "Technical Knowledge"
+                ),
+                new AiEvaluationResponseDTO(
+                        78.0,
+                        "Clear explanation, but could compare use cases more deeply. Good time management.",
+                        "Communication"
+                ),
+                new AiEvaluationResponseDTO(
+                        90.0,
+                        "Excellent React knowledge, examples were relevant. Very confident delivery.",
+                        "React"
+                )
+        );
+
+        EvaluationType type1 = new EvaluationType();
+        type1.setId(UUID.randomUUID());
+        type1.setDescription("Technical Knowledge");
+        type1.setCoefficient(1.0);
+
+        EvaluationType type2 = new EvaluationType();
+        type2.setId(UUID.randomUUID());
+        type2.setDescription("Communication");
+        type2.setCoefficient(1.0);
+
+        EvaluationType type3 = new EvaluationType();
+        type3.setId(UUID.randomUUID());
+        type3.setDescription("React");
+        type3.setCoefficient(1.0);
+
+        Evaluation eval1 = new Evaluation();
+        eval1.setId(UUID.randomUUID());
+        eval1.setScore(85.5);
+        eval1.setFeedback("Strong understanding of memory concepts. Slightly over time, but accurate and clear.");
+        eval1.setEvaluationType(type1);
+
+        Evaluation eval2 = new Evaluation();
+        eval2.setId(UUID.randomUUID());
+        eval2.setScore(78.0);
+        eval2.setFeedback("Clear explanation, but could compare use cases more deeply. Good time management.");
+        eval2.setEvaluationType(type2);
+
+        Evaluation eval3 = new Evaluation();
+        eval3.setId(UUID.randomUUID());
+        eval3.setScore(90.0);
+        eval3.setFeedback("Excellent React knowledge, examples were relevant. Very confident delivery.");
+        eval3.setEvaluationType(type3);
+
+        placeholders=  new InterviewEvaluationPlaceholdersDTO(
+                candidateDTO,
+                offerDTO,
+                3,
+                15,
+                List.of("Technical Knowledge", "Communication", "React"),
+                List.of(eval1, eval2, eval3),
+                List.of(type1, type2, type3)
+        );
+
+
+        List<Evaluation> savedEvaluations = List.of(
+                eval1,eval2,eval3
+        );
+        when(interviewServ.getInterviewEvaluationPlaceholders(interviewId)).thenReturn(placeholders);
+        when(evaluationServ.prepareEvaluationResponseFromAi(questionsAndAnswersForEvaluation, placeholders))
+                .thenReturn(aiEvaluationResponseDTOS);
+        when(evaluationServ.saveAIEvaluationResponse(aiEvaluationResponseDTOS, placeholders))
+                .thenReturn(savedEvaluations);
+
+
+        List<Double> expectedScores = List.of(85.5, 78.0, 90.0);
+        List<String> expectedFeedbacks = List.of(
+                "Strong understanding of memory concepts. Slightly over time, but accurate and clear.",
+                "Clear explanation, but could compare use cases more deeply. Good time management.",
+                "Excellent React knowledge, examples were relevant. Very confident delivery."
+        );
+
+        ResultActions result = mockMvc.perform(post("/api/v1/interviews/{interviewId}/evaluation", interviewId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(questionsAndAnswersForEvaluation))
+                .accept(MediaType.APPLICATION_JSON)
+                .with(SecurityMockMvcRequestPostProcessors.csrf()));
+
+        result.andExpect(status().isCreated())
+                .andExpect(jsonPath("$", hasSize(3)));
+
+        for (int i = 0; i < expectedScores.size(); i++) {
+            result.andExpect(jsonPath(String.format("$[%d].id", i)).exists())
+                    .andExpect(jsonPath(String.format("$[%d].score", i)).value(expectedScores.get(i)))
+                    .andExpect(jsonPath(String.format("$[%d].feedback", i)).value(expectedFeedbacks.get(i)));
+        }
+
+
+
+        verify(interviewServ).getInterviewEvaluationPlaceholders(interviewId);
+        verify(evaluationServ).prepareEvaluationResponseFromAi(questionsAndAnswersForEvaluation, placeholders);
+        verify(evaluationServ).saveAIEvaluationResponse(aiEvaluationResponseDTOS, placeholders);
+
+
+    }
+
+    @Test
+    @WithMockUser
+    void shouldReturnAllEvaluations() throws Exception {
+        List<Evaluation> evaluations = List.of(
+                new Evaluation(UUID.randomUUID(), 80.0, "Good job", null,new EvaluationType(UUID.randomUUID(), "Technical", 1.0)),
+                new Evaluation(UUID.randomUUID(), 75.5, "Needs improvement", null,new EvaluationType(UUID.randomUUID(), "Communication", 1.0))
+        );
+
+        when(evaluationServ.getAllEvaluationsByInterviewID(interviewId)).thenReturn(evaluations);
+
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluation", interviewId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].score").value(80.0))
+                .andExpect(jsonPath("$[0].feedback").value("Good job"))
+                .andExpect(jsonPath("$[0].evaluationType.description").value("Technical"))
+                .andExpect(jsonPath("$[1].score").value(75.5))
+                .andExpect(jsonPath("$[1].feedback").value("Needs improvement"))
+                .andExpect(jsonPath("$[1].evaluationType.description").value("Communication"));
+
+        verify(evaluationServ).getAllEvaluationsByInterviewID(interviewId);
+    }
+
+    @Test
+    @WithMockUser
+    void shouldReturnAllEvaluationsDTO() throws Exception {
+
+        List<EvaluationTypeDTO> evaluationTypesDTO = List.of(
+                new EvaluationTypeDTO(UUID.randomUUID(),"communication",2.0),
+                new EvaluationTypeDTO(UUID.randomUUID(),"Technical",3.0)
+        );
+        List<EvaluationDTO> evaluationDTOs = List.of(
+                new EvaluationDTO(UUID.randomUUID(), 90.0, "Excellent", interviewId,evaluationTypesDTO.get(0).id()),
+                new EvaluationDTO(UUID.randomUUID(), 85.0, "Very Good", interviewId,evaluationTypesDTO.get(1).id())
+        );
+
+
+
+        when(evaluationServ.getAllEvaluationsDTOByInterviewID(interviewId)).thenReturn(evaluationDTOs);
+
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluationDTO", interviewId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].score").value(90.0))
+                .andExpect(jsonPath("$[0].feedback").value("Excellent"))
+                .andExpect(jsonPath("$[0].evaluationTypeId").value(evaluationTypesDTO.get(0).id().toString()))
+                .andExpect(jsonPath("$[1].score").value(85.0))
+                .andExpect(jsonPath("$[1].feedback").value("Very Good"))
+                .andExpect(jsonPath("$[1].evaluationTypeId").value(evaluationTypesDTO.get(1).id().toString()));
+
+        verify(evaluationServ).getAllEvaluationsDTOByInterviewID(interviewId);
+    }
+
 }
