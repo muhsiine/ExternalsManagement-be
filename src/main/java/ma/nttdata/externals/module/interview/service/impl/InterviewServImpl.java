@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -249,19 +250,33 @@ public class InterviewServImpl implements InterviewServ {
 
     @Override
     public InterviewEvaluationPlaceholders getInterviewEvaluationPlaceholders(UUID interviewId){
-        Interview interview = interviewRepository.findWithCandidateAndOfferById(interviewId)
+        Interview interview = interviewRepository.findWithCandidateOfferEvaluationsAndTypesById(interviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview Not Found",interviewId));
 
         CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
 
         OfferDTO offer = offerMapper.toDto(interview.getOffer());
 
-        new InterviewEvaluationPlaceholders(
+        List<String> evaluationsTypesDescription = interview.getEvaluations()
+                .stream()
+                .map(evaluation -> evaluation.getEvaluationType().getDescription())
+               .toList();
+
+        List<EvaluationType> evaluationTypes = interview.getEvaluations()
+                .stream()
+                .map(evaluation -> evaluation.getEvaluationType())
+                .toList();
+
+
+
+        return new InterviewEvaluationPlaceholders(
                 candidate,
                 offer,
-                1,
-                2,
-                null
+                interview.getNumberOfQuestions(),
+                interview.getEstimatedDuration(),
+                evaluationsTypesDescription,
+                interview.getEvaluations(),
+                evaluationTypes
         );
 
     }

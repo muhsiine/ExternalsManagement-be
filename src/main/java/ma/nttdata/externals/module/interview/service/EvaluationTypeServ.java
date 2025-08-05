@@ -17,4 +17,6 @@ public interface EvaluationTypeServ {
     void deleteType(UUID id);
 
     List<EvaluationTypeDTO> findAllById(List<UUID> ids);
+
+
 }

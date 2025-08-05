@@ -7,11 +7,9 @@ import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.Question;
-import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
-import ma.nttdata.externals.module.interview.service.InterviewServ;
-import ma.nttdata.externals.module.interview.service.QuestionServ;
-import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
+import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +33,7 @@ public class InterviewController  {
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
     private final EvaluationTypeServ evaluationTypeServ;
+    private final EvaluationServ evaluationServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -228,8 +227,12 @@ public class InterviewController  {
     }
 
     @PostMapping("/{interviewId}/evaluation")
-    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,QuestionsAndAnswersForEvaluationDTO questionsAndAnswersForEvaluation){
+    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswersForEvaluation){
+        InterviewEvaluationPlaceholders placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
+        List<AiEvaluationResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationResponseFromAi(questionsAndAnswersForEvaluation,placeholders);
+        List< Evaluation> evaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,placeholders);
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(aiEvaluationResponse);
     }
 
 }

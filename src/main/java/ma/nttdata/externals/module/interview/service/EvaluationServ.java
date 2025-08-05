@@ -4,6 +4,7 @@ import ma.nttdata.externals.module.interview.dto.AiEvaluationResponseDTO;
 import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
 import ma.nttdata.externals.module.interview.dto.InterviewEvaluationPlaceholders;
 import ma.nttdata.externals.module.interview.dto.QuestionsAndAnswersForEvaluationDTO;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,7 +20,9 @@ public interface EvaluationServ {
 
     void deleteEvaluation(UUID id);
 
-    List<AiEvaluationResponseDTO> prepareEvaluationResponseFromAi(QuestionsAndAnswersForEvaluationDTO questionsAndAnswers, InterviewEvaluationPlaceholders placeholders);
+    List<AiEvaluationResponseDTO> prepareEvaluationResponseFromAi(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholders placeholders);
 
-    String getInterviewsEvaluationsFromAiByPrompt(QuestionsAndAnswersForEvaluationDTO questionsAndAnswers, InterviewEvaluationPlaceholders placeholders);
+    String getInterviewsEvaluationsFromAiByPrompt(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholders placeholders);
+
+    List<Evaluation> saveAIEvaluationResponse(List<AiEvaluationResponseDTO> aiEvaluationResponse, InterviewEvaluationPlaceholders placeholders);
 }

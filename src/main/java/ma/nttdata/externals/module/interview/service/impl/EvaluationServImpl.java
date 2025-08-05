@@ -14,6 +14,7 @@ import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
+import ma.nttdata.externals.module.interview.mapper.EvaluationTypeMapper;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
@@ -25,6 +26,7 @@ import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EvaluationServImpl implements EvaluationServ {
@@ -106,7 +108,7 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public List<AiEvaluationResponseDTO> prepareEvaluationResponseFromAi(QuestionsAndAnswersForEvaluationDTO questionsAndAnswers, InterviewEvaluationPlaceholders placeholders){
+    public List<AiEvaluationResponseDTO> prepareEvaluationResponseFromAi(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholders placeholders){
         try{
             String generatedEvaluation = mockFlag ? InterviewEvaluationPromptConstants.JSON_MOCK
             :getInterviewsEvaluationsFromAiByPrompt(questionsAndAnswers,placeholders);
@@ -122,7 +124,7 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public String getInterviewsEvaluationsFromAiByPrompt(QuestionsAndAnswersForEvaluationDTO questionsAndAnswers, InterviewEvaluationPlaceholders placeholders){
+    public String getInterviewsEvaluationsFromAiByPrompt(List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswers, InterviewEvaluationPlaceholders placeholders){
         String prompt  = InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT;
 
         prompt.replace(InterviewEvaluationPromptConstants.CANDIDATE_PLACEHOLDER,placeholders.candidate().toString())
@@ -138,5 +140,32 @@ public class EvaluationServImpl implements EvaluationServ {
                 .body(prompt)
                 .retrieve()
                 .body(String.class);
+    }
+
+    @Override
+    public List<Evaluation> saveAIEvaluationResponse(List<AiEvaluationResponseDTO> aiEvaluationResponse,InterviewEvaluationPlaceholders placeholders){
+          List<Evaluation> evaluations = placeholders.evaluations();
+
+
+
+        if (evaluations.size() != aiEvaluationResponse.size()) {
+            throw new IllegalArgumentException("Mismatch between evaluations and AI responses");
+        }
+
+        for(int i=0;i<evaluations.size();i++){
+            Evaluation evaluation = evaluations.get(i);
+            String evaluationTypeDescription = evaluation.getEvaluationType().getDescription();
+
+            for(int j=0;j<aiEvaluationResponse.size();j++){
+                AiEvaluationResponseDTO evaluationResponse = aiEvaluationResponse.get(j);
+                if(evaluationResponse.description().equals(evaluationTypeDescription)){
+                    evaluation.setFeedback(evaluationResponse.feedback());
+                    evaluation.setScore(evaluationResponse.score());
+                }
+            }
+
+        }
+
+        return evaluationRepository.saveAll(evaluations);
     }
 }

@@ -23,8 +23,9 @@ public final class InterviewEvaluationPromptConstants {
             - Align scoring with evaluation type coefficients - critical evaluation types demand higher standards
             - Consider interview context: {NumberOfQuestions} questions in {InterviewDuration} minutes affects expected answer depth
             - Provide specific feedback referencing actual answers and time performance
-            - Ensure fairness by matching evaluation difficulty to candidate's stated experience level
+            - Ensure fairness by matching evaluation difficulty to candidate's stated experience level.
             - Return a valid Json Array, and respect this structure do not add anything to it "{JSON_SCHEMA}".
+            - Maintain the order of evaluations in the output exactly as provided in the 'EvaluationTypes' list.
             
             Here is the information needed for the evaluation:
             #Interview Duration: "{InterviewDuration}",

@@ -67,4 +67,6 @@ public class EvaluationTypeServImpl implements EvaluationTypeServ {
         return evaluationTypes.stream()
                 .map(mapper::toDto).collect(Collectors.toList());
     }
+
+
 }
