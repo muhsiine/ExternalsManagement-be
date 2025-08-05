@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.interview.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -27,11 +28,11 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "interview_id", nullable = false)
+    @JsonBackReference
     private Interview interview;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "answer_id", nullable = false)
-    @JsonIgnore
     private Answer answer;
 
 }

@@ -204,7 +204,7 @@ public class InterviewServImpl implements InterviewServ {
     @Override
     public placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId){
         Interview interview = interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Interview" + interviewId));
+                .orElseThrow(() -> new ResourceNotFoundException("Interview" , interviewId));
 
         CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
 

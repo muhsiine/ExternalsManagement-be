@@ -6,6 +6,7 @@ import ma.nttdata.externals.module.interview.dto.placeholdersForInterviewQuestio
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
 import ma.nttdata.externals.module.interview.dto.AIQuestionResponseDTO;
 import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
+import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
@@ -45,6 +46,9 @@ public class QuestionServiceImplTest {
     @Mock
     private RestClient.ResponseSpec responseSpec;
 
+    @Mock
+    private AnswerRepository answerRepository;
+
     private boolean mockFlag = true;
 
 
@@ -57,7 +61,8 @@ public class QuestionServiceImplTest {
                 questionMapper,
                 interviewRepository,
                 true,
-                aiRestClient);
+                aiRestClient,
+                answerRepository);
         CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
         OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), null, null, null);
 
@@ -88,36 +93,37 @@ public class QuestionServiceImplTest {
                 questionMapper,
                 interviewRepository,
                 false,
-                aiRestClient);
-        List<AIQuestionResponseDTO> aiResponses = List.of(
-                new AIQuestionResponseDTO("What is Java?", "3"),
-                new AIQuestionResponseDTO("Explain REST APIs.", "4"),
-                new AIQuestionResponseDTO("Describe microservices.", "5"),
-                new AIQuestionResponseDTO("What is Spring Boot?", "6")
+                aiRestClient,
+                answerRepository);
+        String mockedJson = """
+        [
+            {"description": "What is Java?", "durationInMinutes": "3"},
+            {"description": "Explain REST APIs.", "durationInMinutes": "4"}
+        ]
+        """;
+
+
+
+        doReturn(mockedJson)
+                .when(questionServ)
+                .generateInterviewQuestionsByPrompt(any(), any());
+
+        CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), "John", null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), "Backend", null, null);
+        placeholdersForInterviewQuestionsPromptDTO promptDTO =
+                new placeholdersForInterviewQuestionsPromptDTO(candidateDTO, offerDTO, 2, 30);
+
+        List<EvaluationTypeDTO> evaluationTypes = List.of(
+                new EvaluationTypeDTO(UUID.randomUUID(), "Technical", 1.0)
         );
 
-        List<QuestionDTO> questions = aiResponses.stream()
-                .map(raw -> new QuestionDTO(
-                        null,
-                        raw.description(),
-                        parseDuration(raw.durationInMinutes()),
-                        null,
-                        null
-                ))
-                .toList();
+        List<QuestionDTO> result = questionServ.prepareQuestionsFromAIResponse(promptDTO, evaluationTypes);
 
-        assertEquals(4, questions.size());
-
-        assertEquals(3, questions.get(0).durationInMinutes());
-        assertEquals(4, questions.get(1).durationInMinutes());
-        assertEquals(5, questions.get(2).durationInMinutes());
-        assertEquals(6, questions.get(3).durationInMinutes());
-
-
-        assertEquals("What is Java?", questions.get(0).description());
-        assertEquals("Explain REST APIs.", questions.get(1).description());
-        assertEquals("Describe microservices.", questions.get(2).description());
-        assertEquals("What is Spring Boot?", questions.get(3).description());
+        assertEquals(2, result.size());
+        assertEquals("What is Java?", result.get(0).description());
+        assertEquals(3, result.get(0).durationInMinutes());
+        assertEquals("Explain REST APIs.", result.get(1).description());
+        assertEquals(4, result.get(1).durationInMinutes());
     }
     private Integer parseDuration(String durationStr) {
         if (durationStr == null) return null;
@@ -137,7 +143,8 @@ public class QuestionServiceImplTest {
                 questionMapper,
                 interviewRepository,
                 false,
-                aiRestClient);
+                aiRestClient,
+                answerRepository);
         CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), "John Doe", null, 0, null, null, null, null, null, null, null, null, null, null, null);
         OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), "Java Developer", null, null);
         placeholdersForInterviewQuestionsPromptDTO promptDTO = new placeholdersForInterviewQuestionsPromptDTO(

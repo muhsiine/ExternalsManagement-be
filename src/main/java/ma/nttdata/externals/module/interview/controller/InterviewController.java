@@ -212,7 +212,7 @@ public class InterviewController  {
             description = "Return the questions of that interview"
     )
     @GetMapping("/{interviewId}/getQuestions")
-    public ResponseEntity<List<Question>> getInterviewQuestions(UUID interviewId){
+    public ResponseEntity<List<Question>> getInterviewQuestions(@PathVariable UUID interviewId){
         return ResponseEntity.ok(questionServ.findAllQuestionsByInterviewId(interviewId));
     }
 
@@ -221,7 +221,7 @@ public class InterviewController  {
             description = "Return the DTO of questions of that interview"
     )
     @GetMapping("/{interviewId}/getQuestionsDTO")
-    public ResponseEntity<List<QuestionDTO>> getInterviewQuestionsDTOS(UUID interviewId){
+    public ResponseEntity<List<QuestionDTO>> getInterviewQuestionsDTOS(@PathVariable UUID interviewId){
 
         return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
     }

@@ -9,9 +9,11 @@ import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
 import ma.nttdata.externals.module.interview.dto.placeholdersForInterviewQuestionsPromptDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
 import ma.nttdata.externals.module.interview.dto.AIQuestionResponseDTO;
+import ma.nttdata.externals.module.interview.entity.Answer;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
+import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
@@ -32,17 +34,19 @@ public class QuestionServImpl implements QuestionServ {
     private final InterviewRepository interviewRepository;
     private final boolean mockFlag;
     private final RestClient aiRestClient;
+    private final AnswerRepository answerRepository;
 
     public QuestionServImpl(QuestionRepository questionRepository,
                             QuestionMapper questionMapper,
                             InterviewRepository interviewRepository,
                             @Value("${app.mock.flag}") boolean mockFlag,
-                            @Qualifier("aiServiceClient") RestClient aiRestClient) {
+                            @Qualifier("aiServiceClient") RestClient aiRestClient, AnswerRepository answerRepository) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
         this.interviewRepository = interviewRepository;
         this.mockFlag = mockFlag;
         this.aiRestClient = aiRestClient;
+        this.answerRepository = answerRepository;
     }
 
     @Override
@@ -146,7 +150,17 @@ public class QuestionServImpl implements QuestionServ {
 
     public List<QuestionDTO> saveAllQuestions(List<QuestionDTO> questionsDTO){
         List<Question> questions = questionsDTO.stream()
-                .map(questionMapper::toEntity).collect(Collectors.toList());
+                .map(qdto -> {
+                    Question question = questionMapper.toEntity(qdto);
+                    Interview interview = new Interview();
+                    interview.setId(qdto.interviewId());
+                    question.setInterview(interview);
+
+                    Answer emptyAnswer = new Answer();
+                    Answer savedAnswer = answerRepository.save(emptyAnswer);
+                    question.setAnswer(savedAnswer);
+                    return question;
+                }).collect(Collectors.toList());
 
         List<Question> savedQuestions = questionRepository.saveAll(questions);
 
