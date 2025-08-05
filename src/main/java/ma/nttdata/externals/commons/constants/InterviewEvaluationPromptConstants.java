@@ -57,21 +57,6 @@ public final class InterviewEvaluationPromptConstants {
                  "score": 82,
                  "feedback": "Communication was clear and well-structured throughout the interview. The candidate articulated technical concepts effectively and asked relevant clarifying questions. They maintained good eye contact and professional demeanor. Response time was generally within expected ranges. Minor improvement area: occasionally used too much technical jargon when simpler explanations would suffice for broader team communication.",
                  "evaluationType": "Communication"
-               },
-               {
-                 "score": 85,
-                 "feedback": "Strong React knowledge demonstrated through detailed explanations of hooks, state management, and component lifecycle. The candidate provided specific examples from their previous projects and correctly explained concepts like useEffect dependencies and context API. Answered React questions 10% faster than estimated, showing confidence in the technology. Well-aligned with the senior React developer requirements in the job offer.",
-                 "evaluationType": "React"
-               },
-               {
-                 "score": 73,
-                 "feedback": "Good foundational knowledge of Node.js concepts including event loop, middleware, and API development. However, struggled with some advanced topics like clustering and performance optimization, taking 45% longer than expected on these questions. Given the candidate's 3 years of experience mentioned in their profile, this performance is adequate but shows room for growth in enterprise-level Node.js applications.",
-                 "evaluationType": "Node.js"
-               },
-               {
-                 "score": 79,
-                 "feedback": "Overall solid performance across all evaluation areas. The candidate completed 8 questions in the 60-minute interview timeframe, showing reasonable time management. Their technical skills align well with the full-stack developer position requirements, though some areas need strengthening. Communication style fits the collaborative team environment described in the job offer. Recommended for next round with focus on Node.js advanced concepts.",
-                 "evaluationType": "Overall Evaluation"
                }
             ]
             """;

@@ -113,7 +113,7 @@ public class EvaluationServImplTest {
         List<AiEvaluationResponseDTO> result = evaluationServ.prepareEvaluationResponseFromAi(qaList, placeholders);
 
         assertNotNull(result);
-        assertEquals(5, result.size());
+        assertEquals(2, result.size());
 
         AiEvaluationResponseDTO first = result.get(0);
         assertEquals("Problem Solving", first.evaluationType());
