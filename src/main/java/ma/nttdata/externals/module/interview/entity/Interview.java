@@ -41,6 +41,12 @@ public class Interview {
     @Column(name = "comment")
     private String comment;
 
+    @Column(name = "number_of_questions")
+    int numberOfQuestions;
+
+    @Column(name = "estimated_duration")
+    int estimatedDuration;
+
     @ManyToOne(fetch =  FetchType.EAGER)
     @JoinColumn(name = "candidate_id" , nullable = false)
     private Candidate candidate;

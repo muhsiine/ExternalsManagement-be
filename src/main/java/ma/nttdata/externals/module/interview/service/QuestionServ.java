@@ -1,6 +1,9 @@
 package ma.nttdata.externals.module.interview.service;
 
+import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
+import ma.nttdata.externals.module.interview.dto.placeholdersForInterviewQuestionsPromptDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
+import ma.nttdata.externals.module.interview.entity.Question;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,4 +19,14 @@ public interface QuestionServ {
     QuestionDTO updateQuestion(UUID id, QuestionDTO questionDTO);
 
     void deleteQuestion(UUID id);
+
+    List<QuestionDTO> prepareQuestionsFromAIResponse(placeholdersForInterviewQuestionsPromptDTO  placeholders, List<EvaluationTypeDTO> evaluationTypes);
+
+    String generateInterviewQuestionsByPrompt(placeholdersForInterviewQuestionsPromptDTO  placeholders, List<EvaluationTypeDTO> evaluationTypes);
+
+    List<QuestionDTO> saveAllQuestions(List<QuestionDTO> questions);
+
+    List<Question> findAllQuestionsByInterviewId(UUID interviewId);
+
+    List<QuestionDTO> findAllQuestionsDTOSByInterviewId(UUID interviewId);
 }
