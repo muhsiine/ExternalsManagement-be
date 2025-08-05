@@ -17,6 +17,7 @@ import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -220,6 +221,25 @@ public class InterviewServImpl implements InterviewServ {
                 interview.getScheduledAt(),
                 interview.getLink()
         );
+    }
+
+    @Override
+    public InterviewEvaluationPlaceholders getInterviewEvaluationPlaceholders(UUID interviewId){
+        Interview interview = interviewRepository.findWithCandidateAndOfferById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview Not Found",interviewId));
+
+        CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
+
+        OfferDTO offer = null;
+
+        new InterviewEvaluationPlaceholders(
+                candidate,
+                offer,
+                1,
+                2,
+                null
+        );
+
     }
 }
 

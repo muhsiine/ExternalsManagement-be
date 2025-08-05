@@ -51,4 +51,6 @@ public interface InterviewServ {
     String saveInterviewLink(String token, UUID interviewId);
 
     SendEmailDTO getEmailInfo(UUID interviewId);
+
+    InterviewEvaluationPlaceholders getInterviewEvaluationPlaceholders(UUID interviewId);
 }

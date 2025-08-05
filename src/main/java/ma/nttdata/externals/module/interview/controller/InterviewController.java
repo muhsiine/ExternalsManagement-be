@@ -180,4 +180,10 @@ public class InterviewController  {
             return ResponseEntity.ok("Email sent successfully!");
     }
 
+
+    @PostMapping("/{interviewId}/evaluation")
+    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,QuestionsAndAnswersForEvaluationDTO questionsAndAnswersForEvaluation){
+
+    }
+
 }
