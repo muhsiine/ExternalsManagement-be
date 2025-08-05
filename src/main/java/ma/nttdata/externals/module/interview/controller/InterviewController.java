@@ -191,10 +191,10 @@ public class InterviewController  {
     @PostMapping("/{interviewId}/generateQuestions")
     public ResponseEntity<List<QuestionDTO>> generateInterviewQuestions(@PathVariable UUID interviewId,
                                                                    @RequestBody GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest) {
-        InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo = interviewServ.getInterviewCandidateAndOffer(interviewId);
+        placeholdersForInterviewQuestionsPromptDTO placeholders = interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId);
         List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
 
-        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse(generateQuestionsInfo, evaluationTypes);
+        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes);
         List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
                 .map(q -> new QuestionDTO(
                         null,

@@ -2,14 +2,13 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
-import ma.nttdata.externals.module.interview.dto.InterviewQuestionsPromptPlaceholdersDTO;
+import ma.nttdata.externals.module.interview.dto.placeholdersForInterviewQuestionsPromptDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
-import ma.nttdata.externals.module.interview.dto.QuestionResponseFromAI;
+import ma.nttdata.externals.module.interview.dto.AIQuestionResponseDTO;
 import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -51,7 +50,7 @@ public class QuestionServiceImplTest {
         CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
         OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), null, null, null);
 
-        InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo = new InterviewQuestionsPromptPlaceholdersDTO(
+        placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo = new placeholdersForInterviewQuestionsPromptDTO(
                 candidateDTO,
                 offerDTO,
                 3,
@@ -79,11 +78,11 @@ public class QuestionServiceImplTest {
                 interviewRepository,
                 false,
                 aiRestClient);
-        List<QuestionResponseFromAI> aiResponses = List.of(
-                new QuestionResponseFromAI("What is Java?", "3"),
-                new QuestionResponseFromAI("Explain REST APIs.", "4"),
-                new QuestionResponseFromAI("Describe microservices.", "5"),
-                new QuestionResponseFromAI("What is Spring Boot?", "6")
+        List<AIQuestionResponseDTO> aiResponses = List.of(
+                new AIQuestionResponseDTO("What is Java?", "3"),
+                new AIQuestionResponseDTO("Explain REST APIs.", "4"),
+                new AIQuestionResponseDTO("Describe microservices.", "5"),
+                new AIQuestionResponseDTO("What is Spring Boot?", "6")
         );
 
         List<QuestionDTO> questions = aiResponses.stream()

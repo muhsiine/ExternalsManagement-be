@@ -6,9 +6,9 @@ import ma.nttdata.externals.commons.constants.InterviewPromptConstants;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
-import ma.nttdata.externals.module.interview.dto.InterviewQuestionsPromptPlaceholdersDTO;
+import ma.nttdata.externals.module.interview.dto.placeholdersForInterviewQuestionsPromptDTO;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
-import ma.nttdata.externals.module.interview.dto.QuestionResponseFromAI;
+import ma.nttdata.externals.module.interview.dto.AIQuestionResponseDTO;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
@@ -96,15 +96,15 @@ public class QuestionServImpl implements QuestionServ {
 
 
     @Override
-    public List<QuestionDTO> prepareQuestionsFromAIResponse(InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes) {
+    public List<QuestionDTO> prepareQuestionsFromAIResponse(placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes) {
         try {
-            String jsonResponse = mockFlag ?
+            String generatedQuestionsJson = mockFlag ?
                     InterviewPromptConstants.JSON_MOCK:
                     generateInterviewQuestionsByPrompt(generateQuestionsInfo, evaluationTypes);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
-            List<QuestionResponseFromAI> questions = objectMapper.readValue(jsonResponse, new TypeReference<List<QuestionResponseFromAI>>() {});
+            List<AIQuestionResponseDTO> questions = objectMapper.readValue(generatedQuestionsJson, new TypeReference<List<AIQuestionResponseDTO>>() {});
 
             return questions.stream()
                     .map(raw -> new QuestionDTO(
@@ -124,7 +124,7 @@ public class QuestionServImpl implements QuestionServ {
     }
 
     @Override
-    public String generateInterviewQuestionsByPrompt(InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes){
+    public String generateInterviewQuestionsByPrompt(placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes){
         String prompt = InterviewPromptConstants.INTERVIEW_QUESTION_GENERATION_PROMPT;
 
         prompt = prompt.replace(InterviewPromptConstants.CANDIDATE_DATA_PLACEHOLDER, generateQuestionsInfo.candidate().toString())

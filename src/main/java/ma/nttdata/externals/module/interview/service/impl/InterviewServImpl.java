@@ -202,7 +202,7 @@ public class InterviewServImpl implements InterviewServ {
         return interviewLink;
     }
     @Override
-    public InterviewQuestionsPromptPlaceholdersDTO getInterviewCandidateAndOffer(UUID interviewId){
+    public placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId){
         Interview interview = interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Interview not found with ID: " + interviewId));
 
@@ -210,14 +210,14 @@ public class InterviewServImpl implements InterviewServ {
 
         OfferDTO offer = offerMapper.toDto(interview.getOffer());
 
-        InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo = new InterviewQuestionsPromptPlaceholdersDTO(
+        placeholdersForInterviewQuestionsPromptDTO  placeholders = new placeholdersForInterviewQuestionsPromptDTO(
                 candidate,
                 offer,
                 interview.getNumberOfQuestions(),
                 interview.getEstimatedDuration()
         );
 
-        return generateQuestionsInfo;
+        return  placeholders;
     }
 
     @Override

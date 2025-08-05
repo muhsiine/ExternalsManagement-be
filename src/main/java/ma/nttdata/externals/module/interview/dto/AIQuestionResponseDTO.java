@@ -1,6 +1,6 @@
 package ma.nttdata.externals.module.interview.dto;
 
-public record QuestionResponseFromAI (
+public record AIQuestionResponseDTO(
         String description,
         String durationInMinutes
 ){}

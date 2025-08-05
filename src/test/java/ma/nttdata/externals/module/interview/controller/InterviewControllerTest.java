@@ -119,6 +119,8 @@ class InterviewControllerTest {
                 "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 candidateId,
                 offerId,
                 List.of(evaluationDTO),
@@ -163,6 +165,8 @@ class InterviewControllerTest {
                 "Strong technical skills",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 Collections.emptyList(),
@@ -178,6 +182,8 @@ class InterviewControllerTest {
                 "Good communication",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 Collections.emptyList(),
@@ -239,6 +245,8 @@ class InterviewControllerTest {
                 "Great candidate",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
@@ -254,6 +262,8 @@ class InterviewControllerTest {
                 inputDto.feedback_general(),
                 inputDto.scheduledAt(),
                 inputDto.comment(),
+                15,
+                60,
                 inputDto.candidateId(),
                 inputDto.offerId(),
                 Collections.emptyList(),
@@ -296,6 +306,8 @@ class InterviewControllerTest {
                 "Updated feedback",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
@@ -442,7 +454,7 @@ class InterviewControllerTest {
         int numberOfQuestions = 5;
         int estimatedDuration = 30;
 
-        InterviewQuestionsPromptPlaceholdersDTO generateQuestionsInfo = new InterviewQuestionsPromptPlaceholdersDTO(
+        placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo = new placeholdersForInterviewQuestionsPromptDTO(
                 candidateDTO,
                 offerDTO,
                 numberOfQuestions,
@@ -481,7 +493,7 @@ class InterviewControllerTest {
                 new EvaluationTypeDTO(UUID.randomUUID(), "Creativity", 0.8)
         );
 
-        when(interviewServ.getInterviewCandidateAndOffer(interviewId))
+        when(interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId))
                 .thenReturn(generateQuestionsInfo);
         when(evaluationTypeServ.findAllById(anyList()))
                 .thenReturn(evaluationTypeDTOS);
@@ -520,7 +532,7 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$[1].durationInMinutes").value(4))
                 .andExpect(jsonPath("$[2].description").value("Explain microservices architecture."))
                 .andExpect(jsonPath("$[2].durationInMinutes").value(6));
-        verify(interviewServ).getInterviewCandidateAndOffer(interviewId);
+        verify(interviewServ).getPlaceholdersForInterviewQuestionsPrompt(interviewId);
         verify(evaluationTypeServ).findAllById(anyList());
         verify(questionServ).prepareQuestionsFromAIResponse(
                 eq(generateQuestionsInfo),
