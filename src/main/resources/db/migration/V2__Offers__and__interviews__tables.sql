@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS interviews (
     feedback_general VARCHAR(255),
     scheduled_at TIMESTAMP,
     comment VARCHAR(255),
+    number_of_questions INTEGER,
+    estimated_duration INTEGER,
 
     candidate_id UUID NOT NULL,
     offer_id UUID NOT NULL,

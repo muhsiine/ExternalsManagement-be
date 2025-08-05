@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class QuestionServiceImplTest {
@@ -33,6 +35,15 @@ public class QuestionServiceImplTest {
     private RestClient aiRestClient;
 
     private QuestionServImpl questionServ;
+
+    @Mock
+    private RestClient.RequestBodySpec requestBodySpec;
+
+    @Mock
+    private RestClient.RequestBodyUriSpec requestBodyUriSpec;
+
+    @Mock
+    private RestClient.ResponseSpec responseSpec;
 
     private boolean mockFlag = true;
 
@@ -117,5 +128,46 @@ public class QuestionServiceImplTest {
             return null;
         }
     }
+
+    @Test
+    void should_generate_questions_prompt_successfully() {
+
+        questionServ = new QuestionServImpl(
+                questionRepository,
+                questionMapper,
+                interviewRepository,
+                false,
+                aiRestClient);
+        CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), "John Doe", null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), "Java Developer", null, null);
+        placeholdersForInterviewQuestionsPromptDTO promptDTO = new placeholdersForInterviewQuestionsPromptDTO(
+                candidateDTO, offerDTO, 5, 30
+        );
+
+        List<EvaluationTypeDTO> evaluationTypes = List.of(
+                new EvaluationTypeDTO(UUID.randomUUID(), "Technical", 1.0),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Communication", 1.0)
+        );
+
+        String mockedResponse = "[{\"description\":\"What is OOP?\",\"durationInMinutes\":5}]";
+
+        when(aiRestClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri("/generateInterviewQuestions")).thenReturn(requestBodySpec);
+        when(requestBodySpec.body(anyString())).thenReturn(requestBodySpec);
+        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.body(String.class)).thenReturn(mockedResponse);
+
+
+
+        String result = questionServ.generateInterviewQuestionsByPrompt(promptDTO, evaluationTypes);
+
+        assertEquals(mockedResponse, result);
+        verify(aiRestClient).post();
+        verify(requestBodyUriSpec).uri("/generateInterviewQuestions");
+        verify(requestBodySpec).body(anyString());
+        verify(requestBodySpec).retrieve();
+        verify(responseSpec).body(String.class);
+    }
+
 
 }
