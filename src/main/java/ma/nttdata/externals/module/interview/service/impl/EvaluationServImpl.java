@@ -155,7 +155,7 @@ public class EvaluationServImpl implements EvaluationServ {
 
             for(int j=0;j<aiEvaluationResponse.size();j++){
                 AiEvaluationResponseDTO evaluationResponse = aiEvaluationResponse.get(j);
-                if(evaluationResponse.description().equals(evaluationTypeDescription)){
+                if(evaluationResponse.evaluationType().equals(evaluationTypeDescription)){
                     evaluation.setFeedback(evaluationResponse.feedback());
                     evaluation.setScore(evaluationResponse.score());
                     break;

@@ -6,8 +6,7 @@ import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
-import ma.nttdata.externals.module.interview.entity.Evaluation;
-import ma.nttdata.externals.module.interview.entity.EvaluationType;
+import ma.nttdata.externals.module.interview.entity.*;
 import ma.nttdata.externals.module.interview.service.*;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,11 +23,13 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -455,6 +456,61 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.coefficient").value(2.0));
     }
 
+
+    @Test
+    @WithMockUser
+    void shouldGenerateAndSaveInterviewLink() throws Exception {
+
+        String mockToken = "secure-token-xyz";
+        String mockLink = "https://interviews.nttdata.com/interview/" + mockToken;
+
+
+
+        when(interviewServ.getInterviewById(interviewId)).thenReturn(interviewDTO);
+        when(interviewTokenServ.generateToken(interviewDTO.scheduledAt())).thenReturn(mockToken);
+        when(interviewServ.saveInterviewLink(mockToken, interviewId)).thenReturn(mockLink);
+
+        mockMvc.perform(post("/api/v1/interviews/{interviewId}/generateAndSaveLink", interviewId)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(mockLink));
+
+    }
+
+    @Test
+    @WithMockUser
+    void should_send_email() throws Exception {
+
+        SendEmailDTO mockPayload = new SendEmailDTO(
+                candidateDTO.fullName(),
+                offerDTO.title(),
+                "test@gmail.com",
+                interviewDTO.scheduledAt(),
+                "https://interviews.nttdata.com/interview/abc123"
+        );
+
+        given(interviewServ.getEmailInfo(interviewId)).willReturn(mockPayload);
+
+        String expectedHtml = "<html>Email content here</html>";
+
+        given(emailContentBuilder.buildInterviewEmail(
+                mockPayload.candidateFullName(),
+                mockPayload.offerTitle(),
+                mockPayload.link(),
+                mockPayload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
+        )).willReturn(expectedHtml);
+
+        doNothing().when(emailService).sendEmail(mockPayload.email(), "Your Interview at NTT DATA", expectedHtml);
+        mockMvc.perform(post("/api/v1/interviews/{interviewId}/sendEmail", interviewId)
+                .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Email sent successfully!"));
+
+
+
+    }
+
+
     @Test
     @WithMockUser
     void generateInterviewQuestions() throws Exception {
@@ -546,6 +602,56 @@ class InterviewControllerTest {
                 eq(evaluationTypeDTOS)
         );
         verify(questionServ).saveAllQuestions(anyList());
+    }
+
+    @Test
+    @WithMockUser
+    void shouldReturnQuestionsList() throws Exception {
+
+
+        Question q1 = new Question();
+        q1.setId(UUID.randomUUID());
+        q1.setDescription("what is spring boot");
+        q1.setDurationInMinutes(50);
+        Answer answer1 = new Answer();
+        answer1.setId(answerId);
+        q1.setAnswer(answer1);
+        Interview interview = new Interview();
+        //interview won't be fetched when using entity because there will be a cycle
+        interview.setId(interviewId);
+        q1.setInterview(interview);
+
+
+
+        List<Question> questions = List.of(q1);
+
+        given(questionServ.findAllQuestionsByInterviewId(interviewId)).willReturn(questions);
+
+        mockMvc.perform(get("/api/v1/interviews/" + interviewId + "/getQuestions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].description").value("what is spring boot"))
+                .andExpect(jsonPath("$[0].durationInMinutes").value(50))
+                .andExpect(jsonPath("$[0].answer.id").value(answerId.toString()));;
+    }
+
+    @Test
+    @WithMockUser
+    void shouldReturnQuestionDTOList() throws Exception {
+
+
+        QuestionDTO dto1 = new QuestionDTO(UUID.randomUUID(), "what is spring boot", 5, interviewId, answerId);
+        List<QuestionDTO> dtos = List.of(dto1);
+
+        given(questionServ.findAllQuestionsDTOSByInterviewId(interviewId)).willReturn(dtos);
+
+        mockMvc.perform(get("/api/v1/interviews/" + interviewId + "/getQuestionsDTO"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].description").value("what is spring boot"))
+                .andExpect(jsonPath("$[0].durationInMinutes").value(5))
+                .andExpect(jsonPath("$[0].interviewId").value(interviewId.toString()))
+                .andExpect(jsonPath("$[0].answerId").value(answerId.toString()));
     }
 
 
