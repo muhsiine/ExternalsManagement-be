@@ -20,4 +20,10 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
             "offer"
     })
     Optional<Interview> findWithCandidateAndOfferById(UUID interviewId);
+
+    @EntityGraph(attributePaths = {
+            "candidate",
+            "offer"
+    })
+    Optional<Interview> findWithCandidateWithoutContactsAndOfferById(UUID id);
 }

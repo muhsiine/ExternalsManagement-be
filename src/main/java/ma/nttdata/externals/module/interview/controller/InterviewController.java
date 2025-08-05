@@ -2,13 +2,15 @@ package ma.nttdata.externals.module.interview.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.entity.Question;
+import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
@@ -16,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -29,9 +30,11 @@ import java.util.UUID;
 public class InterviewController  {
 
     private final InterviewServ interviewServ;
+    private final QuestionServ questionServ;
     private final InterviewTokenServ interviewTokenServ;
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
+    private final EvaluationTypeServ evaluationTypeServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -180,4 +183,47 @@ public class InterviewController  {
             return ResponseEntity.ok("Email sent successfully!");
     }
 
+
+    @Operation(
+            summary = "Generate Interview questions by interview Id",
+            description = "It sends a prompt to the AI and then get The question"
+    )
+    @PostMapping("/{interviewId}/generateQuestions")
+    public ResponseEntity<List<QuestionDTO>> generateInterviewQuestions(@PathVariable UUID interviewId,
+                                                                   @RequestBody GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest) {
+        placeholdersForInterviewQuestionsPromptDTO placeholders = interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId);
+        List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
+
+        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes);
+        List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
+                .map(q -> new QuestionDTO(
+                        null,
+                        q.description(),
+                        q.durationInMinutes(),
+                        interviewId,
+                        null
+                ))
+                .toList();
+        List<QuestionDTO> savedQuestions = questionServ.saveAllQuestions(generatedQuestionsWithInterviewId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedQuestions);
+    }
+
+    @Operation(
+            summary = "Get interview questions by interview Id",
+            description = "Return the questions of that interview"
+    )
+    @GetMapping("/{interviewId}/getQuestions")
+    public ResponseEntity<List<Question>> getInterviewQuestions(UUID interviewId){
+        return ResponseEntity.ok(questionServ.findAllQuestionsByInterviewId(interviewId));
+    }
+
+    @Operation(
+            summary = "Get interview questions by interview Id",
+            description = "Return the DTO of questions of that interview"
+    )
+    @GetMapping("/{interviewId}/getQuestionsDTO")
+    public ResponseEntity<List<QuestionDTO>> getInterviewQuestionsDTOS(UUID interviewId){
+
+        return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
+    }
 }

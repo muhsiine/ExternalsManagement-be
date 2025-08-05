@@ -17,6 +17,8 @@ public record InterviewDTO(
         String feedback_general ,
         LocalDateTime scheduledAt ,
         String comment,
+        int numberOfQuestions,
+        int estimatedDuration,
         UUID offerId,
         UUID candidateId ,
         List<EvaluationDTO> evaluations ,

@@ -19,6 +19,8 @@ import ma.nttdata.externals.module.interview.service.InterviewServ;
 
 import ma.nttdata.externals.module.offer.entity.Offer;
 import org.springframework.beans.factory.annotation.Value;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,8 @@ public class InterviewServImpl implements InterviewServ {
 
     private final String interviewBaseLink;
 
+    private final OfferMapper offerMapper;
+
     public InterviewServImpl(
             InterviewMapper interviewMapper,
             InterviewRepository interviewRepository ,
@@ -60,7 +64,8 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationMapper evaluationMapper ,
             EvaluationTypeMapper evaluationTypeMapper ,
             CandidateMapper candidateMapper,
-            @Value("${interview.baseLink}") String interviewBaseLink
+            @Value("${interview.baseLink}") String interviewBaseLink,
+            OfferMapper offerMapper
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -73,6 +78,7 @@ public class InterviewServImpl implements InterviewServ {
         this.evaluationTypeMapper= evaluationTypeMapper;
         this.candidateMapper = candidateMapper;
         this.interviewBaseLink = interviewBaseLink;
+        this.offerMapper = offerMapper;
     }
 
     // new interview
@@ -194,6 +200,24 @@ public class InterviewServImpl implements InterviewServ {
         interview.setLink(interviewLink);
         interviewRepository.save(interview);
         return interviewLink;
+    }
+    @Override
+    public placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId){
+        Interview interview = interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found with ID: " + interviewId));
+
+        CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
+
+        OfferDTO offer = offerMapper.toDto(interview.getOffer());
+
+        placeholdersForInterviewQuestionsPromptDTO  placeholders = new placeholdersForInterviewQuestionsPromptDTO(
+                candidate,
+                offer,
+                interview.getNumberOfQuestions(),
+                interview.getEstimatedDuration()
+        );
+
+        return  placeholders;
     }
 
     @Override

@@ -8,11 +8,12 @@ import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.*;
 import ma.nttdata.externals.module.interview.mapper.*;
 import ma.nttdata.externals.module.interview.repository.*;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
+import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import ma.nttdata.externals.module.offer.repository.OfferRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -39,6 +40,7 @@ class InterviewSrvImplTest {
     @Mock private EvaluationMapper evaluationMapper;
     @Mock private EvaluationTypeMapper evaluationTypeMapper;
     @Mock private CandidateMapper candidateMapper;
+    @Mock private OfferMapper offerMapper;
 
     private InterviewServImpl interviewServ;
 
@@ -58,7 +60,8 @@ class InterviewSrvImplTest {
                 evaluationMapper,
                 evaluationTypeMapper,
                 candidateMapper,
-                TEST_BASE_LINK
+                TEST_BASE_LINK,
+                offerMapper
         );
     }
 
@@ -76,6 +79,8 @@ class InterviewSrvImplTest {
                 "feedback",
                 LocalDateTime.now().plusDays(2),
                 "Good communication during the meeting",
+                3,
+                30,
                 offerId,
                 candidateId,
                 new ArrayList<>(),
@@ -107,7 +112,7 @@ class InterviewSrvImplTest {
         List<Interview> interviews = List.of(new Interview());
         when(interviewRepository.findAll()).thenReturn(interviews);
         when(interviewMapper.toDtoList(interviews)).thenReturn(List.of(
-                new InterviewDTO(null, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(null, null, null, null, null, null, null, null, 7,40,null, null, new ArrayList<>(), new ArrayList<>())
         ));
 
         List<InterviewDTO> result = interviewServ.getAllInterviews();
@@ -121,7 +126,7 @@ class InterviewSrvImplTest {
         Interview interview = new Interview();
         when(interviewRepository.findById(id)).thenReturn(Optional.of(interview));
         when(interviewMapper.toDto(interview)).thenReturn(
-                new InterviewDTO(id, null, null, null, null, null, null, null, null, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(id, null, null, null, null, null, null, null,5,30, null, null, new ArrayList<>(), new ArrayList<>())
         );
 
         InterviewDTO result = interviewServ.getInterviewById(id);
@@ -148,6 +153,8 @@ class InterviewSrvImplTest {
                 "feedback",
                 LocalDateTime.now().plusDays(2),
                 "Interview in general passed smoothly",
+                3,
+                30,
                 offerId,
                 candidateId,
                 new ArrayList<>(),
@@ -178,7 +185,7 @@ class InterviewSrvImplTest {
         List<Interview> list = List.of(new Interview());
         when(interviewRepository.findByOfferId(offerId)).thenReturn(list);
         when(interviewMapper.toDtoList(list)).thenReturn(List.of(
-                new InterviewDTO(null, null, null, null, null, null, null, null, offerId, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(null, null, null, null, null, null, null, null,8,50, offerId, null, new ArrayList<>(), new ArrayList<>())
         ));
 
         List<InterviewDTO> result = interviewServ.getInterviewsByOfferId(offerId);
@@ -254,5 +261,50 @@ class InterviewSrvImplTest {
         EvaluationTypeDTO result = interviewServ.getEvaluationTypeOfEvaluation(evaluationId);
 
         assertNotNull(result);
+    }
+
+    @Test
+    void getInterviewCandidateWithoutContactsAndOffer_should_return_interview_candidate_and_offer() {
+
+        UUID interviewId = UUID.randomUUID();
+
+        Candidate candidate = new Candidate();
+        candidate.setId(UUID.randomUUID());
+
+        Offer offer = new Offer();
+        offer.setId(UUID.randomUUID());
+
+        EvaluationType evalType1 = new EvaluationType();
+        evalType1.setId(UUID.randomUUID());
+
+        Evaluation evaluation1 = new Evaluation();
+        evaluation1.setEvaluationType(evalType1);
+
+        List<Evaluation> evaluations = List.of(evaluation1);
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+        interview.setEvaluations(evaluations);
+
+        CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(offer.getId(), null, null, null);
+
+        when(interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)).thenReturn(Optional.of(interview));
+        when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
+
+        placeholdersForInterviewQuestionsPromptDTO result = interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId);
+
+        assertNotNull(result);
+        assertEquals(candidateDTO, result.candidate());
+        assertEquals(offerDTO, result.offer());
+
+
+        verify(interviewRepository).findWithCandidateWithoutContactsAndOfferById(interviewId);
+        verify(candidateMapper).candidateToCandidateDTO(candidate);
+        verify(offerMapper).toDto(offer);
+
     }
 }

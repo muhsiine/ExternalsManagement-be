@@ -1,17 +1,18 @@
 package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,6 +50,12 @@ class InterviewControllerTest {
     @MockitoBean
     private EmailContentBuilder emailContentBuilder;
 
+    @MockitoBean
+    private QuestionServ questionServ;
+
+    @MockitoBean
+    private EvaluationTypeServ evaluationTypeServ;
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -59,12 +66,14 @@ class InterviewControllerTest {
     private UUID evaluationId;
     private UUID evaluationTypeId;
     private UUID answerId;
+    private UUID offerID;
     private InterviewDTO interviewDTO;
     private QuestionDTO questionDTO;
     private AnswerDTO answerDTO;
     private CandidateDTO candidateDTO;
     private EvaluationDTO evaluationDTO;
     private EvaluationTypeDTO evaluationTypeDTO;
+    private OfferDTO offerDTO;
 
     @BeforeEach
     void setUp() {
@@ -75,6 +84,7 @@ class InterviewControllerTest {
         evaluationId = UUID.randomUUID();
         evaluationTypeId = UUID.randomUUID();
         answerId = UUID.randomUUID();
+        offerId = UUID.randomUUID();
 
         evaluationDTO = new EvaluationDTO(
                 evaluationId,
@@ -109,6 +119,8 @@ class InterviewControllerTest {
                 "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 candidateId,
                 offerId,
                 List.of(evaluationDTO),
@@ -131,6 +143,13 @@ class InterviewControllerTest {
                 Collections.emptyList(), // naturalLanguages
                 List.of(interviewDTO) // interviews
         );
+
+        offerDTO = new OfferDTO(
+                offerId,
+                "Backend Engineer",
+                "We need a backend engineer with solid experience in Node js and spring boot",
+                List.of(interviewDTO)
+        );
     }
 
     @Test
@@ -146,6 +165,8 @@ class InterviewControllerTest {
                 "Strong technical skills",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 Collections.emptyList(),
@@ -161,6 +182,8 @@ class InterviewControllerTest {
                 "Good communication",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 Collections.emptyList(),
@@ -222,6 +245,8 @@ class InterviewControllerTest {
                 "Great candidate",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
@@ -237,6 +262,8 @@ class InterviewControllerTest {
                 inputDto.feedback_general(),
                 inputDto.scheduledAt(),
                 inputDto.comment(),
+                15,
+                60,
                 inputDto.candidateId(),
                 inputDto.offerId(),
                 Collections.emptyList(),
@@ -279,6 +306,8 @@ class InterviewControllerTest {
                 "Updated feedback",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                15,
+                60,
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
@@ -417,5 +446,98 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.id").value(evaluationTypeId.toString()))
                 .andExpect(jsonPath("$.description").value("Technical Skills"))
                 .andExpect(jsonPath("$.coefficient").value(2.0));
+    }
+
+    @Test
+    @WithMockUser
+    void generateInterviewQuestions() throws Exception {
+        int numberOfQuestions = 5;
+        int estimatedDuration = 30;
+
+        placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo = new placeholdersForInterviewQuestionsPromptDTO(
+                candidateDTO,
+                offerDTO,
+                numberOfQuestions,
+                estimatedDuration
+        );
+
+        List<QuestionDTO> generatedQuestions = Arrays.asList(
+                new QuestionDTO(
+                        UUID.randomUUID(),
+                        "What is your experience with Spring Boot?",
+                        5,
+                        interviewId,
+                        null
+                ),
+                new QuestionDTO(
+                        UUID.randomUUID(),
+                        "How do you handle database transactions?",
+                        4,
+                        interviewId,
+                        null
+                ),
+                new QuestionDTO(
+                        UUID.randomUUID(),
+                        "Explain microservices architecture.",
+                        6,
+                        interviewId,
+                        null
+                )
+        );
+
+        List<EvaluationTypeDTO> evaluationTypeDTOS = List.of(
+                new EvaluationTypeDTO(UUID.randomUUID(), "Technical Skills", 1.5),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Communication", 1.0),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Problem Solving", 2.0),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Teamwork", 1.2),
+                new EvaluationTypeDTO(UUID.randomUUID(), "Creativity", 0.8)
+        );
+
+        when(interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId))
+                .thenReturn(generateQuestionsInfo);
+        when(evaluationTypeServ.findAllById(anyList()))
+                .thenReturn(evaluationTypeDTOS);
+        when(questionServ.prepareQuestionsFromAIResponse(generateQuestionsInfo,evaluationTypeDTOS))
+                .thenReturn(generatedQuestions);
+        when(questionServ.saveAllQuestions(anyList()))
+                .thenReturn(generatedQuestions);
+
+
+        String requestBody = """
+        {
+          "evaluationTypesIds": ["%s", "%s","%s","%s"],
+          "numberOfQuestions": %d,
+          "estimatedInterviewDuration": %d
+        }
+        """.formatted(
+                evaluationTypeDTOS.get(0).id(),
+                evaluationTypeDTOS.get(1).id(),
+                evaluationTypeDTOS.get(2).id(),
+                evaluationTypeDTOS.get(3).id(),
+                numberOfQuestions,
+                estimatedDuration
+        );
+
+        mockMvc.perform(post("/api/v1/interviews/{interviewId}/generateQuestions", interviewId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
+                .andExpect(jsonPath("$[0].description").value("What is your experience with Spring Boot?"))
+                .andExpect(jsonPath("$[0].durationInMinutes").value(5))
+                .andExpect(jsonPath("$[0].interviewId").value(interviewId.toString()))
+                .andExpect(jsonPath("$[1].description").value("How do you handle database transactions?"))
+                .andExpect(jsonPath("$[1].durationInMinutes").value(4))
+                .andExpect(jsonPath("$[2].description").value("Explain microservices architecture."))
+                .andExpect(jsonPath("$[2].durationInMinutes").value(6));
+        verify(interviewServ).getPlaceholdersForInterviewQuestionsPrompt(interviewId);
+        verify(evaluationTypeServ).findAllById(anyList());
+        verify(questionServ).prepareQuestionsFromAIResponse(
+                eq(generateQuestionsInfo),
+                eq(evaluationTypeDTOS)
+        );
+        verify(questionServ).saveAllQuestions(anyList());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,5 +58,13 @@ public class EvaluationTypeServImpl implements EvaluationTypeServ {
         EvaluationType type = evaluationTyperepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("EvaluationType not found with id: " + id));
         evaluationTyperepository.delete(type);
+    }
+
+    @Override
+    public List<EvaluationTypeDTO> findAllById(List<UUID> ids){
+        List<EvaluationType> evaluationTypes = evaluationTyperepository.findAllById(ids);
+
+        return evaluationTypes.stream()
+                .map(mapper::toDto).collect(Collectors.toList());
     }
 }

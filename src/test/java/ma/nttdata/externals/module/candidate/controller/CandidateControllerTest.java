@@ -62,6 +62,8 @@ class CandidateControllerTest {
                 "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
+                1,
+                2,
                 candidateId,
                 offerId,
                 Collections.emptyList(), // evaluations
