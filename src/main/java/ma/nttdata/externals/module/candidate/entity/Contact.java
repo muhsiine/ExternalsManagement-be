@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.candidate.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

@@ -9,6 +9,7 @@ import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.Question;
+import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
@@ -264,6 +265,15 @@ public class InterviewController  {
     @GetMapping("/{interviewId}/evaluationDTO")
     public ResponseEntity<List<EvaluationDTO>> getInterviewEvaluationsDTO(@PathVariable UUID interviewId){
         return ResponseEntity.ok(evaluationServ.getAllEvaluationsDTOByInterviewID(interviewId));
+    }
+
+    @Operation(
+            summary = "Get all the evaluations of an interview",
+            description = "Return the evaluations of an interview alongside with their evaluationTypes"
+    )
+    @GetMapping("/{interviewId}/evaluationsWithInterview")
+    public ResponseEntity<List<EvaluationWithInterviewAndEvaluationTypeDTO>> getInterviewWithEvaluations(@PathVariable UUID interviewId){
+        return ResponseEntity.ok(evaluationServ.getAllEvaluationsWithInterviewByInterviewId(interviewId));
     }
 
 }

@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
-import ma.nttdata.externals.module.interview.dto.AiEvaluationResponseDTO;
-import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
-import ma.nttdata.externals.module.interview.dto.InterviewEvaluationPlaceholdersDTO;
-import ma.nttdata.externals.module.interview.dto.QuestionsAndAnswersForEvaluationDTO;
+import ma.nttdata.externals.module.candidate.dto.CandidateWithoutInterviewDTO;
+import ma.nttdata.externals.module.candidate.entity.Candidate;
+import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.interview.entity.Interview;
@@ -17,6 +16,7 @@ import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
+import ma.nttdata.externals.module.offer.dto.OfferWithoutInterviewDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -177,4 +177,65 @@ public class EvaluationServImpl implements EvaluationServ {
     public List<EvaluationDTO> getAllEvaluationsDTOByInterviewID(UUID interviewId){
         return evaluationMapper.toDtoList(evaluationRepository.findByInterviewId(interviewId));
     }
+
+    @Override
+    public List<EvaluationWithInterviewAndEvaluationTypeDTO> getAllEvaluationsWithInterviewByInterviewId(UUID interviewId) {
+        List<Evaluation> evaluations = evaluationRepository.findByInterviewId(interviewId);
+
+        return evaluations.stream().map(evaluation -> {
+            Interview interview = evaluation.getInterview();
+
+            Candidate candidate = interview.getCandidate();
+            InterviewWithCandidateAndOfferDTO interviewDTO = new InterviewWithCandidateAndOfferDTO(
+                    interview.getId(),
+                    interview.getStartTime(),
+                    interview.getEndTime(),
+                    interview.getDescription(),
+                    interview.getLink(),
+                    interview.getFeedback_general(),
+                    interview.getScheduledAt(),
+                    interview.getComment(),
+                    interview.getNumberOfQuestions(),
+                    interview.getEstimatedDuration(),
+                    new CandidateWithoutInterviewDTO(
+                            candidate.getId(),
+                            candidate.getFullName(),
+                            candidate.getBirthDate(),
+                            candidate.getYearsOfExperience(),
+                            candidate.getGender(),
+                            candidate.getMainTech(),
+                            candidate.getSummary(),
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null
+                    ),
+                    new OfferWithoutInterviewDTO(
+                            interview.getOffer().getId(),
+                            interview.getOffer().getTitle(),
+                            interview.getOffer().getDescription()
+                    )
+            );
+
+            EvaluationType evaluationType = evaluation.getEvaluationType();
+            EvaluationTypeDTO evaluationTypeDTO = new EvaluationTypeDTO(
+                    evaluationType.getId(),
+                    evaluationType.getDescription(),
+                    evaluationType.getCoefficient()
+            );
+
+            return new EvaluationWithInterviewAndEvaluationTypeDTO(
+                    evaluation.getId(),
+                    evaluation.getScore(),
+                    evaluation.getFeedback(),
+                    interviewDTO,
+                    evaluationTypeDTO
+            );
+        }).toList();
+    }
+
+
 }
