@@ -176,14 +176,13 @@ public class InterviewServImpl implements InterviewServ {
     }
     //add comment
     @Override
-    public InterviewDTO addComment(UUID id, String comment) {
+    public InterviewDTO addCommentToInterview(UUID id, String comment) {
         Interview interview = interviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Interview not found with Id " + id));
+                .orElseThrow(() -> new RuntimeException("Interview not found with ID: " + id));
 
-        // Assuming Interview entity has a `comment` field
-        interview.setComment(comment);
-
+        interview.setComment(comment); // Assuming 'comment' is a field in the Interview entity
         Interview updatedInterview = interviewRepository.save(interview);
+
         return interviewMapper.toDto(updatedInterview);
     }
 

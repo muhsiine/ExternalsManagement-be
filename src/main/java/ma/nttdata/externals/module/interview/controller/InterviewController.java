@@ -69,13 +69,17 @@ public class InterviewController  {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
         }
     }
+    @Operation(
+            summary = "Add a comment to an interview",
+            description = "Updates the comment field of an interview by ID"
+    )
     @PutMapping("/{id}/add-comment")
     public ResponseEntity<InterviewDTO> addComment(
             @PathVariable UUID id,
-            @RequestBody Map<String, String> payload) {
+            @RequestBody CommentRequestDTO commentRequestDTO) {
         try {
-            String comment = payload.get("comment");
-            return ResponseEntity.ok(interviewServ.addComment(id, comment));
+            InterviewDTO updatedInterview = interviewServ.addCommentToInterview(id, commentRequestDTO.comment());
+            return ResponseEntity.ok(updatedInterview);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
         }

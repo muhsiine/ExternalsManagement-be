@@ -46,7 +46,8 @@ public interface InterviewServ {
     List<EvaluationDTO> getEvaluationsOfInterview(UUID interviewId);
 
     // add a comment for interview
-    InterviewDTO addComment(UUID id, String comment);
+    InterviewDTO addCommentToInterview(UUID id, String comment);
+
 
     EvaluationTypeDTO getEvaluationTypeOfEvaluation(UUID evaluationId);
 }

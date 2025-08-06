@@ -41,6 +41,7 @@ public abstract class InterviewMapper {
     @Mapping(target = "offer", ignore = true)
     @Mapping(target = "evaluations" , ignore = true)
     @Mapping(target = "questions" , ignore = true)
+
     public abstract void updateInterviewFromDto(InterviewDTO dto, @MappingTarget Interview entity);
 
     // AfterMapping to set candidate and offer manually using repository
