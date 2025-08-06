@@ -9,6 +9,7 @@ import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.*;
 import ma.nttdata.externals.module.interview.service.*;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.dto.OfferWithoutInterviewDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -422,24 +423,7 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.summary").value("Hardworking and detail-oriented."));
     }
 
-    @Test
-    @WithMockUser
-    void getEvaluationsOfInterview() throws Exception {
-        // Arrange
-        List<EvaluationDTO> evaluations = List.of(evaluationDTO);
 
-        // When
-        when(interviewServ.getEvaluationsOfInterview(interviewId)).thenReturn(evaluations);
-
-        // Then
-        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].id").value(evaluationId.toString()))
-                .andExpect(jsonPath("$[0].score").value(4.5))
-                .andExpect(jsonPath("$[0].feedback").value("Good technical skills"));
-    }
 
     @Test
     @WithMockUser
@@ -604,36 +588,7 @@ class InterviewControllerTest {
         verify(questionServ).saveAllQuestions(anyList());
     }
 
-    @Test
-    @WithMockUser
-    void shouldReturnQuestionsList() throws Exception {
 
-
-        Question q1 = new Question();
-        q1.setId(UUID.randomUUID());
-        q1.setDescription("what is spring boot");
-        q1.setDurationInMinutes(50);
-        Answer answer1 = new Answer();
-        answer1.setId(answerId);
-        q1.setAnswer(answer1);
-        Interview interview = new Interview();
-        //interview won't be fetched when using entity because there will be a cycle
-        interview.setId(interviewId);
-        q1.setInterview(interview);
-
-
-
-        List<Question> questions = List.of(q1);
-
-        given(questionServ.findAllQuestionsByInterviewId(interviewId)).willReturn(questions);
-
-        mockMvc.perform(get("/api/v1/interviews/" + interviewId + "/getQuestions"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].description").value("what is spring boot"))
-                .andExpect(jsonPath("$[0].durationInMinutes").value(50))
-                .andExpect(jsonPath("$[0].answer.id").value(answerId.toString()));;
-    }
 
     @Test
     @WithMockUser
@@ -645,7 +600,7 @@ class InterviewControllerTest {
 
         given(questionServ.findAllQuestionsDTOSByInterviewId(interviewId)).willReturn(dtos);
 
-        mockMvc.perform(get("/api/v1/interviews/" + interviewId + "/getQuestionsDTO"))
+        mockMvc.perform(get("/api/v1/interviews/" + interviewId + "/getQuestions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].description").value("what is spring boot"))
@@ -783,57 +738,49 @@ class InterviewControllerTest {
 
     }
 
-    @Test
-    @WithMockUser
-    void shouldReturnAllEvaluations() throws Exception {
-        List<Evaluation> evaluations = List.of(
-                new Evaluation(UUID.randomUUID(), 80.0, "Good job", null,new EvaluationType(UUID.randomUUID(), "Technical", 1.0)),
-                new Evaluation(UUID.randomUUID(), 75.5, "Needs improvement", null,new EvaluationType(UUID.randomUUID(), "Communication", 1.0))
-        );
-
-        when(evaluationServ.getAllEvaluationsByInterviewID(interviewId)).thenReturn(evaluations);
-
-        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluation", interviewId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].score").value(80.0))
-                .andExpect(jsonPath("$[0].feedback").value("Good job"))
-                .andExpect(jsonPath("$[0].evaluationType.description").value("Technical"))
-                .andExpect(jsonPath("$[1].score").value(75.5))
-                .andExpect(jsonPath("$[1].feedback").value("Needs improvement"))
-                .andExpect(jsonPath("$[1].evaluationType.description").value("Communication"));
-
-        verify(evaluationServ).getAllEvaluationsByInterviewID(interviewId);
-    }
 
     @Test
     @WithMockUser
-    void shouldReturnAllEvaluationsDTO() throws Exception {
+    void shouldReturnAllEvaluationsWithInterviewAndEvaluationTypeDTO() throws Exception {
+        UUID interviewId = UUID.randomUUID();
+        UUID candidateId = UUID.randomUUID();
+        UUID offerId = UUID.randomUUID();
 
-        List<EvaluationTypeDTO> evaluationTypesDTO = List.of(
-                new EvaluationTypeDTO(UUID.randomUUID(),"communication",2.0),
-                new EvaluationTypeDTO(UUID.randomUUID(),"Technical",3.0)
+        EvaluationTypeDTO evalType1 = new EvaluationTypeDTO(UUID.randomUUID(), "communication", 2.0);
+        EvaluationTypeDTO evalType2 = new EvaluationTypeDTO(UUID.randomUUID(), "technical", 3.0);
+
+        CandidateWithoutInterviewDTO candidate = new CandidateWithoutInterviewDTO(
+                candidateId, "John Doe", LocalDate.of(1990, 1, 1), 5, GenderEnum.M,
+                "Java", "Experienced developer", null, null, null, null, null, null, null
         );
-        List<EvaluationDTO> evaluationDTOs = List.of(
-                new EvaluationDTO(UUID.randomUUID(), 90.0, "Excellent", interviewId,evaluationTypesDTO.get(0).id()),
-                new EvaluationDTO(UUID.randomUUID(), 85.0, "Very Good", interviewId,evaluationTypesDTO.get(1).id())
+
+        OfferWithoutInterviewDTO offer = new OfferWithoutInterviewDTO(offerId, "Backend Developer", "Job Description");
+
+        InterviewWithCandidateAndOfferDTO interviewDTO = new InterviewWithCandidateAndOfferDTO(
+                interviewId, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "Tech Interview",
+                "https://meet.link", "Great candidate", LocalDateTime.now().minusDays(1),
+                "No comments", 5, 60, candidate, offer
         );
 
+        List<EvaluationWithInterviewAndEvaluationTypeDTO> evaluationDTOs = List.of(
+                new EvaluationWithInterviewAndEvaluationTypeDTO(UUID.randomUUID(), 90.0, "Excellent", interviewDTO, evalType1),
+                new EvaluationWithInterviewAndEvaluationTypeDTO(UUID.randomUUID(), 85.0, "Very Good", interviewDTO, evalType2)
+        );
 
+        when(evaluationServ.getAllEvaluationsWithInterviewByInterviewId(interviewId)).thenReturn(evaluationDTOs);
 
-        when(evaluationServ.getAllEvaluationsDTOByInterviewID(interviewId)).thenReturn(evaluationDTOs);
-
-        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluationDTO", interviewId))
+        mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].score").value(90.0))
                 .andExpect(jsonPath("$[0].feedback").value("Excellent"))
-                .andExpect(jsonPath("$[0].evaluationTypeId").value(evaluationTypesDTO.get(0).id().toString()))
+                .andExpect(jsonPath("$[0].evaluationType.description").value("communication"))
                 .andExpect(jsonPath("$[1].score").value(85.0))
                 .andExpect(jsonPath("$[1].feedback").value("Very Good"))
-                .andExpect(jsonPath("$[1].evaluationTypeId").value(evaluationTypesDTO.get(1).id().toString()));
+                .andExpect(jsonPath("$[1].evaluationType.description").value("technical"));
 
-        verify(evaluationServ).getAllEvaluationsDTOByInterviewID(interviewId);
+        verify(evaluationServ).getAllEvaluationsWithInterviewByInterviewId(interviewId);
     }
+
 
 }

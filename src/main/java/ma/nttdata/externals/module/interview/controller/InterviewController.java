@@ -238,7 +238,7 @@ public class InterviewController  {
             description = "Return the evaluations of an interview alongside with their evaluationTypes"
     )
     @GetMapping("/{interviewId}/evaluations")
-    public ResponseEntity<List<EvaluationWithInterviewAndEvaluationTypeDTO>> getInterviewWithEvaluations(@PathVariable UUID interviewId){
+    public ResponseEntity<List<EvaluationWithInterviewAndEvaluationTypeDTO>> getInterviewEvaluations(@PathVariable UUID interviewId){
         return ResponseEntity.ok(evaluationServ.getAllEvaluationsWithInterviewByInterviewId(interviewId));
     }
 
