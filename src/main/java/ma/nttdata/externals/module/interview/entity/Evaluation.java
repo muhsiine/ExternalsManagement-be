@@ -27,8 +27,6 @@ public class Evaluation {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "interview_id", nullable = false)
-    @JsonBackReference // to prevent cycles because when i tried to save it kept fetching because
-    // interview reference evaluation and evaluation references interview
     private Interview interview;
 
     @OneToOne(fetch =FetchType.EAGER)
