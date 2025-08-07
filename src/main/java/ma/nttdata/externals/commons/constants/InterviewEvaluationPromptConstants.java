@@ -26,6 +26,9 @@ public final class InterviewEvaluationPromptConstants {
             - Ensure fairness by matching evaluation difficulty to candidate's stated experience level.
             - Return a valid Json Array, and respect this structure do not add anything to it "{JSON_SCHEMA}".
             - Maintain the order of evaluations in the output exactly as provided in the 'EvaluationTypes' list.
+            - For the 'evaluationType' field in the output, use the exact 'description' value from each EvaluationTypes list.
+            - Ensure each evaluation in the output array corresponds exactly to one EvaluationType from the input list.
+            - Do not skip any evaluation types or add additional ones not provided in the Evaluation Types.
             
             Here is the information needed for the evaluation:
             #Interview Duration: "{InterviewDuration}",
@@ -40,8 +43,8 @@ public final class InterviewEvaluationPromptConstants {
             [
               {
                 "score": "Double - between 0.00 and 100.00",
-                "feedback": "String - Try to give a an overall feedback of the performance of the candidate in this evaluation type",
-                "evaluationType": "String - description of the evaluationType"
+                "feedback": "String - Try to give an overall feedback of the performance of the candidate in this evaluation type",
+                "evaluationType": "String - use the exact 'description' field value from the corresponding EvaluationType entity"
               }
             ]
             """;
