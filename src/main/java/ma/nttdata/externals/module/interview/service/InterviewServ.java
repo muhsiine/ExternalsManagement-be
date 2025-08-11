@@ -53,4 +53,6 @@ public interface InterviewServ {
     SendEmailDTO getEmailInfo(UUID interviewId);
 
     placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId);
+
+    PlaceholdersForInterviewEvaluationPromptDTO getInterviewEvaluationPlaceholders(UUID interviewId);
 }

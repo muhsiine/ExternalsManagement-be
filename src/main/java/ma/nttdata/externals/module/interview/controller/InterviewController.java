@@ -7,6 +7,7 @@ import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
@@ -35,6 +36,7 @@ public class InterviewController  {
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
     private final EvaluationTypeServ evaluationTypeServ;
+    private final EvaluationTypeServ evaluationServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -226,4 +228,27 @@ public class InterviewController  {
 
         return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
     }
+
+    @Operation(
+            summary = "Generates interview evaluations using AI ",
+            description = """
+        This endpoint receives a list of questions and candidate answers for a specific interview, 
+        and calls an AI service to generate evaluations based on multiple criteria 
+        (e.g., time management, technical accuracy, job alignment).
+
+        The AI returns scores and feedback for each evaluation type defined in the interview context. 
+        These evaluations are then persisted to the database.
+
+        It returns the list of AI-generated evaluation responses.
+        """
+    )
+    @PostMapping("/{interviewId}/evaluations")
+    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswersForEvaluation){
+        PlaceholdersForInterviewEvaluationPromptDTO placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
+        //List<EvaluationsAIResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationResponseFromAi(questionsAndAnswersForEvaluation,placeholders);
+        //List<Evaluation> evaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,placeholders);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(placeholders);
+    }
+
 }

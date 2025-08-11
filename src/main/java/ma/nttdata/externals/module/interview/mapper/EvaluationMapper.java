@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.interview.mapper;
 
 import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
+import ma.nttdata.externals.module.interview.dto.EvaluationsAIResponseDTO;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
@@ -44,4 +45,29 @@ public interface EvaluationMapper {
             evaluation.setEvaluationType(type);
         }
     }
+
+    default List<Evaluation> mapAIEvaluationResponsesToEvaluations(
+            List<EvaluationsAIResponseDTO> aiResponses,
+            List<Evaluation> evaluations) {
+
+        if (evaluations.size() != aiResponses.size()) {
+            throw new IllegalArgumentException("Mismatch between evaluations and AI responses");
+        }
+
+        for (Evaluation evaluation : evaluations) {
+            String evaluationTypeDescription = evaluation.getEvaluationType().getDescription();
+
+            for (EvaluationsAIResponseDTO aiResponse : aiResponses) {
+                if (aiResponse.evaluationType().equals(evaluationTypeDescription)) {
+                    evaluation.setFeedback(aiResponse.feedback());
+                    evaluation.setScore(aiResponse.score());
+                    break;
+                }
+            }
+        }
+
+        return evaluations;
+    }
+
+
 }
