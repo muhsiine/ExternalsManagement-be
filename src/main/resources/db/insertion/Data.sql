@@ -324,7 +324,7 @@ evaluation_type_ids AS (
 INSERT INTO evaluations (id, score, feedback, interview_id, evaluation_type_id)
 SELECT
     uuid_generate_v4(),
-    ROUND((RANDOM() * 5)::NUMERIC, 2),
+    ROUND((RANDOM() * 100)::NUMERIC, 2),
     (ARRAY[
         'Excellent performance',
         'Good knowledge but lacks experience',
