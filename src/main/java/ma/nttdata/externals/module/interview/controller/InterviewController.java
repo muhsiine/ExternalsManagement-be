@@ -9,10 +9,7 @@ import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.Question;
-import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
-import ma.nttdata.externals.module.interview.service.InterviewServ;
-import ma.nttdata.externals.module.interview.service.QuestionServ;
-import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
+import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +33,7 @@ public class InterviewController  {
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
     private final EvaluationTypeServ evaluationTypeServ;
-    private final EvaluationTypeServ evaluationServ;
+    private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -51,7 +48,7 @@ public class InterviewController  {
             summary = "Get all interviews",
             description = "Returns a list of all interviews in the system"
     )
-    @GetMapping("/all")
+    @GetMapping()
     public ResponseEntity<List<InterviewDTO>> getAllInterviews() {
         return ResponseEntity.ok(interviewServ.getAllInterviews());
     }
@@ -238,17 +235,12 @@ public class InterviewController  {
 
         The AI returns scores and feedback for each evaluation type defined in the interview context. 
         These evaluations are then persisted to the database.
-
-        It returns the list of AI-generated evaluation responses.
         """
     )
     @PostMapping("/{interviewId}/evaluations")
-    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody List<QuestionsAndAnswersForEvaluationDTO> questionsAndAnswersForEvaluation){
-        PlaceholdersForInterviewEvaluationPromptDTO placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
-        //List<EvaluationsAIResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationResponseFromAi(questionsAndAnswersForEvaluation,placeholders);
-        //List<Evaluation> evaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,placeholders);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(placeholders);
+    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
+        List<Evaluation> savedEvaluations = interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
     }
 
 }

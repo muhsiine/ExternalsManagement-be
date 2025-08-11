@@ -10,8 +10,6 @@ import java.util.List;
 public record PlaceholdersForInterviewEvaluationPromptDTO(
         CandidateDTO candidate,
         OfferDTO offer,
-        List<String> evaluationsDescription,
-        List<Evaluation> evaluations,
         List<EvaluationType> evaluationType
 ) {
 }

@@ -105,7 +105,7 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public List<EvaluationsAIResponseDTO> prepareEvaluationsResponseFromAi(InterviewEvaluationsRequestDTO interviewEvaluationsRequest,PlaceholdersForInterviewEvaluationPromptDTO  placeholders){
+    public List<EvaluationsAIResponseDTO> prepareEvaluationsDTOFromAiResponse(InterviewEvaluationsRequestDTO interviewEvaluationsRequest,PlaceholdersForInterviewEvaluationPromptDTO  placeholders){
         try{
             String generatedEvaluation = mockFlag ? InterviewEvaluationPromptConstants.JSON_MOCK
                     :getInterviewsEvaluationsFromAiByPrompt(interviewEvaluationsRequest,placeholders);
@@ -128,7 +128,7 @@ public class EvaluationServImpl implements EvaluationServ {
                 .replace(InterviewEvaluationPromptConstants.OFFER_PLACEHOLDER,placeholders.offer().toString())
                 .replace(InterviewEvaluationPromptConstants.JSON_SCHEMA_PLACEHOLDER,InterviewEvaluationPromptConstants.JS0N_SCHEMA)
                 .replace(InterviewEvaluationPromptConstants.QUESTION_ANSWER_DTO_PLACEHOLDER,interviewEvaluationsRequest.questionsAndAnswersForEvaluation().toString())
-                .replace(InterviewEvaluationPromptConstants.EVALUATION_TYPES_PLACEHOLDER,placeholders.evaluationsDescription().toString())
+                .replace(InterviewEvaluationPromptConstants.EVALUATION_TYPES_PLACEHOLDER,placeholders.evaluationType().toString())
                 .replace(InterviewEvaluationPromptConstants.JSON_MOCK_PLACEHOLDER,InterviewEvaluationPromptConstants.JSON_MOCK_PLACEHOLDER);
 
         return aiRestClient.post()
@@ -139,9 +139,16 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public List<Evaluation> saveAIEvaluationResponse(List<EvaluationsAIResponseDTO> aiEvaluationsResponse, PlaceholdersForInterviewEvaluationPromptDTO placeholders){
-        List<Evaluation> evaluations = evaluationMapper.mapAIEvaluationResponsesToEvaluations(aiEvaluationsResponse,placeholders.evaluations());
+    public List<Evaluation> saveAIEvaluationResponse(List<EvaluationsAIResponseDTO> aiEvaluationsResponse, List<Evaluation> evaluations){
+        List<Evaluation> evaluationsWithFeedbackAndScore = evaluationMapper.mapAIEvaluationResponsesToEvaluations(aiEvaluationsResponse,evaluations);
 
-        return evaluationRepository.saveAll(evaluations);
+        return evaluationRepository.saveAll(evaluationsWithFeedbackAndScore);
     }
+
+    @Override
+    public List<Evaluation> getAllEvaluationsByInterviewID(UUID interviewId){
+
+        return evaluationRepository.findByInterviewId(interviewId);
+    }
+
 }

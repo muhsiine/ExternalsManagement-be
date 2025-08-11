@@ -20,9 +20,11 @@ public interface EvaluationServ {
 
     void deleteEvaluation(UUID id);
 
-    List<EvaluationsAIResponseDTO> prepareEvaluationsResponseFromAi(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO placeholders);
+    List<EvaluationsAIResponseDTO> prepareEvaluationsDTOFromAiResponse(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO placeholders);
 
     String getInterviewsEvaluationsFromAiByPrompt(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO placeholders);
 
-    List<Evaluation> saveAIEvaluationResponse(List<EvaluationsAIResponseDTO> aiEvaluationResponse, PlaceholdersForInterviewEvaluationPromptDTO placeholders);
+    List<Evaluation> saveAIEvaluationResponse(List<EvaluationsAIResponseDTO> aiEvaluationResponse, List<Evaluation> evaluations);
+
+    List<Evaluation> getAllEvaluationsByInterviewID(UUID interviewId);
 }

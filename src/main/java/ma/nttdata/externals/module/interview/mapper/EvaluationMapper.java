@@ -50,15 +50,11 @@ public interface EvaluationMapper {
             List<EvaluationsAIResponseDTO> aiResponses,
             List<Evaluation> evaluations) {
 
-        if (evaluations.size() != aiResponses.size()) {
-            throw new IllegalArgumentException("Mismatch between evaluations and AI responses");
-        }
-
         for (Evaluation evaluation : evaluations) {
             String evaluationTypeDescription = evaluation.getEvaluationType().getDescription();
 
             for (EvaluationsAIResponseDTO aiResponse : aiResponses) {
-                if (aiResponse.evaluationType().equals(evaluationTypeDescription)) {
+                if (aiResponse.evaluationTypeDescription().equals(evaluationTypeDescription)) {
                     evaluation.setFeedback(aiResponse.feedback());
                     evaluation.setScore(aiResponse.score());
                     break;

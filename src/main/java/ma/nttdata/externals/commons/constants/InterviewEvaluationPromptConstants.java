@@ -77,10 +77,10 @@ public final class InterviewEvaluationPromptConstants {
         """;
 
 
-    public static final String OFFER_PLACEHOLDER = "OFFER_DATA";
-    public static final String CANDIDATE_PLACEHOLDER = "CANDIDATE_DATA";
-    public static final String QUESTION_ANSWER_DTO_PLACEHOLDER = "QuestionAnswer_DATA";
-    public static final String EVALUATION_TYPES_PLACEHOLDER = "EVALUATION_TYPES_DATA";
-    public static final String JSON_SCHEMA_PLACEHOLDER = "JSON_SCHEMA";
-    public static final String JSON_MOCK_PLACEHOLDER = "JSON_MOCK";
+    public static final String OFFER_PLACEHOLDER = "{OFFER_DATA}";
+    public static final String CANDIDATE_PLACEHOLDER = "{CANDIDATE_DATA}";
+    public static final String QUESTION_ANSWER_DTO_PLACEHOLDER = "{QuestionAnswer_DATA}";
+    public static final String EVALUATION_TYPES_PLACEHOLDER = "{EVALUATION_TYPES_DATA}";
+    public static final String JSON_SCHEMA_PLACEHOLDER = "{JSON_SCHEMA}";
+    public static final String JSON_MOCK_PLACEHOLDER = "{JSON_MOCK}";
 }

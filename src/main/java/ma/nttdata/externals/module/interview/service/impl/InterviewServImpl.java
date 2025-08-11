@@ -252,26 +252,15 @@ public class InterviewServImpl implements InterviewServ {
                 .orElseThrow(() -> new ResourceNotFoundException("Interview",interviewId));
 
         CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
-
         OfferDTO offer = offerMapper.toDto(interview.getOffer());
-
-        List<String> evaluationsTypesDescription = interview.getEvaluations()
-                .stream()
-                .map(evaluation -> evaluation.getEvaluationType().getDescription())
-                .toList();
-
         List<EvaluationType> evaluationTypes = interview.getEvaluations()
                 .stream()
                 .map(evaluation -> evaluation.getEvaluationType())
                 .toList();
 
-
-
         return new PlaceholdersForInterviewEvaluationPromptDTO(
                 candidate,
                 offer,
-                evaluationsTypesDescription,
-                interview.getEvaluations(),
                 evaluationTypes
         );
 
