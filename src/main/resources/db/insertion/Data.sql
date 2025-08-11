@@ -270,7 +270,9 @@ INSERT INTO interviews (
     link,
     feedback_general,
     scheduled_at,
-    comment
+    comment,
+    number_of_questions,
+    estimated_duration
 )
 SELECT
     uuid_generate_v4(),
@@ -282,7 +284,9 @@ SELECT
     'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
     NULL,
     CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
-    'Auto-generated comment for testing'
+    'Auto-generated comment for testing',
+     15,
+     60
 FROM offer_ids o
 CROSS JOIN candidate_ids c
 LIMIT 20;
