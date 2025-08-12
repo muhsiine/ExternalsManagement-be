@@ -24,9 +24,11 @@ import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -264,6 +266,16 @@ public class InterviewServImpl implements InterviewServ {
                 evaluationTypes
         );
 
+    }
+
+    public List<InterviewListDTO> getAllInterviewList(){
+        List<Interview> interviews = interviewRepository.findAll();
+
+        List<InterviewListDTO> interviewList = interviews.stream()
+                .map(interviewMapper::fromInterviewToInterviewListDTO)
+                .collect(Collectors.toList());
+
+        return interviewList;
     }
 }
 

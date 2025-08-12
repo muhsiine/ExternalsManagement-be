@@ -55,4 +55,6 @@ public interface InterviewServ {
     placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId);
 
     PlaceholdersForInterviewEvaluationPromptDTO getInterviewEvaluationPlaceholders(UUID interviewId);
+
+    List<InterviewListDTO> getAllInterviewList();
 }

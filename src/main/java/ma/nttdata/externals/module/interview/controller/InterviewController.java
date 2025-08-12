@@ -49,7 +49,7 @@ public class InterviewController  {
             description = "Returns a list of all interviews in the system"
     )
     @GetMapping()
-    public ResponseEntity<List<InterviewDTO>> getAllInterviews() {
+    public ResponseEntity<List<InterviewListDTO>> getAllInterviews() {
         return ResponseEntity.ok(interviewServ.getAllInterviews());
     }
 

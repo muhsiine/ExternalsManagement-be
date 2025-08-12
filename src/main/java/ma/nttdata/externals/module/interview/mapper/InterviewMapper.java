@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.mapper;
 
 import ma.nttdata.externals.module.interview.dto.InterviewDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
+import ma.nttdata.externals.module.interview.dto.InterviewListDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
@@ -29,6 +30,11 @@ public abstract class InterviewMapper {
     @Mapping(target = "candidate", ignore = true)
     @Mapping(target = "offer", ignore = true)
     public abstract Interview toEntity(InterviewDTO interviewDTO);
+
+    @Mapping(target = "candidateFullName",source = "interview.candidate.fullName")
+    @Mapping(target= "candidateMainTech", source = "interview.candidate.mainTech")
+    @Mapping(target = "offerTitle", source = "interview.offer.title")
+    public abstract InterviewListDTO fromInterviewToInterviewListDTO(Interview interview);
 
     // List mappings
     public abstract List<InterviewDTO> toDtoList(List<Interview> interviews);
