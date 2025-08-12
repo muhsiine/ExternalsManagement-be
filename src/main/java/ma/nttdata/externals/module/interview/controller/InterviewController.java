@@ -50,7 +50,7 @@ public class InterviewController  {
     )
     @GetMapping()
     public ResponseEntity<List<InterviewListDTO>> getAllInterviews() {
-        return ResponseEntity.ok(interviewServ.getAllInterviews());
+        return ResponseEntity.ok(interviewServ.getAllInterviewList());
     }
 
     @Operation(

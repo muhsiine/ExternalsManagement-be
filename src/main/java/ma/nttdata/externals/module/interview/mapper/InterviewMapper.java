@@ -31,9 +31,9 @@ public abstract class InterviewMapper {
     @Mapping(target = "offer", ignore = true)
     public abstract Interview toEntity(InterviewDTO interviewDTO);
 
-    @Mapping(target = "candidateFullName",source = "interview.candidate.fullName")
-    @Mapping(target= "candidateMainTech", source = "interview.candidate.mainTech")
-    @Mapping(target = "offerTitle", source = "interview.offer.title")
+    @Mapping(target = "candidateFullName",source = "candidate.fullName")
+    @Mapping(target= "candidateMainTech", source = "candidate.mainTech")
+    @Mapping(target = "offerTitle", source = "offer.title")
     public abstract InterviewListDTO fromInterviewToInterviewListDTO(Interview interview);
 
     // List mappings
