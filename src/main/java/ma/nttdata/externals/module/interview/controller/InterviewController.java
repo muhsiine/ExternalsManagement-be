@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -76,6 +77,21 @@ public class InterviewController  {
             @RequestBody InterviewDTO interviewDTO) {
         try {
             return ResponseEntity.ok(interviewServ.updateInterview(id, interviewDTO));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        }
+    }
+    @Operation(
+            summary = "Add a comment to an interview",
+            description = "Updates the comment field of an interview by ID"
+    )
+    @PutMapping("/{id}/add-comment")
+    public ResponseEntity<InterviewDTO> addComment(
+            @PathVariable UUID id,
+            @RequestBody CommentRequestDTO commentRequestDTO) {
+        try {
+            InterviewDTO updatedInterview = interviewServ.addCommentToInterview(id, commentRequestDTO.comment());
+            return ResponseEntity.ok(updatedInterview);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
         }

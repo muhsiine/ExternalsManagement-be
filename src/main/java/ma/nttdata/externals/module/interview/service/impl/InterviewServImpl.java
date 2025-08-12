@@ -191,6 +191,17 @@ public class InterviewServImpl implements InterviewServ {
 
         return evaluationTypeMapper.toDto(evaluationType);
     }
+    //add comment
+    @Override
+    public InterviewDTO addCommentToInterview(UUID id, String comment) {
+        Interview interview = interviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Interview not found with ID: " + id));
+
+        interview.setComment(comment); // Assuming 'comment' is a field in the Interview entity
+        Interview updatedInterview = interviewRepository.save(interview);
+
+        return interviewMapper.toDto(updatedInterview);
+    }
 
     @Override
     public String saveInterviewLink(String token, UUID interviewId) {
