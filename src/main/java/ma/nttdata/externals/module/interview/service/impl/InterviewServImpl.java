@@ -24,9 +24,11 @@ import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -189,6 +191,17 @@ public class InterviewServImpl implements InterviewServ {
 
         return evaluationTypeMapper.toDto(evaluationType);
     }
+    //add comment
+    @Override
+    public InterviewDTO addCommentToInterview(UUID id, String comment) {
+        Interview interview = interviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Interview not found with ID: " + id));
+
+        interview.setComment(comment); // Assuming 'comment' is a field in the Interview entity
+        Interview updatedInterview = interviewRepository.save(interview);
+
+        return interviewMapper.toDto(updatedInterview);
+    }
 
     @Override
     public String saveInterviewLink(String token, UUID interviewId) {
@@ -244,6 +257,36 @@ public class InterviewServImpl implements InterviewServ {
                 interview.getScheduledAt(),
                 interview.getLink()
         );
+    }
+
+    @Override
+    public PlaceholdersForInterviewEvaluationPromptDTO getInterviewEvaluationPlaceholders(UUID interviewId){
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview",interviewId));
+
+        CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
+        OfferDTO offer = offerMapper.toDto(interview.getOffer());
+        List<EvaluationType> evaluationTypes = interview.getEvaluations()
+                .stream()
+                .map(evaluation -> evaluation.getEvaluationType())
+                .toList();
+
+        return new PlaceholdersForInterviewEvaluationPromptDTO(
+                candidate,
+                offer,
+                evaluationTypes
+        );
+
+    }
+
+    public List<InterviewListDTO> getAllInterviewList(){
+        List<Interview> interviews = interviewRepository.findAll();
+
+        List<InterviewListDTO> interviewList = interviews.stream()
+                .map(interviewMapper::fromInterviewToInterviewListDTO)
+                .collect(Collectors.toList());
+
+        return interviewList;
     }
 }
 

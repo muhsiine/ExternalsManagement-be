@@ -7,11 +7,9 @@ import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.Question;
-import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
-import ma.nttdata.externals.module.interview.service.InterviewServ;
-import ma.nttdata.externals.module.interview.service.QuestionServ;
-import ma.nttdata.externals.module.interview.service.InterviewTokenServ;
+import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -35,6 +34,7 @@ public class InterviewController  {
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
     private final EvaluationTypeServ evaluationTypeServ;
+    private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -49,9 +49,9 @@ public class InterviewController  {
             summary = "Get all interviews",
             description = "Returns a list of all interviews in the system"
     )
-    @GetMapping("/all")
-    public ResponseEntity<List<InterviewDTO>> getAllInterviews() {
-        return ResponseEntity.ok(interviewServ.getAllInterviews());
+    @GetMapping()
+    public ResponseEntity<List<InterviewListDTO>> getAllInterviews() {
+        return ResponseEntity.ok(interviewServ.getAllInterviewList());
     }
 
     @Operation(
@@ -77,6 +77,21 @@ public class InterviewController  {
             @RequestBody InterviewDTO interviewDTO) {
         try {
             return ResponseEntity.ok(interviewServ.updateInterview(id, interviewDTO));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        }
+    }
+    @Operation(
+            summary = "Add a comment to an interview",
+            description = "Updates the comment field of an interview by ID"
+    )
+    @PutMapping("/{id}/add-comment")
+    public ResponseEntity<InterviewDTO> addComment(
+            @PathVariable UUID id,
+            @RequestBody CommentRequestDTO commentRequestDTO) {
+        try {
+            InterviewDTO updatedInterview = interviewServ.addCommentToInterview(id, commentRequestDTO.comment());
+            return ResponseEntity.ok(updatedInterview);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
         }
@@ -133,14 +148,6 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewServ.getCandidateByInterviewId(interviewId)) ;
     }
 
-    @Operation(
-            summary = "Get evaluations of an interview",
-            description = "Fetches all evaluations that belong to a specific interview"
-    )
-    @GetMapping("/{interviewId}/evaluations")
-    public ResponseEntity<List<EvaluationDTO>> getEvaluationsOfInterview(@PathVariable UUID interviewId) {
-        return ResponseEntity.ok(interviewServ.getEvaluationsOfInterview(interviewId));
-    }
 
     @Operation(
             summary = "Get evaluation type by evaluation ID",
@@ -226,4 +233,31 @@ public class InterviewController  {
 
         return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
     }
+
+    @Operation(
+            summary = "Generates interview evaluations using AI ",
+            description = """
+        This endpoint receives a list of questions and candidate answers for a specific interview, 
+        and calls an AI service to generate evaluations based on multiple criteria 
+        (e.g., time management, technical accuracy, job alignment).
+
+        The AI returns scores and feedback for each evaluation type defined in the interview context. 
+        These evaluations are then persisted to the database.
+        """
+    )
+    @PostMapping("/{interviewId}/evaluations")
+    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
+        List<Evaluation> savedEvaluations = interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
+    }
+
+    @Operation(
+            summary = "Get all the evaluations of an interview",
+            description = "Return the evaluations of an interview alongside with their evaluationTypes"
+    )
+    @GetMapping("/{interviewId}/evaluations")
+    public ResponseEntity<InterviewEvaluationDTO> getInterviewEvaluations(@PathVariable UUID interviewId){
+        return ResponseEntity.ok(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId));
+    }
+
 }
