@@ -45,6 +45,9 @@ public interface InterviewServ {
     // get evaluations of an interview
     List<EvaluationDTO> getEvaluationsOfInterview(UUID interviewId);
 
+    // add a comment for interview
+    InterviewDTO addCommentToInterview(UUID id, String comment);
+
 
     EvaluationTypeDTO getEvaluationTypeOfEvaluation(UUID evaluationId);
 
@@ -53,4 +56,8 @@ public interface InterviewServ {
     SendEmailDTO getEmailInfo(UUID interviewId);
 
     placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId);
+
+    PlaceholdersForInterviewEvaluationPromptDTO getInterviewEvaluationPlaceholders(UUID interviewId);
+
+    List<InterviewListDTO> getAllInterviewList();
 }

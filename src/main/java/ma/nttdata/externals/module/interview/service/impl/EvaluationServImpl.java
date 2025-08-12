@@ -1,8 +1,14 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
+import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
+import ma.nttdata.externals.module.interview.dto.EvaluationsAIResponseDTO;
 import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewEvaluationsRequestDTO;
+import ma.nttdata.externals.module.interview.dto.PlaceholdersForInterviewEvaluationPromptDTO;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.interview.entity.Interview;
@@ -11,19 +17,37 @@ import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 public class EvaluationServImpl implements EvaluationServ {
 
     private final EvaluationRepository evaluationRepository;
     private final EvaluationMapper evaluationMapper;
     private final InterviewRepository interviewRepository;
     private final EvaluationTypeRepository evaluationTypeRepository;
+    private final boolean mockFlag;
+    private final RestClient aiRestClient;
+
+    public EvaluationServImpl(EvaluationRepository evaluationRepository,
+                              EvaluationMapper evaluationMapper,
+                              InterviewRepository interviewRepository,
+                              EvaluationTypeRepository evaluationTypeRepository,
+                              @Value("${app.mock.flag}") boolean mockFlag,
+                              @Qualifier("aiServiceClient") RestClient aiRestClient) {
+        this.evaluationRepository = evaluationRepository;
+        this.evaluationMapper = evaluationMapper;
+        this.interviewRepository = interviewRepository;
+        this.evaluationTypeRepository = evaluationTypeRepository;
+        this.mockFlag = mockFlag;
+        this.aiRestClient = aiRestClient;
+    }
 
     @Override
     public List<EvaluationDTO> getAllEvaluations() {
@@ -79,4 +103,52 @@ public class EvaluationServImpl implements EvaluationServ {
                 .orElseThrow(() -> new ResourceNotFoundException("Evaluation not found with id: " + id));
         evaluationRepository.delete(evaluation);
     }
+
+    @Override
+    public List<EvaluationsAIResponseDTO> prepareEvaluationsDTOFromAiResponse(InterviewEvaluationsRequestDTO interviewEvaluationsRequest,PlaceholdersForInterviewEvaluationPromptDTO  placeholders){
+        try{
+            String generatedEvaluation = mockFlag ? InterviewEvaluationPromptConstants.JSON_MOCK
+                    :getInterviewsEvaluationsFromAiByPrompt(interviewEvaluationsRequest,placeholders);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<EvaluationsAIResponseDTO> evaluation = objectMapper.readValue(generatedEvaluation, new TypeReference<List<EvaluationsAIResponseDTO>>() {});
+
+            return evaluation;
+        }catch (Exception e){
+            throw new InternalServerException("Failed to parse questions JSON", e);
+        }
+
+    }
+
+    @Override
+    public String getInterviewsEvaluationsFromAiByPrompt(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO placeholders){
+        String prompt  = InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT;
+
+        prompt.replace(InterviewEvaluationPromptConstants.CANDIDATE_PLACEHOLDER,placeholders.candidate().toString())
+                .replace(InterviewEvaluationPromptConstants.OFFER_PLACEHOLDER,placeholders.offer().toString())
+                .replace(InterviewEvaluationPromptConstants.JSON_SCHEMA_PLACEHOLDER,InterviewEvaluationPromptConstants.JS0N_SCHEMA)
+                .replace(InterviewEvaluationPromptConstants.QUESTION_ANSWER_DTO_PLACEHOLDER,interviewEvaluationsRequest.questionsAndAnswersForEvaluation().toString())
+                .replace(InterviewEvaluationPromptConstants.EVALUATION_TYPES_PLACEHOLDER,placeholders.evaluationType().toString())
+                .replace(InterviewEvaluationPromptConstants.JSON_MOCK_PLACEHOLDER,InterviewEvaluationPromptConstants.JSON_MOCK_PLACEHOLDER);
+
+        return aiRestClient.post()
+                .uri("/evaluationInterview")
+                .body(prompt)
+                .retrieve()
+                .body(String.class);
+    }
+
+    @Override
+    public List<Evaluation> saveAIEvaluationResponse(List<EvaluationsAIResponseDTO> aiEvaluationsResponse, List<Evaluation> evaluations){
+        List<Evaluation> evaluationsWithFeedbackAndScore = evaluationMapper.mapAIEvaluationResponsesToEvaluations(aiEvaluationsResponse,evaluations);
+
+        return evaluationRepository.saveAll(evaluationsWithFeedbackAndScore);
+    }
+
+    @Override
+    public List<Evaluation> getAllEvaluationsByInterviewID(UUID interviewId){
+
+        return evaluationRepository.findByInterviewId(interviewId);
+    }
+
 }
