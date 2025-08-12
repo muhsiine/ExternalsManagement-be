@@ -132,14 +132,6 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewServ.getCandidateByInterviewId(interviewId)) ;
     }
 
-    @Operation(
-            summary = "Get evaluations of an interview",
-            description = "Fetches all evaluations that belong to a specific interview"
-    )
-    @GetMapping("/{interviewId}/evaluations")
-    public ResponseEntity<List<EvaluationDTO>> getEvaluationsOfInterview(@PathVariable UUID interviewId) {
-        return ResponseEntity.ok(interviewServ.getEvaluationsOfInterview(interviewId));
-    }
 
     @Operation(
             summary = "Get evaluation type by evaluation ID",
@@ -241,6 +233,15 @@ public class InterviewController  {
     public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
         List<Evaluation> savedEvaluations = interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
+    }
+
+    @Operation(
+            summary = "Get all the evaluations of an interview",
+            description = "Return the evaluations of an interview alongside with their evaluationTypes"
+    )
+    @GetMapping("/{interviewId}/evaluations")
+    public ResponseEntity<InterviewEvaluationDTO> getInterviewEvaluations(@PathVariable UUID interviewId){
+        return ResponseEntity.ok(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId));
     }
 
 }

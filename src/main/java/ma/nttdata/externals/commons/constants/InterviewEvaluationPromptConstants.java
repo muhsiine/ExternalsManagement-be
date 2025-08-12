@@ -36,7 +36,7 @@ public final class InterviewEvaluationPromptConstants {
               {
                 "score": "Double - between 0.00 and 100.00",
                 "feedback": "String - Try to give an overall feedback of the performance of the candidate in this evaluation type",
-                "evaluationType": "String - use the exact 'description' field value from the corresponding EvaluationType entity"
+                "evaluationTypeDescription": "String - use the exact 'description' field value from the corresponding EvaluationType entity"
               }
             ]
             """;
@@ -46,32 +46,32 @@ public final class InterviewEvaluationPromptConstants {
           {
              "score": 78,
              "feedback": "The candidate demonstrated solid problem-solving skills by breaking down complex scenarios into manageable steps. They showed logical thinking when approaching the algorithm challenge, though they took 35% longer than estimated time (12 minutes vs 8 minutes expected). Their approach was methodical but could benefit from faster pattern recognition to improve efficiency in time-constrained situations.",
-             "evaluationType": "Problem Solving"
+             "evaluationTypeDescription": "Problem Solving"
            },
            {
              "score": 82,
              "feedback": "Communication was clear and well-structured throughout the interview. The candidate articulated technical concepts effectively and asked relevant clarifying questions. They maintained good eye contact and professional demeanor. Response time was generally within expected ranges. Minor improvement area: occasionally used too much technical jargon when simpler explanations would suffice for broader team communication.",
-             "evaluationType": "Communication"
+             "evaluationTypeDescription": "Communication"
            },
            {
              "score": 88,
              "feedback": "The candidate demonstrated strong technical expertise, accurately answering most technical questions and applying relevant frameworks and tools to proposed solutions. They showcased up-to-date knowledge in backend development and database optimization. A slight gap was noted in the depth of cloud deployment strategies.",
-             "evaluationType": "Technical Knowledge"
+             "evaluationTypeDescription": "Technical Knowledge"
            },
            {
              "score": 74,
              "feedback": "Teamwork skills appear solid, with examples of successful collaboration and conflict resolution in previous roles. The candidate emphasizes open communication and adaptability when working with different personalities. Could improve by actively seeking feedback from peers during collaborative tasks.",
-             "evaluationType": "Teamwork"
+             "evaluationTypeDescription": "Teamwork"
            },
            {
              "score": 91,
              "feedback": "The candidate showed high adaptability when presented with unexpected problem changes. They adjusted their approach quickly and kept focus on delivering a workable solution without losing quality. This flexibility is valuable in dynamic project environments.",
-             "evaluationType": "Adaptability"
+             "evaluationTypeDescription": "Adaptability"
            },
            {
              "score": 69,
              "feedback": "Time management was acceptable but could be optimized. While the candidate met deadlines for most answers, they occasionally exceeded the suggested time limit in more complex questions, which may affect performance under strict delivery timelines.",
-             "evaluationType": "Time Management"
+             "evaluationTypeDescription": "Time Management"
            }
         ]
         """;

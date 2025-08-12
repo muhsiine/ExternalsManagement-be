@@ -2,9 +2,11 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.interview.dto.EvaluationsAIResponseDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewEvaluationDTO;
 import ma.nttdata.externals.module.interview.dto.InterviewEvaluationsRequestDTO;
 import ma.nttdata.externals.module.interview.dto.PlaceholdersForInterviewEvaluationPromptDTO;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
+import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
 import ma.nttdata.externals.module.interview.service.InterviewEvaluationUtilServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
@@ -19,6 +21,7 @@ public class InterviewEvaluationUtilServImpl implements InterviewEvaluationUtilS
 
     private final EvaluationServ evaluationServ;
     private final InterviewServ interviewServ;
+    private final EvaluationMapper evaluationMapper;
 
     @Override
     public List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest) {
@@ -27,5 +30,11 @@ public class InterviewEvaluationUtilServImpl implements InterviewEvaluationUtilS
         List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
         List<Evaluation> savedEvaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,evaluations);
         return savedEvaluations;
+    }
+
+    @Override
+    public InterviewEvaluationDTO getInterviewEvaluations(UUID interviewId){
+        List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
+        return evaluationMapper.mapEvaluationToInterviewEvaluation(evaluations);
     }
 }
