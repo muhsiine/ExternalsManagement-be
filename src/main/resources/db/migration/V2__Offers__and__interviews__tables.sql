@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS questions (
     duration_in_minutes INTEGER,
 
     interview_id UUID NOT NULL,
-    answer_id UUID NOT NULL,
+    answer_id UUID,
 
     CONSTRAINT fk_interview
         FOREIGN KEY (interview_id)
