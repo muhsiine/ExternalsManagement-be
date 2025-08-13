@@ -29,6 +29,12 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
+import ma.nttdata.externals.module.interview.dto.EvaluationWithInterviewAndEvaluationTypeDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewWithCandidateAndOfferDTO;
+import ma.nttdata.externals.module.candidate.dto.CandidateWithoutInterviewDTO;
+import ma.nttdata.externals.module.offer.dto.OfferWithoutInterviewDTO;
+import ma.nttdata.externals.module.interview.service.EvaluationServ;
 @WebMvcTest(InterviewController.class)
 class InterviewControllerTest {
 
@@ -58,6 +64,9 @@ class InterviewControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private EvaluationServ evaluationServ;
 
     private UUID interviewId;
     private UUID candidateId;
@@ -412,6 +421,52 @@ class InterviewControllerTest {
     @Test
     @WithMockUser
     void getEvaluationsOfInterview() throws Exception {
+        // Create test data for EvaluationWithInterviewAndEvaluationTypeDTO
+        UUID evaluationId1 = UUID.randomUUID();
+        UUID evaluationId2 = UUID.randomUUID();
+
+        // Create CandidateWithoutInterviewDTO
+        CandidateWithoutInterviewDTO candidateWithoutInterview = new CandidateWithoutInterviewDTO(
+                candidateId,
+                "John Doe",
+                LocalDate.of(1990, 5, 15),
+                5,
+                GenderEnum.M,
+                "Java",
+                "Experienced developer",
+                Collections.emptyList(), // contacts
+                Collections.emptyList(), // experiences
+                Collections.emptyList(), // skills
+                Collections.emptyList(), // educations
+                Collections.emptyList(), // cvFiles
+                null, // address
+                Collections.emptyList()  // naturalLanguages
+        );
+
+        // Create OfferWithoutInterviewDTO
+        OfferWithoutInterviewDTO offerWithoutInterview = new OfferWithoutInterviewDTO(
+                offerId,
+                "Backend Engineer",
+                "Senior Backend Developer position"
+        );
+
+        // Create InterviewWithCandidateAndOfferDTO
+        InterviewWithCandidateAndOfferDTO interviewWithDetails = new InterviewWithCandidateAndOfferDTO(
+                interviewId,
+                LocalDateTime.of(2025, 7, 21, 10, 0),
+                LocalDateTime.of(2025, 7, 21, 11, 0),
+                "Technical Interview",
+                "https://meet.example.com/tech",
+                "Strong technical skills",
+                LocalDateTime.of(2025, 8, 3, 6, 0),
+                "Great problem-solving skills",
+                5,
+                60,
+                candidateWithoutInterview,
+                offerWithoutInterview
+        );
+
+        // Create EvaluationTypeDTO instances
         EvaluationTypeDTO evaluationType1 = new EvaluationTypeDTO(
                 UUID.randomUUID(),
                 "Technical Skills",
@@ -424,46 +479,52 @@ class InterviewControllerTest {
                 1.0
         );
 
-        FullEvaluationDTO evaluation1 = new FullEvaluationDTO(
-                UUID.randomUUID(),
+        // Create EvaluationWithInterviewAndEvaluationTypeDTO instances
+        EvaluationWithInterviewAndEvaluationTypeDTO evaluation1 = new EvaluationWithInterviewAndEvaluationTypeDTO(
+                evaluationId1,
                 4.7,
                 "Excellent technical knowledge",
-                interviewId,
+                interviewWithDetails,
                 evaluationType1
         );
 
-        FullEvaluationDTO evaluation2 = new FullEvaluationDTO(
-                UUID.randomUUID(),
+        EvaluationWithInterviewAndEvaluationTypeDTO evaluation2 = new EvaluationWithInterviewAndEvaluationTypeDTO(
+                evaluationId2,
                 3.8,
                 "Good communication skills but can improve",
-                interviewId,
+                interviewWithDetails,
                 evaluationType2
         );
 
-        InterviewEvaluationDTO interviewEvaluation = new InterviewEvaluationDTO(
-                interviewId,
-                "Alice Smith",
-                "Backend Engineer",
-                LocalDateTime.of(2025, 9, 10, 14, 0),
-                60,
-                List.of(evaluation1, evaluation2)
-        );
+        List<EvaluationWithInterviewAndEvaluationTypeDTO> evaluationsList = List.of(evaluation1, evaluation2);
 
-        when(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId)).thenReturn(interviewEvaluation);
+        // Mock the service call - NOTE: This now calls evaluationServ instead of interviewEvaluationUtilServ
+        when(evaluationServ.getAllEvaluationsWithInterviewByInterviewId(interviewId)).thenReturn(evaluationsList);
 
-
+        // Perform the test
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.interviewId").value(interviewId.toString()))
-                .andExpect(jsonPath("$.candidateFullName").value("Alice Smith"))
-                .andExpect(jsonPath("$.offerTitle").value("Backend Engineer"))
-                .andExpect(jsonPath("$.evaluations", org.hamcrest.Matchers.hasSize(2)))
-                .andExpect(jsonPath("$.evaluations[0].score").value(4.7))
-                .andExpect(jsonPath("$.evaluations[0].feedback").value("Excellent technical knowledge"))
-                .andExpect(jsonPath("$.evaluations[1].score").value(3.8))
-                .andExpect(jsonPath("$.evaluations[1].feedback").value("Good communication skills but can improve"));
+                .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(2)))
+                // Test first evaluation
+                .andExpect(jsonPath("$[0].id").value(evaluationId1.toString()))
+                .andExpect(jsonPath("$[0].score").value(4.7))
+                .andExpect(jsonPath("$[0].feedback").value("Excellent technical knowledge"))
+                .andExpect(jsonPath("$[0].interview.id").value(interviewId.toString()))
+                .andExpect(jsonPath("$[0].interview.description").value("Technical Interview"))
+                .andExpect(jsonPath("$[0].interview.candidate.fullName").value("John Doe"))
+                .andExpect(jsonPath("$[0].interview.offer.title").value("Backend Engineer"))
+                .andExpect(jsonPath("$[0].evaluationType.description").value("Technical Skills"))
+                .andExpect(jsonPath("$[0].evaluationType.coefficient").value(1.5))
+                // Test second evaluation
+                .andExpect(jsonPath("$[1].id").value(evaluationId2.toString()))
+                .andExpect(jsonPath("$[1].score").value(3.8))
+                .andExpect(jsonPath("$[1].feedback").value("Good communication skills but can improve"))
+                .andExpect(jsonPath("$[1].evaluationType.description").value("Communication"))
+                .andExpect(jsonPath("$[1].evaluationType.coefficient").value(1.0));
 
+        // Verify the correct service method is called
+        verify(evaluationServ).getAllEvaluationsWithInterviewByInterviewId(interviewId);
     }
 
     @Test
