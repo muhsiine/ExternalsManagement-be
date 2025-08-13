@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
@@ -21,6 +22,8 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -306,5 +309,103 @@ class InterviewSrvImplTest {
         verify(candidateMapper).candidateToCandidateDTO(candidate);
         verify(offerMapper).toDto(offer);
 
+    }
+
+    @Test
+    void should_fetch_Interview_Evaluation_placeholders(){
+        UUID interviewId = UUID.randomUUID();
+
+        Candidate candidate = new Candidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("habib");
+
+        Offer offer = new Offer();
+        offer.setId(UUID.randomUUID());
+        offer.setTitle("Backend Engineer");
+
+        EvaluationType evalType1 = new EvaluationType();
+        evalType1.setId(UUID.randomUUID());
+        String description = "communication Skills";
+        evalType1.setDescription(description);
+
+        Evaluation evaluation1 = new Evaluation();
+        evaluation1.setEvaluationType(evalType1);
+
+        List<Evaluation> evaluations = List.of(evaluation1);
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+        interview.setEvaluations(evaluations);
+        interview.setEstimatedDuration(30);
+        interview.setNumberOfQuestions(15);
+        CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), "habib", null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(offer.getId(), "Backend Engineer", null, null);
+
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
+        when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
+        when(offerMapper.toDto(offer)).thenReturn(offerDTO);
+
+        PlaceholdersForInterviewEvaluationPromptDTO  placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
+
+        assertNotNull(placeholders );
+        assertEquals(candidateDTO, placeholders.candidate());
+        assertEquals(offerDTO, placeholders.offer());
+        assertEquals(List.of(evaluation1.getEvaluationType()), placeholders.evaluationType());
+
+        verify(interviewRepository).findById(interviewId);
+        verify(candidateMapper).candidateToCandidateDTO(candidate);
+        verify(offerMapper).toDto(offer);
+    }
+
+    @Test
+    void should_throw_not_found_Exception(){
+
+        UUID interviewId = UUID.randomUUID();
+
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.empty());
+
+
+        assertThatThrownBy(()->interviewServ.getInterviewEvaluationPlaceholders(interviewId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Interview not found with id: "+interviewId);
+
+        verify(interviewRepository).findById(interviewId);
+        verify(candidateMapper,never()).candidateToCandidateDTO(any());
+        verify(offerMapper,never()).toDto(any());
+
+    }
+
+    @Test
+    void getAllInterviewList_should_return_interview_List(){
+        Interview interview = new Interview();
+        interview.setId(UUID.randomUUID());
+        interview.setDescription("nothing");
+        interview.setNumberOfQuestions(15);
+        when(interviewRepository.findAll()).thenReturn(List.of(interview));
+
+        InterviewListDTO interviewList = new InterviewListDTO(
+                interview.getId(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "",
+                null,
+                null
+        );
+
+        when(interviewMapper.fromInterviewToInterviewListDTO(interview)).thenReturn(interviewList);
+
+        List<InterviewListDTO> interviewListDTOS = interviewServ.getAllInterviewList();
+
+        assertEquals(1, interviewListDTOS.size());
+        assertTrue(interviewListDTOS.contains(interviewList));
+        verify(interviewRepository).findAll();
+        verify(interviewMapper).fromInterviewToInterviewListDTO(interview);
     }
 }
