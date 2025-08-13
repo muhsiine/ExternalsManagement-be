@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
@@ -9,6 +10,7 @@ import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -210,5 +212,64 @@ public class EvaluationServImplTest {
         assertEquals(2, result.size());
         assertEquals(expectedEvaluations, result);
     }
+
+    @Test
+    void getInterviewsEvaluationsFromAiByPrompt_should_return_expected_response() {
+
+        evaluationServ = new EvaluationServImpl(
+                evaluationRepository,
+                evaluationMapper,
+                interviewRepository,
+                evaluationTypeRepository,
+                true,
+                aiRestClient
+        );
+
+        QuestionsAndAnswersForEvaluationDTO qa = new QuestionsAndAnswersForEvaluationDTO(
+                "What is OOP?", "Object Oriented Programming", 5, 5
+        );
+        InterviewEvaluationsRequestDTO requestDTO = new InterviewEvaluationsRequestDTO(
+                List.of(qa)
+        );
+
+        CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), "John Doe", null, 0, null, null, null, null, null, null, null, null, null, null, null);
+        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), "Java Developer", null, null);
+        EvaluationType tech = new EvaluationType();
+        tech.setId(UUID.randomUUID());
+        tech.setDescription("Technical");
+        tech.setCoefficient(1.0);
+
+        EvaluationType comm = new EvaluationType();
+        comm.setId(UUID.randomUUID());
+        comm.setDescription("Communication");
+        comm.setCoefficient(1.0);
+
+        List<EvaluationType> evaluationTypes = List.of(tech, comm);
+
+        PlaceholdersForInterviewEvaluationPromptDTO placeholders = new PlaceholdersForInterviewEvaluationPromptDTO(
+                candidateDTO, offerDTO, evaluationTypes
+        );
+
+
+
+        String mockedResponse = "{\"evaluation\":\"Good\"}";
+
+        when(aiRestClient.post()).thenReturn(requestBodyUriSpec);
+        when(requestBodyUriSpec.uri("/evaluationInterview")).thenReturn(requestBodySpec);
+        when(requestBodySpec.body(anyString())).thenReturn(requestBodySpec);
+        when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+        when(responseSpec.body(String.class)).thenReturn(mockedResponse);
+
+        String result = evaluationServ.getInterviewsEvaluationsFromAiByPrompt(requestDTO, placeholders);
+
+        assertEquals(mockedResponse, result);
+
+        verify(aiRestClient).post();
+        verify(requestBodyUriSpec).uri("/evaluationInterview");
+        verify(requestBodySpec).body(anyString());
+        verify(requestBodySpec).retrieve();
+        verify(responseSpec).body(String.class);
+    }
+
 
 }
