@@ -6,6 +6,9 @@ import ma.nttdata.externals.commons.services.EmailService;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
+import ma.nttdata.externals.module.interview.entity.EvaluationType;
+import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.service.*;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -573,4 +576,50 @@ class InterviewControllerTest {
         );
         verify(questionServ).saveAllQuestions(anyList());
     }
+
+    @Test
+    @WithMockUser
+    void should_return_evaluation_is_created_and_saved() throws Exception {
+        QuestionsAndAnswersForEvaluationDTO questionsAndAnswersForEvaluation1 =
+                new QuestionsAndAnswersForEvaluationDTO(
+                        "what is the useState hook",
+                         "use state is",
+                        2,
+                            3);
+        QuestionsAndAnswersForEvaluationDTO questionsAndAnswersForEvaluation2 =
+                new QuestionsAndAnswersForEvaluationDTO(
+                        "what is the useEffect hook",
+                        "useEffect is",
+                        2,
+                        3);
+        InterviewEvaluationsRequestDTO interviewEvaluationsRequest = new InterviewEvaluationsRequestDTO(List.of(questionsAndAnswersForEvaluation1, questionsAndAnswersForEvaluation2));
+
+        Evaluation evaluation = new Evaluation();
+        evaluation.setFeedback("nothing");
+        evaluation.setScore(60.0);
+        EvaluationType evaluationType = new EvaluationType();
+        evaluationType.setId(UUID.randomUUID());
+        evaluationType.setCoefficient(3.0);
+        evaluationType.setDescription("react skills");
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        evaluation.setInterview(interview);
+        evaluation.setEvaluationType(evaluationType);
+        String jsonRequest = new ObjectMapper().writeValueAsString(interviewEvaluationsRequest);
+
+
+        when(interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest)).thenReturn(List.of(evaluation));
+
+        mockMvc.perform(post("/api/v1/interviews/{interviewId}/evaluations",interviewId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                .andExpect(status().isCreated())
+                .andExpect(content().string("Evaluation is created and saved"));
+
+        verify(interviewEvaluationUtilServ).prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+    }
+
+
 }
