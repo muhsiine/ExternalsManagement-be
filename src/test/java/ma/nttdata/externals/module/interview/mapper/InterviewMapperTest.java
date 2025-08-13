@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.mapper;
 
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
 import ma.nttdata.externals.module.interview.dto.InterviewDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewListDTO;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.offer.entity.Offer;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -71,6 +73,47 @@ class InterviewMapperTest {
     }
 
 
+    @Test
+    void fromInterviewToInterviewListDTO_should_return_valid_interviewListDTO(){
+
+        Candidate candidate = new Candidate();
+        candidate.setId(UUID.randomUUID());
+        candidate.setFullName("hamid");
+        candidate.setMainTech("React");
+        Offer offer = new Offer();
+        offer.setId(UUID.randomUUID());
+        offer.setTitle("test");
+
+        Interview interview = new Interview();
+        interview.setId(UUID.randomUUID());
+        interview.setStartTime(LocalDateTime.now());
+        interview.setEndTime(LocalDateTime.now().plusHours(1));
+        interview.setDescription("Interview for testing");
+        interview.setLink("http://example.com/interview");
+        interview.setFeedback_general("No feedback yet");
+        interview.setScheduledAt(LocalDateTime.now().plusDays(1));
+        interview.setComment("Initial comment");
+        interview.setNumberOfQuestions(5);
+        interview.setEstimatedDuration(60);
+        interview.setCandidate(candidate);
+        interview.setOffer(offer);
+
+        InterviewListDTO res = interviewMapper.fromInterviewToInterviewListDTO(interview);
+
+        assertThat(res).isNotNull();
+        assertThat(res.id()).isEqualTo(interview.getId());
+        assertThat(res.startTime()).isEqualTo(interview.getStartTime());
+        assertThat(res.endTime()).isEqualTo(interview.getEndTime());
+        assertThat(res.description()).isEqualTo(interview.getDescription());
+        assertThat(res.link()).isEqualTo(interview.getLink());
+        assertThat(res.feedback_general()).isEqualTo(interview.getFeedback_general());
+        assertThat(res.scheduledAt()).isEqualTo(interview.getScheduledAt());
+        assertThat(res.comment()).isEqualTo(interview.getComment());
+        assertThat(res.candidateFullName()).isEqualTo(candidate.getFullName());
+        assertThat(res.candidateMainTech()).isEqualTo(candidate.getMainTech());
+        assertThat(res.offerTitle()).isEqualTo(offer.getTitle());
+
+    }
 
 
 }
