@@ -1,14 +1,15 @@
 package ma.nttdata.externals.module.interview.service.impl;
+import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.entity.Candidate;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
-import ma.nttdata.externals.module.interview.dto.EvaluationsAIResponseDTO;
-import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
-import ma.nttdata.externals.module.interview.dto.InterviewEvaluationsRequestDTO;
-import ma.nttdata.externals.module.interview.dto.PlaceholdersForInterviewEvaluationPromptDTO;
+import ma.nttdata.externals.module.candidate.dto.CandidateWithoutInterviewDTO;
+import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
+import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.interview.entity.Interview;
@@ -17,11 +18,12 @@ import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
+import ma.nttdata.externals.module.offer.dto.OfferWithoutInterviewDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
+import ma.nttdata.externals.module.candidate.entity.Candidate;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,10 +36,14 @@ public class EvaluationServImpl implements EvaluationServ {
     private final EvaluationTypeRepository evaluationTypeRepository;
     private final boolean mockFlag;
     private final RestClient aiRestClient;
+    private final CandidateMapper candidateMapper;
+
 
     public EvaluationServImpl(EvaluationRepository evaluationRepository,
                               EvaluationMapper evaluationMapper,
                               InterviewRepository interviewRepository,
+                              CandidateMapper candidateMapper,
+
                               EvaluationTypeRepository evaluationTypeRepository,
                               @Value("${app.mock.flag}") boolean mockFlag,
                               @Qualifier("aiServiceClient") RestClient aiRestClient) {
@@ -47,6 +53,8 @@ public class EvaluationServImpl implements EvaluationServ {
         this.evaluationTypeRepository = evaluationTypeRepository;
         this.mockFlag = mockFlag;
         this.aiRestClient = aiRestClient;
+        this.candidateMapper = candidateMapper; // Add this
+
     }
 
     @Override
@@ -149,6 +157,68 @@ public class EvaluationServImpl implements EvaluationServ {
     public List<Evaluation> getAllEvaluationsByInterviewID(UUID interviewId){
 
         return evaluationRepository.findByInterviewId(interviewId);
+    }
+    @Override
+    public List<EvaluationWithInterviewAndEvaluationTypeDTO> getAllEvaluationsWithInterviewByInterviewId(UUID interviewId) {
+        List<Evaluation> evaluations = evaluationRepository.findByInterviewId(interviewId);
+
+        return evaluations.stream().map(evaluation -> {
+            Interview interview = evaluation.getInterview();
+            Candidate candidate = interview.getCandidate();
+
+            CandidateDTO candidateDTO = candidateMapper.candidateToCandidateDTO(candidate);
+
+            CandidateWithoutInterviewDTO candidateWithoutInterviewDTO = new CandidateWithoutInterviewDTO(
+                    candidateDTO.id(),
+                    candidateDTO.fullName(),
+                    candidateDTO.birthDate(),
+                    candidateDTO.yearsOfExperience(),
+                    candidateDTO.gender(),
+                    candidateDTO.mainTech(),
+                    candidateDTO.summary(),
+                    candidateDTO.contacts(),
+                    candidateDTO.experiences(),
+                    candidateDTO.skills(),
+                    candidateDTO.educations(),
+                    candidateDTO.cvFiles(),
+                    candidateDTO.address(),
+                    candidateDTO.naturalLanguages()
+            );
+
+            InterviewWithCandidateAndOfferDTO interviewDTO = new InterviewWithCandidateAndOfferDTO(
+                    interview.getId(),
+                    interview.getStartTime(),
+                    interview.getEndTime(),
+                    interview.getDescription(),
+                    interview.getLink(),
+                    interview.getFeedback_general(),
+                    interview.getScheduledAt(),
+                    interview.getComment(),
+                    interview.getNumberOfQuestions(),
+                    interview.getEstimatedDuration(),
+                    candidateWithoutInterviewDTO,
+                    new OfferWithoutInterviewDTO(
+                            interview.getOffer().getId(),
+                            interview.getOffer().getTitle(),
+                            interview.getOffer().getDescription()
+                    )
+            );
+
+            EvaluationType evaluationType = evaluation.getEvaluationType();
+            EvaluationTypeDTO evaluationTypeDTO = new EvaluationTypeDTO(
+                    evaluationType.getId(),
+                    evaluationType.getDescription(),
+                    evaluationType.getCoefficient()
+            );
+
+            return new EvaluationWithInterviewAndEvaluationTypeDTO(
+                    evaluation.getId(),
+                    evaluation.getScore(),
+                    evaluation.getFeedback(),
+                    interviewDTO,
+                    evaluationTypeDTO
+            );
+        }).toList();
     }
 
 }

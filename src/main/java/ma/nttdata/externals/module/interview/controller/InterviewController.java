@@ -34,6 +34,8 @@ public class InterviewController  {
     private final EmailService emailService;
     private final EmailContentBuilder emailContentBuilder;
     private final EvaluationTypeServ evaluationTypeServ;
+    private final EvaluationServ evaluationServ;
+
     private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
 
     @Operation(
@@ -251,13 +253,13 @@ public class InterviewController  {
         return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
     }
 
+
     @Operation(
             summary = "Get all the evaluations of an interview",
             description = "Return the evaluations of an interview alongside with their evaluationTypes"
     )
     @GetMapping("/{interviewId}/evaluations")
-    public ResponseEntity<InterviewEvaluationDTO> getInterviewEvaluations(@PathVariable UUID interviewId){
-        return ResponseEntity.ok(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId));
+    public ResponseEntity<List<EvaluationWithInterviewAndEvaluationTypeDTO>> getInterviewEvaluations(@PathVariable UUID interviewId){
+        return ResponseEntity.ok(evaluationServ.getAllEvaluationsWithInterviewByInterviewId(interviewId));
     }
-
 }

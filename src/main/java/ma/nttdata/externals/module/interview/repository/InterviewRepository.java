@@ -11,10 +11,6 @@ import java.util.UUID;
 public interface InterviewRepository extends JpaRepository<Interview, UUID> {
     List<Interview> findByOfferId(UUID offerId);
 
-    /*
-     * Retrieves an Interview entity by its ID along with its associated Candidate's contacts
-     * and the related Offer entity in a single query.
-     */
     @EntityGraph(attributePaths = {
             "candidate.contacts",
             "offer"

@@ -1,9 +1,6 @@
 package ma.nttdata.externals.module.interview.service;
 
-import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
-import ma.nttdata.externals.module.interview.dto.EvaluationsAIResponseDTO;
-import ma.nttdata.externals.module.interview.dto.InterviewEvaluationsRequestDTO;
-import ma.nttdata.externals.module.interview.dto.PlaceholdersForInterviewEvaluationPromptDTO;
+import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 
 import java.util.List;
@@ -27,4 +24,6 @@ public interface EvaluationServ {
     List<Evaluation> saveAIEvaluationResponse(List<EvaluationsAIResponseDTO> aiEvaluationResponse, List<Evaluation> evaluations);
 
     List<Evaluation> getAllEvaluationsByInterviewID(UUID interviewId);
+
+    List<EvaluationWithInterviewAndEvaluationTypeDTO> getAllEvaluationsWithInterviewByInterviewId(UUID interviewId);
 }
