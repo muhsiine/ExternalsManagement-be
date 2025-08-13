@@ -10,6 +10,8 @@ import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
 import ma.nttdata.externals.module.interview.service.InterviewEvaluationUtilServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
+import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,11 +24,13 @@ public class InterviewEvaluationUtilServImpl implements InterviewEvaluationUtilS
     private final EvaluationServ evaluationServ;
     private final InterviewServ interviewServ;
     private final EvaluationMapper evaluationMapper;
+    private final PromptService promptServ;
 
     @Override
     public List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest) {
         PlaceholdersForInterviewEvaluationPromptDTO placeholders = interviewServ.getInterviewEvaluationPlaceholders(interviewId);
-        List<EvaluationsAIResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationsDTOFromAiResponse(interviewEvaluationsRequest,placeholders);
+        PromptDTO prompt = promptServ.findByPromptCode(interviewEvaluationsRequest.promptCode());
+        List<EvaluationsAIResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationsDTOFromAiResponse(interviewEvaluationsRequest,placeholders,prompt);
         List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
         List<Evaluation> savedEvaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,evaluations);
         return savedEvaluations;
