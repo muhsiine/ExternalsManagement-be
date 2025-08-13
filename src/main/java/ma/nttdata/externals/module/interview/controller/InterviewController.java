@@ -8,7 +8,6 @@ import ma.nttdata.externals.commons.services.impl.EmailServiceImpl;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
-import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
@@ -28,12 +27,11 @@ import java.util.UUID;
 public class InterviewController  {
 
     private final InterviewServ interviewServ;
-    private final QuestionServ questionServ;
     private final InterviewTokenServ interviewTokenServ;
     private final EmailServiceImpl emailServiceImpl;
     private final EmailContentBuilder emailContentBuilder;
-    private final EvaluationTypeServ evaluationTypeServ;
     private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
+    private final InterviewQuestionsUtilServ interviewQuestionsUtilServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -197,40 +195,8 @@ public class InterviewController  {
     @PostMapping("/{interviewId}/generateQuestions")
     public ResponseEntity<List<QuestionDTO>> generateInterviewQuestions(@PathVariable UUID interviewId,
                                                                    @RequestBody GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest) {
-        placeholdersForInterviewQuestionsPromptDTO placeholders = interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId);
-        List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
-
-        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes);
-        List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
-                .map(q -> new QuestionDTO(
-                        null,
-                        q.description(),
-                        q.durationInMinutes(),
-                        interviewId,
-                        null
-                ))
-                .toList();
-        List<QuestionDTO> savedQuestions = questionServ.saveAllQuestions(generatedQuestionsWithInterviewId);
+        List<QuestionDTO> savedQuestions = interviewQuestionsUtilServ.generateInterviewQuestions(interviewId,generateInterviewQuestionsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedQuestions);
-    }
-
-    @Operation(
-            summary = "Get interview questions by interview Id",
-            description = "Return the questions of that interview"
-    )
-    @GetMapping("/{interviewId}/getQuestions")
-    public ResponseEntity<List<Question>> getInterviewQuestions(UUID interviewId){
-        return ResponseEntity.ok(questionServ.findAllQuestionsByInterviewId(interviewId));
-    }
-
-    @Operation(
-            summary = "Get interview questions by interview Id",
-            description = "Return the DTO of questions of that interview"
-    )
-    @GetMapping("/{interviewId}/getQuestionsDTO")
-    public ResponseEntity<List<QuestionDTO>> getInterviewQuestionsDTOS(UUID interviewId){
-
-        return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
     }
 
     @Operation(
