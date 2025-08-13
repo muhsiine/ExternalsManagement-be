@@ -15,6 +15,7 @@ import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -96,11 +97,11 @@ public class QuestionServImpl implements QuestionServ {
 
 
     @Override
-    public List<QuestionDTO> prepareQuestionsFromAIResponse(placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes) {
+    public List<QuestionDTO> prepareQuestionsFromAIResponse(placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes, PromptDTO prompt) {
         try {
             String generatedQuestionsJson = mockFlag ?
                     InterviewPromptConstants.JSON_MOCK:
-                    generateInterviewQuestionsByPrompt(generateQuestionsInfo, evaluationTypes);
+                    generateInterviewQuestionsByPrompt(generateQuestionsInfo, evaluationTypes,prompt);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -124,21 +125,21 @@ public class QuestionServImpl implements QuestionServ {
     }
 
     @Override
-    public String generateInterviewQuestionsByPrompt(placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes){
-        String prompt = InterviewPromptConstants.INTERVIEW_QUESTION_GENERATION_PROMPT;
+    public String generateInterviewQuestionsByPrompt(placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo, List<EvaluationTypeDTO> evaluationTypes, PromptDTO prompt){
+        String promptDesc = prompt.promptDesc();
 
-        prompt = prompt.replace(InterviewPromptConstants.CANDIDATE_DATA_PLACEHOLDER, generateQuestionsInfo.candidate().toString())
+        promptDesc = promptDesc.replace(InterviewPromptConstants.CANDIDATE_DATA_PLACEHOLDER, generateQuestionsInfo.candidate().toString())
                 .replace(InterviewPromptConstants.OFFER_DATA_PLACEHOLDER, generateQuestionsInfo.offer().toString())
                 .replace(InterviewPromptConstants.EVALUATION_TYPE_DATA_PLACEHOLDER,evaluationTypes.toString())
                 .replace(InterviewPromptConstants.NUMBER_OF_QUESTIONS_PLACEHOLDER,String.valueOf(generateQuestionsInfo.numberOfQuestions()))
                 .replace(InterviewPromptConstants.ESTIMATED_DURATION_PLACEHOLDER,String.valueOf(generateQuestionsInfo.estimatedDuration()))
-                .replace(InterviewPromptConstants.JSON_SCHEMA_PLACEHOLDER,InterviewPromptConstants.JSON_SCHEMA);
+                .replace(InterviewPromptConstants.JSON_SCHEMA_PLACEHOLDER,prompt.schema());
 
 
 
         return aiRestClient.post()
                 .uri("/generateInterviewQuestions")
-                .body(prompt)
+                .body(promptDesc)
                 .retrieve()
                 .body(String.class);
 

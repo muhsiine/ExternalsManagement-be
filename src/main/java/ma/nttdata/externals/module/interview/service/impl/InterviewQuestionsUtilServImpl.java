@@ -9,6 +9,8 @@ import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.InterviewQuestionsUtilServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
+import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,13 +23,14 @@ public class InterviewQuestionsUtilServImpl implements InterviewQuestionsUtilSer
     private final InterviewServ interviewServ;
     private final EvaluationTypeServ evaluationTypeServ;
     private final QuestionServ questionServ;
+    private final PromptService promptService;
 
     public List<QuestionDTO> generateInterviewQuestions(UUID interviewId,
                                                         GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest){
         placeholdersForInterviewQuestionsPromptDTO placeholders = interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId);
         List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
-
-        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes);
+        PromptDTO prompt = promptService.findByPromptCode(generateInterviewQuestionsRequest.promptCode());
+        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes,prompt);
         List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
                 .map(q -> new QuestionDTO(
                         null,

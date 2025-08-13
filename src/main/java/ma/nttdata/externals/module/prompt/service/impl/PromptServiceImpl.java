@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.prompt.service.impl;
 
+import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.entity.Prompt;
 import ma.nttdata.externals.module.prompt.mapper.PromptMapper;
@@ -63,5 +64,12 @@ public class PromptServiceImpl implements PromptService {
     @Override
     public void deletePrompt(UUID id) {
         promptRepository.deleteById(id);
+    }
+
+    @Override
+    public PromptDTO findByPromptCode(String promptCode){
+        Prompt prompt = promptRepository.findByPromptCode(promptCode)
+                .orElseThrow(()-> new ResourceNotFoundException("prompt",promptCode));
+        return promptMapper.toDTO(prompt);
     }
 }
