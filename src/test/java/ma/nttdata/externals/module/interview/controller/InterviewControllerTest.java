@@ -2,7 +2,7 @@ package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
-import ma.nttdata.externals.commons.services.EmailService;
+import ma.nttdata.externals.commons.services.impl.EmailServiceImpl;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
@@ -45,7 +45,7 @@ class InterviewControllerTest {
     private InterviewTokenServ interviewTokenServ;
 
     @MockitoBean
-    private EmailService emailService;
+    private EmailServiceImpl emailServiceImpl;
 
     @MockitoBean
     private EmailContentBuilder emailContentBuilder;

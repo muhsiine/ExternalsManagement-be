@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
-import ma.nttdata.externals.commons.services.EmailService;
+import ma.nttdata.externals.commons.services.impl.EmailServiceImpl;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -31,7 +30,7 @@ public class InterviewController  {
     private final InterviewServ interviewServ;
     private final QuestionServ questionServ;
     private final InterviewTokenServ interviewTokenServ;
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
     private final EmailContentBuilder emailContentBuilder;
     private final EvaluationTypeServ evaluationTypeServ;
     private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
@@ -186,7 +185,7 @@ public class InterviewController  {
                     payload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
             );
 
-            emailService.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
+            emailServiceImpl.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
             return ResponseEntity.ok("Email sent successfully!");
     }
 
