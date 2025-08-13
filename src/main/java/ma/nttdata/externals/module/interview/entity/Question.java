@@ -30,7 +30,7 @@ public class Question {
     private Interview interview;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "answer_id", nullable = false)
+    @JoinColumn(name = "answer_id", nullable = true)
     @JsonIgnore
     private Answer answer;
 
