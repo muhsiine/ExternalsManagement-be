@@ -30,8 +30,8 @@ public class InterviewController  {
     private final InterviewTokenServ interviewTokenServ;
     private final EmailServiceImpl emailServiceImpl;
     private final EmailContentBuilder emailContentBuilder;
-    private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
     private final InterviewQuestionsUtilServ interviewQuestionsUtilServ;
+    private final QuestionServ questionServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -118,15 +118,6 @@ public class InterviewController  {
     }
 
     @Operation(
-            summary = "Get questions by interview ID",
-            description = "Returns all questions linked to a specific interview"
-    )
-    @GetMapping("/{interviewId}/questions")
-    public ResponseEntity<List<QuestionDTO>> getQuestionsByInterviewId(@PathVariable UUID interviewId) {
-        return ResponseEntity.ok(interviewServ.getQuestionsByInterviewId(interviewId));
-    }
-
-    @Operation(
             summary = "Get answer of a question",
             description = "Returns the answer associated with a given question ID"
     )
@@ -200,6 +191,16 @@ public class InterviewController  {
     }
 
     @Operation(
+            summary = "Get interview questions by interview Id",
+            description = "Return the DTO of questions of that interview"
+    )
+    @GetMapping("/{interviewId}//getQuestions")
+    public ResponseEntity<List<QuestionDTO>> getQuestionsByInterviewId(@PathVariable UUID interviewId){
+
+        return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
+    }
+
+    @Operation(
             summary = "Generates interview evaluations using AI ",
             description = """
         This endpoint receives a list of questions and candidate answers for a specific interview, 
@@ -212,7 +213,7 @@ public class InterviewController  {
     )
     @PostMapping("/{interviewId}/evaluations")
     public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
-        List<Evaluation> savedEvaluations = interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+        List<Evaluation> savedEvaluations = interviewServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
     }
 
@@ -222,7 +223,7 @@ public class InterviewController  {
     )
     @GetMapping("/{interviewId}/evaluations")
     public ResponseEntity<InterviewEvaluationDTO> getInterviewEvaluations(@PathVariable UUID interviewId){
-        return ResponseEntity.ok(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId));
+        return ResponseEntity.ok(interviewServ.getInterviewEvaluations(interviewId));
     }
 
 }

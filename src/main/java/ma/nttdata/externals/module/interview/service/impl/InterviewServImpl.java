@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
@@ -15,9 +16,12 @@ import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
+import ma.nttdata.externals.module.interview.service.EvaluationServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 
 import ma.nttdata.externals.module.offer.entity.Offer;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
+import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.springframework.beans.factory.annotation.Value;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.mapper.OfferMapper;
@@ -55,6 +59,10 @@ public class InterviewServImpl implements InterviewServ {
 
     private final OfferMapper offerMapper;
 
+    private final EvaluationServ evaluationServ;
+
+    private final PromptService promptServ;
+
     public InterviewServImpl(
             InterviewMapper interviewMapper,
             InterviewRepository interviewRepository ,
@@ -67,7 +75,7 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationTypeMapper evaluationTypeMapper ,
             CandidateMapper candidateMapper,
             @Value("${interview.baseLink}") String interviewBaseLink,
-            OfferMapper offerMapper
+            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -81,6 +89,8 @@ public class InterviewServImpl implements InterviewServ {
         this.candidateMapper = candidateMapper;
         this.interviewBaseLink = interviewBaseLink;
         this.offerMapper = offerMapper;
+        this.evaluationServ = evaluationServ;
+        this.promptServ = promptServ;
     }
 
     // new interview
@@ -287,6 +297,22 @@ public class InterviewServImpl implements InterviewServ {
                 .collect(Collectors.toList());
 
         return interviewList;
+    }
+
+    @Override
+    public List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest) {
+        PlaceholdersForInterviewEvaluationPromptDTO placeholders = getInterviewEvaluationPlaceholders(interviewId);
+        PromptDTO prompt = promptServ.findByPromptCode(InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE);
+        List<EvaluationsAIResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationsDTOFromAiResponse(interviewEvaluationsRequest,placeholders,prompt);
+        List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
+        List<Evaluation> savedEvaluations = evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse,evaluations);
+        return savedEvaluations;
+    }
+
+    @Override
+    public InterviewEvaluationDTO getInterviewEvaluations(UUID interviewId){
+        List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
+        return evaluationMapper.mapEvaluationToInterviewEvaluation(evaluations);
     }
 }
 

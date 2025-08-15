@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.interview.service;
 
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
 import org.springframework.data.crossstore.ChangeSetPersister;
 
 
@@ -60,4 +61,8 @@ public interface InterviewServ {
     PlaceholdersForInterviewEvaluationPromptDTO getInterviewEvaluationPlaceholders(UUID interviewId);
 
     List<InterviewListDTO> getAllInterviewList();
+
+    List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest);
+
+    InterviewEvaluationDTO getInterviewEvaluations(UUID interviewId);
 }

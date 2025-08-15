@@ -72,14 +72,4 @@ public class QuestionController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(
-            summary = "Get interview questions by interview Id",
-            description = "Return the DTO of questions of that interview"
-    )
-    @GetMapping("/interview/{interviewId}")
-    public ResponseEntity<List<QuestionDTO>> getQuestionsByInterviewId(@PathVariable UUID interviewId){
-
-        return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
-    }
-
 }

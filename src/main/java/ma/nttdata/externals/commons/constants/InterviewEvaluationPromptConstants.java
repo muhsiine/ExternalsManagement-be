@@ -77,6 +77,8 @@ public final class InterviewEvaluationPromptConstants {
         """;
 
 
+    public static final String INTERVIEW_EVALUATION_PROMPT_CODE = "INTERVIEW_EVALUATION_PROMPT";
+
     public static final String OFFER_PLACEHOLDER = "{OFFER_DATA}";
     public static final String CANDIDATE_PLACEHOLDER = "{CANDIDATE_DATA}";
     public static final String QUESTION_ANSWER_DTO_PLACEHOLDER = "{QuestionAnswer_DATA}";
