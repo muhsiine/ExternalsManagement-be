@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
 import ma.nttdata.externals.commons.services.impl.EmailServiceImpl;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
@@ -52,10 +53,7 @@ class InterviewControllerTest {
     private EmailContentBuilder emailContentBuilder;
 
     @MockitoBean
-    private InterviewEvaluationUtilServ interviewEvaluationUtilServ;
-
-    @MockitoBean
-    private InterviewQuestionsUtilServ interviewQuestionsUtilServ;
+    private QuestionServ questionServ;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -76,41 +74,7 @@ class InterviewControllerTest {
     private EvaluationTypeDTO evaluationTypeDTO;
     private OfferDTO offerDTO;
 
-    private static String JSON_SCHEMA = """
-            [
-              {
-                "score": "Double - between 0.00 and 100.00",
-                "feedback": "String - Try to give an overall feedback of the performance of the candidate in this evaluation type",
-                "evaluationTypeDescription": "String - use the exact 'description' field value from the corresponding EvaluationType entity"
-              }
-            ]
-            """;
-    private static final String INTERVIEW_EVALUATION_PROMPT = """
-            You're an expert interviewing manager and talent acquisition specialist.
-            We've passed an interview for an #offer, to a #candidate, and we've gathered the information output and prepared a list of #Question/#answer from that interview,
-            I will provide you below the needed information for them.
-            Prepare a list of evaluations for that interview, each #evaluation_type is an entry in this list, I will also give you the list of #evaluation_types that we need to evaluate this candidate in.
-                                       
-            #Take in consideration these instructions:
-             - The evaluations must be comprehensive and fair considering the job requirements in #offer_data and the #candidate_data
-             - In relevance to the #evaluation_type being assessed, look in the #answers for technical accuracy, depth of knowledge, problem-solving approaches, and communication skills.
-             - If the #answer is correct and the time of #answer is lower than the time given in the question, take it into account for positive assessment.
-             - Cross-reference #candidate answers with #job requirements to ensure role-specific #evaluation.
-             - Take evaluation type #coefficients in consideration
-             - Ensure fairness by matching evaluation difficulty and accuracy to candidate's stated experience level
-             - Use the exact 'description' value from each EvaluationTypes listFor the 'evaluationType' field in the output.
-             - Ensure each evaluation in the output array corresponds exactly to one EvaluationType from the input list.
-             - Do not skip any evaluation types or add additional ones not provided in the Evaluation Types.
-             - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
-             - Use simple language: A2-B1-B2
-             - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting:"{JSON_SCHEMA}", here you have a mock example:"{JSON_MOCK}".
-                                       
-            I provide bellow the needed information:
-             - #Candidate Profile: "{CANDIDATE_DATA}",
-             - #Job Offer requirements: "{OFFER_DATA}",
-             - #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".
-             - #Questions And Answers with the estimated answer time and the real answer time: "{QuestionAnswer_DATA}"
-            """;
+
 
     @BeforeEach
     void setUp() {
@@ -405,7 +369,7 @@ class InterviewControllerTest {
         List<QuestionDTO> questions = List.of(questionDTO);
 
         // When
-        when(interviewServ.getQuestionsByInterviewId(interviewId)).thenReturn(questions);
+        when(questionServ.findAllQuestionsDTOSByInterviewId(interviewId)).thenReturn(questions);
 
         // Then
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/questions", interviewId)
@@ -486,7 +450,7 @@ class InterviewControllerTest {
                 List.of(evaluation1, evaluation2)
         );
 
-        when(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId)).thenReturn(interviewEvaluation);
+        when(interviewServ.getInterviewEvaluations(interviewId)).thenReturn(interviewEvaluation);
 
 
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
@@ -565,10 +529,10 @@ class InterviewControllerTest {
                 new EvaluationTypeDTO(UUID.randomUUID(), "Creativity", 0.8)
         );
 
-        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),"test",INTERVIEW_EVALUATION_PROMPT,JSON_SCHEMA);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE, InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT,InterviewEvaluationPromptConstants.JSON_SCHEMA);
 
 
-        when(interviewQuestionsUtilServ.generateInterviewQuestions(eq(interviewId),any(GenerateInterviewQuestionsRequest.class)))
+        when(interviewServ.generateInterviewQuestions(eq(interviewId),any(GenerateInterviewQuestionsRequest.class)))
                 .thenReturn(generatedQuestions);
 
         String requestBody = """
@@ -618,9 +582,9 @@ class InterviewControllerTest {
                         2,
                         3);
 
-        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),"test",INTERVIEW_EVALUATION_PROMPT,JSON_SCHEMA);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE,InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT,InterviewEvaluationPromptConstants.JSON_SCHEMA);
 
-        InterviewEvaluationsRequestDTO interviewEvaluationsRequest = new InterviewEvaluationsRequestDTO("test",List.of(questionsAndAnswersForEvaluation1, questionsAndAnswersForEvaluation2));
+        InterviewEvaluationsRequestDTO interviewEvaluationsRequest = new InterviewEvaluationsRequestDTO(List.of(questionsAndAnswersForEvaluation1, questionsAndAnswersForEvaluation2));
 
         Evaluation evaluation = new Evaluation();
         evaluation.setFeedback("nothing");
@@ -636,7 +600,7 @@ class InterviewControllerTest {
         String jsonRequest = new ObjectMapper().writeValueAsString(interviewEvaluationsRequest);
 
 
-        when(interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest)).thenReturn(List.of(evaluation));
+        when(interviewServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest)).thenReturn(List.of(evaluation));
 
         mockMvc.perform(post("/api/v1/interviews/{interviewId}/evaluations",interviewId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -646,7 +610,7 @@ class InterviewControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Evaluation is created and saved"));
 
-        verify(interviewEvaluationUtilServ).prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+        verify(interviewServ).prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
     }
 
 

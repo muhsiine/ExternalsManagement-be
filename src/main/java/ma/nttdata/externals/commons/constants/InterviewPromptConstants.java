@@ -96,6 +96,8 @@ public final class InterviewPromptConstants {
               }
             ]
             """;
+
+    public static final String INTERVIEW_GENERATE_QUESTIONS_PROMPT_CODE = "INTERVIEW_QUESTION_GENERATION_PROMPT";
     public static final String CANDIDATE_DATA_PLACEHOLDER = "{CANDIDATE_DATA}";
     public static final String OFFER_DATA_PLACEHOLDER = "{OFFER_DATA}";
     public static final String EVALUATION_TYPE_DATA_PLACEHOLDER = "{EVALUATION_TYPES_DATA}";

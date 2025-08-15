@@ -1,5 +1,7 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
+import ma.nttdata.externals.commons.constants.InterviewPromptConstants;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
@@ -123,10 +125,10 @@ public class EvaluationServImplTest {
                 4
         ));
         PlaceholdersForInterviewEvaluationPromptDTO placeholders = mock(PlaceholdersForInterviewEvaluationPromptDTO.class);
-        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),"test",INTERVIEW_EVALUATION_PROMPT,JSON_SCHEMA);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE,InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT, InterviewEvaluationPromptConstants.JSON_SCHEMA);
 
 
-        List<EvaluationsAIResponseDTO> result = spyService.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO("test",qaList), placeholders,prompt);
+        List<EvaluationsAIResponseDTO> result = spyService.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO(qaList), placeholders,prompt);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -168,9 +170,9 @@ public class EvaluationServImplTest {
                         ));
         PlaceholdersForInterviewEvaluationPromptDTO placeholders = mock(PlaceholdersForInterviewEvaluationPromptDTO.class);
 
-        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),"test",INTERVIEW_EVALUATION_PROMPT,JSON_SCHEMA);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewPromptConstants.INTERVIEW_GENERATE_QUESTIONS_PROMPT_CODE, InterviewPromptConstants.INTERVIEW_QUESTION_GENERATION_PROMPT,InterviewPromptConstants.JSON_SCHEMA);
 
-        List<EvaluationsAIResponseDTO> result = evaluationServ.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO("test",qaList), placeholders,prompt);
+        List<EvaluationsAIResponseDTO> result = evaluationServ.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO(qaList), placeholders,prompt);
 
         assertNotNull(result);
         assertEquals(6, result.size());
@@ -266,7 +268,7 @@ public class EvaluationServImplTest {
                 "What is OOP?", "Object Oriented Programming", 5, 5
         );
         InterviewEvaluationsRequestDTO requestDTO = new InterviewEvaluationsRequestDTO(
-                "test",
+
                 List.of(qa)
         );
 

@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
+import ma.nttdata.externals.commons.constants.InterviewPromptConstants;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
@@ -308,7 +309,7 @@ public class InterviewServImpl implements InterviewServ {
                                                         GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest){
         placeholdersForInterviewQuestionsPromptDTO placeholders = getPlaceholdersForInterviewQuestionsPrompt(interviewId);
         List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
-        PromptDTO prompt = promptServ.findByPromptCode(generateInterviewQuestionsRequest.promptCode());
+        PromptDTO prompt = promptServ.findByPromptCode(InterviewPromptConstants.INTERVIEW_GENERATE_QUESTIONS_PROMPT_CODE);
         List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes,prompt);
         List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
                 .map(q -> new QuestionDTO(
