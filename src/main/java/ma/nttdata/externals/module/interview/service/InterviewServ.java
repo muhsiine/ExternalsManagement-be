@@ -65,4 +65,7 @@ public interface InterviewServ {
     List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest);
 
     InterviewEvaluationDTO getInterviewEvaluations(UUID interviewId);
+
+    List<QuestionDTO> generateInterviewQuestions(UUID interviewId,
+                                                 GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest);
 }

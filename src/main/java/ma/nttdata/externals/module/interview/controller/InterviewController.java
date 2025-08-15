@@ -30,7 +30,6 @@ public class InterviewController  {
     private final InterviewTokenServ interviewTokenServ;
     private final EmailServiceImpl emailServiceImpl;
     private final EmailContentBuilder emailContentBuilder;
-    private final InterviewQuestionsUtilServ interviewQuestionsUtilServ;
     private final QuestionServ questionServ;
 
     @Operation(
@@ -186,7 +185,7 @@ public class InterviewController  {
     @PostMapping("/{interviewId}/generateQuestions")
     public ResponseEntity<List<QuestionDTO>> generateInterviewQuestions(@PathVariable UUID interviewId,
                                                                    @RequestBody GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest) {
-        List<QuestionDTO> savedQuestions = interviewQuestionsUtilServ.generateInterviewQuestions(interviewId,generateInterviewQuestionsRequest);
+        List<QuestionDTO> savedQuestions = interviewServ.generateInterviewQuestions(interviewId,generateInterviewQuestionsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedQuestions);
     }
 

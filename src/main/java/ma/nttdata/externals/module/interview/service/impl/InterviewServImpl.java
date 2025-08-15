@@ -17,8 +17,10 @@ import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
+import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.InterviewServ;
 
+import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
@@ -60,8 +62,9 @@ public class InterviewServImpl implements InterviewServ {
     private final OfferMapper offerMapper;
 
     private final EvaluationServ evaluationServ;
-
     private final PromptService promptServ;
+    private final EvaluationTypeServ evaluationTypeServ;
+    private final QuestionServ questionServ;
 
     public InterviewServImpl(
             InterviewMapper interviewMapper,
@@ -75,7 +78,7 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationTypeMapper evaluationTypeMapper ,
             CandidateMapper candidateMapper,
             @Value("${interview.baseLink}") String interviewBaseLink,
-            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ
+            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ, EvaluationTypeServ evaluationTypeServ, QuestionServ questionServ
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -91,6 +94,8 @@ public class InterviewServImpl implements InterviewServ {
         this.offerMapper = offerMapper;
         this.evaluationServ = evaluationServ;
         this.promptServ = promptServ;
+        this.evaluationTypeServ = evaluationTypeServ;
+        this.questionServ = questionServ;
     }
 
     // new interview
@@ -297,6 +302,25 @@ public class InterviewServImpl implements InterviewServ {
                 .collect(Collectors.toList());
 
         return interviewList;
+    }
+
+    public List<QuestionDTO> generateInterviewQuestions(UUID interviewId,
+                                                        GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest){
+        placeholdersForInterviewQuestionsPromptDTO placeholders = getPlaceholdersForInterviewQuestionsPrompt(interviewId);
+        List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
+        PromptDTO prompt = promptServ.findByPromptCode(generateInterviewQuestionsRequest.promptCode());
+        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes,prompt);
+        List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
+                .map(q -> new QuestionDTO(
+                        null,
+                        q.description(),
+                        q.durationInMinutes(),
+                        interviewId,
+                        null
+                ))
+                .toList();
+        List<QuestionDTO> savedQuestions = questionServ.saveAllQuestions(generatedQuestionsWithInterviewId);
+        return savedQuestions;
     }
 
     @Override
