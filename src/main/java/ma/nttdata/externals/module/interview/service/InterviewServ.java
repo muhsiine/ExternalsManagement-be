@@ -62,7 +62,7 @@ public interface InterviewServ {
 
     List<InterviewListDTO> getAllInterviewList();
 
-    List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest);
+    List<Evaluation> prepareInterviewEvaluations(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest);
 
     InterviewEvaluationDTO getInterviewEvaluations(UUID interviewId);
 

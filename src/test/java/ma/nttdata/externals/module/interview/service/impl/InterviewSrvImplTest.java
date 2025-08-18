@@ -505,7 +505,7 @@ class InterviewSrvImplTest {
         when(evaluationServ.getAllEvaluationsByInterviewID(interviewId)).thenReturn(existingEvaluations);
         when(evaluationServ.saveAIEvaluationResponse(aiEvaluationResponse, existingEvaluations)).thenReturn(savedEvaluations);
 
-        List<Evaluation> result = interviewServSpy.prepareInterviewEvaluation(interviewId, interviewEvaluationsRequest);
+        List<Evaluation> result = interviewServSpy.prepareInterviewEvaluations(interviewId, interviewEvaluationsRequest);
 
 
         assertEquals(savedEvaluations, result);

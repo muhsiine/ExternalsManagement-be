@@ -212,7 +212,7 @@ public class InterviewController  {
     )
     @PostMapping("/{interviewId}/evaluations")
     public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
-        List<Evaluation> savedEvaluations = interviewServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+        List<Evaluation> savedEvaluations = interviewServ.prepareInterviewEvaluations(interviewId,interviewEvaluationsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
     }
 

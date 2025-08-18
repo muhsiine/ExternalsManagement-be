@@ -325,7 +325,7 @@ public class InterviewServImpl implements InterviewServ {
     }
 
     @Override
-    public List<Evaluation> prepareInterviewEvaluation(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest) {
+    public List<Evaluation> prepareInterviewEvaluations(UUID interviewId, InterviewEvaluationsRequestDTO interviewEvaluationsRequest) {
         PlaceholdersForInterviewEvaluationPromptDTO placeholders = getInterviewEvaluationPlaceholders(interviewId);
         PromptDTO prompt = promptServ.findByPromptCode(InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE);
         List<EvaluationsAIResponseDTO> aiEvaluationResponse = evaluationServ.prepareEvaluationsDTOFromAiResponse(interviewEvaluationsRequest,placeholders,prompt);
