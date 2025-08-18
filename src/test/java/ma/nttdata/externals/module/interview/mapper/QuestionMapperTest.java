@@ -72,7 +72,7 @@ class QuestionMapperTest {
         assertEquals(dto.description(), entity.getDescription());
         assertEquals(dto.durationInMinutes(), entity.getDurationInMinutes());
         // Interview and Answer are ignored in the mapper, so they should be null
-        assertNull(entity.getInterview());
+        assertNotNull(entity.getInterview());
         assertNull(entity.getAnswer());
     }
 

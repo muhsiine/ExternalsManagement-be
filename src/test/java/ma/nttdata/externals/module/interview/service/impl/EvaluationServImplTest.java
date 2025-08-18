@@ -1,31 +1,27 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
+import ma.nttdata.externals.commons.constants.InterviewPromptConstants;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.entity.EvaluationType;
-import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
-import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestClient;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +52,42 @@ public class EvaluationServImplTest {
 
     private boolean mockFlag = true;
 
+    private static String JSON_SCHEMA = """
+            [
+              {
+                "score": "Double - between 0.00 and 100.00",
+                "feedback": "String - Try to give an overall feedback of the performance of the candidate in this evaluation type",
+                "evaluationTypeDescription": "String - use the exact 'description' field value from the corresponding EvaluationType entity"
+              }
+            ]
+            """;
+    private static final String INTERVIEW_EVALUATION_PROMPT = """
+            You're an expert interviewing manager and talent acquisition specialist.
+            We've passed an interview for an #offer, to a #candidate, and we've gathered the information output and prepared a list of #Question/#answer from that interview,
+            I will provide you below the needed information for them.
+            Prepare a list of evaluations for that interview, each #evaluation_type is an entry in this list, I will also give you the list of #evaluation_types that we need to evaluate this candidate in.
+                                       
+            #Take in consideration these instructions:
+             - The evaluations must be comprehensive and fair considering the job requirements in #offer_data and the #candidate_data
+             - In relevance to the #evaluation_type being assessed, look in the #answers for technical accuracy, depth of knowledge, problem-solving approaches, and communication skills.
+             - If the #answer is correct and the time of #answer is lower than the time given in the question, take it into account for positive assessment.
+             - Cross-reference #candidate answers with #job requirements to ensure role-specific #evaluation.
+             - Take evaluation type #coefficients in consideration
+             - Ensure fairness by matching evaluation difficulty and accuracy to candidate's stated experience level
+             - Use the exact 'description' value from each EvaluationTypes listFor the 'evaluationType' field in the output.
+             - Ensure each evaluation in the output array corresponds exactly to one EvaluationType from the input list.
+             - Do not skip any evaluation types or add additional ones not provided in the Evaluation Types.
+             - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
+             - Use simple language: A2-B1-B2
+             - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting:"{JSON_SCHEMA}", here you have a mock example:"{JSON_MOCK}".
+                                       
+            I provide bellow the needed information:
+             - #Candidate Profile: "{CANDIDATE_DATA}",
+             - #Job Offer requirements: "{OFFER_DATA}",
+             - #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".
+             - #Questions And Answers with the estimated answer time and the real answer time: "{QuestionAnswer_DATA}"
+            """;
+
     @Test
     void prepareEvaluationResponseFromAi_shouldReturnParsedList_whenMockFlagFalse() throws Exception {
         evaluationServ = new EvaluationServImpl(
@@ -76,7 +108,7 @@ public class EvaluationServImplTest {
             ]
             """;
 
-        doReturn(mockedJson).when(spyService).getInterviewsEvaluationsFromAiByPrompt(any(), any());
+        doReturn(mockedJson).when(spyService).getInterviewsEvaluationsFromAiByPrompt(any(), any(),any());
 
         List<QuestionsAndAnswersForEvaluationDTO> qaList =
         List.of(new QuestionsAndAnswersForEvaluationDTO(
@@ -93,8 +125,10 @@ public class EvaluationServImplTest {
                 4
         ));
         PlaceholdersForInterviewEvaluationPromptDTO placeholders = mock(PlaceholdersForInterviewEvaluationPromptDTO.class);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE,InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT, InterviewEvaluationPromptConstants.JSON_SCHEMA);
 
-        List<EvaluationsAIResponseDTO> result = spyService.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO(qaList), placeholders);
+
+        List<EvaluationsAIResponseDTO> result = spyService.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO(qaList), placeholders,prompt);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -136,7 +170,9 @@ public class EvaluationServImplTest {
                         ));
         PlaceholdersForInterviewEvaluationPromptDTO placeholders = mock(PlaceholdersForInterviewEvaluationPromptDTO.class);
 
-        List<EvaluationsAIResponseDTO> result = evaluationServ.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO(qaList), placeholders);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewPromptConstants.INTERVIEW_GENERATE_QUESTIONS_PROMPT_CODE, InterviewPromptConstants.INTERVIEW_QUESTION_GENERATION_PROMPT,InterviewPromptConstants.JSON_SCHEMA);
+
+        List<EvaluationsAIResponseDTO> result = evaluationServ.prepareEvaluationsDTOFromAiResponse(new InterviewEvaluationsRequestDTO(qaList), placeholders,prompt);
 
         assertNotNull(result);
         assertEquals(6, result.size());
@@ -225,10 +261,14 @@ public class EvaluationServImplTest {
                 aiRestClient
         );
 
+
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),"test",INTERVIEW_EVALUATION_PROMPT,JSON_SCHEMA);
+
         QuestionsAndAnswersForEvaluationDTO qa = new QuestionsAndAnswersForEvaluationDTO(
                 "What is OOP?", "Object Oriented Programming", 5, 5
         );
         InterviewEvaluationsRequestDTO requestDTO = new InterviewEvaluationsRequestDTO(
+
                 List.of(qa)
         );
 
@@ -260,7 +300,7 @@ public class EvaluationServImplTest {
         when(requestBodySpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.body(String.class)).thenReturn(mockedResponse);
 
-        String result = evaluationServ.getInterviewsEvaluationsFromAiByPrompt(requestDTO, placeholders);
+        String result = evaluationServ.getInterviewsEvaluationsFromAiByPrompt(requestDTO, placeholders,prompt);
 
         assertEquals(mockedResponse, result);
 

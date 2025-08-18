@@ -4,11 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
-import ma.nttdata.externals.commons.services.EmailService;
+import ma.nttdata.externals.commons.services.impl.EmailServiceImpl;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
-import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
@@ -20,7 +19,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -29,12 +27,10 @@ import java.util.Map;
 public class InterviewController  {
 
     private final InterviewServ interviewServ;
-    private final QuestionServ questionServ;
     private final InterviewTokenServ interviewTokenServ;
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
     private final EmailContentBuilder emailContentBuilder;
-    private final EvaluationTypeServ evaluationTypeServ;
-    private final InterviewEvaluationUtilServ interviewEvaluationUtilServ;
+    private final QuestionServ questionServ;
 
     @Operation(
             summary = "Create a new interview",
@@ -121,15 +117,6 @@ public class InterviewController  {
     }
 
     @Operation(
-            summary = "Get questions by interview ID",
-            description = "Returns all questions linked to a specific interview"
-    )
-    @GetMapping("/{interviewId}/questions")
-    public ResponseEntity<List<QuestionDTO>> getQuestionsByInterviewId(@PathVariable UUID interviewId) {
-        return ResponseEntity.ok(interviewServ.getQuestionsByInterviewId(interviewId));
-    }
-
-    @Operation(
             summary = "Get answer of a question",
             description = "Returns the answer associated with a given question ID"
     )
@@ -186,7 +173,7 @@ public class InterviewController  {
                     payload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
             );
 
-            emailService.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
+            emailServiceImpl.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
             return ResponseEntity.ok("Email sent successfully!");
     }
 
@@ -198,38 +185,16 @@ public class InterviewController  {
     @PostMapping("/{interviewId}/generateQuestions")
     public ResponseEntity<List<QuestionDTO>> generateInterviewQuestions(@PathVariable UUID interviewId,
                                                                    @RequestBody GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest) {
-        placeholdersForInterviewQuestionsPromptDTO placeholders = interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId);
-        List<EvaluationTypeDTO> evaluationTypes = evaluationTypeServ.findAllById(generateInterviewQuestionsRequest.evaluationTypesIds());
-
-        List<QuestionDTO> generatedQuestions = questionServ.prepareQuestionsFromAIResponse( placeholders, evaluationTypes);
-        List<QuestionDTO> generatedQuestionsWithInterviewId = generatedQuestions.stream()
-                .map(q -> new QuestionDTO(
-                        null,
-                        q.description(),
-                        q.durationInMinutes(),
-                        interviewId,
-                        null
-                ))
-                .toList();
-        List<QuestionDTO> savedQuestions = questionServ.saveAllQuestions(generatedQuestionsWithInterviewId);
+        List<QuestionDTO> savedQuestions = interviewServ.generateInterviewQuestions(interviewId,generateInterviewQuestionsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedQuestions);
-    }
-
-    @Operation(
-            summary = "Get interview questions by interview Id",
-            description = "Return the questions of that interview"
-    )
-    @GetMapping("/{interviewId}/getQuestions")
-    public ResponseEntity<List<Question>> getInterviewQuestions(UUID interviewId){
-        return ResponseEntity.ok(questionServ.findAllQuestionsByInterviewId(interviewId));
     }
 
     @Operation(
             summary = "Get interview questions by interview Id",
             description = "Return the DTO of questions of that interview"
     )
-    @GetMapping("/{interviewId}/getQuestionsDTO")
-    public ResponseEntity<List<QuestionDTO>> getInterviewQuestionsDTOS(UUID interviewId){
+    @GetMapping("/{interviewId}/questions")
+    public ResponseEntity<List<QuestionDTO>> getQuestionsByInterviewId(@PathVariable UUID interviewId){
 
         return ResponseEntity.ok(questionServ.findAllQuestionsDTOSByInterviewId(interviewId));
     }
@@ -246,8 +211,8 @@ public class InterviewController  {
         """
     )
     @PostMapping("/{interviewId}/evaluations")
-    public ResponseEntity<?> prepareInterviewEvaluation(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
-        List<Evaluation> savedEvaluations = interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+    public ResponseEntity<?> prepareInterviewEvaluations(@PathVariable UUID interviewId,@RequestBody InterviewEvaluationsRequestDTO interviewEvaluationsRequest){
+        List<Evaluation> savedEvaluations = interviewServ.prepareInterviewEvaluations(interviewId,interviewEvaluationsRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body("Evaluation is created and saved");
     }
 
@@ -257,7 +222,7 @@ public class InterviewController  {
     )
     @GetMapping("/{interviewId}/evaluations")
     public ResponseEntity<InterviewEvaluationDTO> getInterviewEvaluations(@PathVariable UUID interviewId){
-        return ResponseEntity.ok(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId));
+        return ResponseEntity.ok(interviewServ.getInterviewEvaluations(interviewId));
     }
 
 }

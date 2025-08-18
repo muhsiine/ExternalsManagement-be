@@ -71,4 +71,5 @@ public class QuestionController {
         questionServ.deleteQuestion(id);
         return ResponseEntity.noContent().build();
     }
+
 }

@@ -31,7 +31,7 @@ public final class InterviewEvaluationPromptConstants {
              - #Questions And Answers with the estimated answer time and the real answer time: "{QuestionAnswer_DATA}"
             """;
 
-    public static final String JS0N_SCHEMA = """
+    public static final String JSON_SCHEMA = """
             [
               {
                 "score": "Double - between 0.00 and 100.00",
@@ -76,6 +76,8 @@ public final class InterviewEvaluationPromptConstants {
         ]
         """;
 
+
+    public static final String INTERVIEW_EVALUATION_PROMPT_CODE = "INTERVIEW_EVALUATION_PROMPT";
 
     public static final String OFFER_PLACEHOLDER = "{OFFER_DATA}";
     public static final String CANDIDATE_PLACEHOLDER = "{CANDIDATE_DATA}";

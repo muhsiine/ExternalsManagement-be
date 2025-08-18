@@ -1,6 +1,7 @@
 package ma.nttdata.externals.module.prompt.service;
 
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
+import ma.nttdata.externals.module.prompt.entity.Prompt;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,4 +16,5 @@ public interface PromptService {
     Page<PromptDTO> getAllPromptsPaginated(Pageable pageable);
     PromptDTO updatePrompt(UUID id, PromptDTO promptDTO);
     void deletePrompt(UUID id);
+    PromptDTO findByPromptCode(String promptCode);
 }

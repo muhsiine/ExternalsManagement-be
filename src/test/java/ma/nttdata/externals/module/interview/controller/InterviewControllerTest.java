@@ -1,8 +1,9 @@
 package ma.nttdata.externals.module.interview.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ma.nttdata.externals.commons.constants.InterviewEvaluationPromptConstants;
 import ma.nttdata.externals.commons.services.EmailContentBuilder;
-import ma.nttdata.externals.commons.services.EmailService;
+import ma.nttdata.externals.commons.services.impl.EmailServiceImpl;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.*;
@@ -11,11 +12,11 @@ import ma.nttdata.externals.module.interview.entity.EvaluationType;
 import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.service.*;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -38,26 +39,20 @@ class InterviewControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private InterviewServ interviewServ;
 
     @MockitoBean
     private InterviewTokenServ interviewTokenServ;
 
     @MockitoBean
-    private EmailService emailService;
+    private EmailServiceImpl emailServiceImpl;
 
     @MockitoBean
     private EmailContentBuilder emailContentBuilder;
 
     @MockitoBean
     private QuestionServ questionServ;
-
-    @MockitoBean
-    private EvaluationTypeServ evaluationTypeServ;
-
-    @MockitoBean
-    private InterviewEvaluationUtilServ interviewEvaluationUtilServ;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -77,6 +72,8 @@ class InterviewControllerTest {
     private EvaluationDTO evaluationDTO;
     private EvaluationTypeDTO evaluationTypeDTO;
     private OfferDTO offerDTO;
+
+
 
     @BeforeEach
     void setUp() {
@@ -371,7 +368,7 @@ class InterviewControllerTest {
         List<QuestionDTO> questions = List.of(questionDTO);
 
         // When
-        when(interviewServ.getQuestionsByInterviewId(interviewId)).thenReturn(questions);
+        when(questionServ.findAllQuestionsDTOSByInterviewId(interviewId)).thenReturn(questions);
 
         // Then
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/questions", interviewId)
@@ -452,7 +449,7 @@ class InterviewControllerTest {
                 List.of(evaluation1, evaluation2)
         );
 
-        when(interviewEvaluationUtilServ.getInterviewEvaluations(interviewId)).thenReturn(interviewEvaluation);
+        when(interviewServ.getInterviewEvaluations(interviewId)).thenReturn(interviewEvaluation);
 
 
         mockMvc.perform(get("/api/v1/interviews/{interviewId}/evaluations", interviewId)
@@ -521,6 +518,8 @@ class InterviewControllerTest {
                 )
         );
 
+
+
         List<EvaluationTypeDTO> evaluationTypeDTOS = List.of(
                 new EvaluationTypeDTO(UUID.randomUUID(), "Technical Skills", 1.5),
                 new EvaluationTypeDTO(UUID.randomUUID(), "Communication", 1.0),
@@ -529,29 +528,24 @@ class InterviewControllerTest {
                 new EvaluationTypeDTO(UUID.randomUUID(), "Creativity", 0.8)
         );
 
-        when(interviewServ.getPlaceholdersForInterviewQuestionsPrompt(interviewId))
-                .thenReturn(generateQuestionsInfo);
-        when(evaluationTypeServ.findAllById(anyList()))
-                .thenReturn(evaluationTypeDTOS);
-        when(questionServ.prepareQuestionsFromAIResponse(generateQuestionsInfo,evaluationTypeDTOS))
-                .thenReturn(generatedQuestions);
-        when(questionServ.saveAllQuestions(anyList()))
-                .thenReturn(generatedQuestions);
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE, InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT,InterviewEvaluationPromptConstants.JSON_SCHEMA);
 
+
+        when(interviewServ.generateInterviewQuestions(eq(interviewId),any(GenerateInterviewQuestionsRequest.class)))
+                .thenReturn(generatedQuestions);
 
         String requestBody = """
         {
-          "evaluationTypesIds": ["%s", "%s","%s","%s"],
-          "numberOfQuestions": %d,
-          "estimatedInterviewDuration": %d
+          "promptCode": "%s",
+          "evaluationTypesIds": ["%s", "%s","%s","%s"]
+          
         }
         """.formatted(
+                prompt.promptCode(),
                 evaluationTypeDTOS.get(0).id(),
                 evaluationTypeDTOS.get(1).id(),
                 evaluationTypeDTOS.get(2).id(),
-                evaluationTypeDTOS.get(3).id(),
-                numberOfQuestions,
-                estimatedDuration
+                evaluationTypeDTOS.get(3).id()
         );
 
         mockMvc.perform(post("/api/v1/interviews/{interviewId}/generateQuestions", interviewId)
@@ -568,13 +562,7 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$[1].durationInMinutes").value(4))
                 .andExpect(jsonPath("$[2].description").value("Explain microservices architecture."))
                 .andExpect(jsonPath("$[2].durationInMinutes").value(6));
-        verify(interviewServ).getPlaceholdersForInterviewQuestionsPrompt(interviewId);
-        verify(evaluationTypeServ).findAllById(anyList());
-        verify(questionServ).prepareQuestionsFromAIResponse(
-                eq(generateQuestionsInfo),
-                eq(evaluationTypeDTOS)
-        );
-        verify(questionServ).saveAllQuestions(anyList());
+
     }
 
     @Test
@@ -592,6 +580,9 @@ class InterviewControllerTest {
                         "useEffect is",
                         2,
                         3);
+
+        PromptDTO prompt = new PromptDTO(UUID.randomUUID(),InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT_CODE,InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT,InterviewEvaluationPromptConstants.JSON_SCHEMA);
+
         InterviewEvaluationsRequestDTO interviewEvaluationsRequest = new InterviewEvaluationsRequestDTO(List.of(questionsAndAnswersForEvaluation1, questionsAndAnswersForEvaluation2));
 
         Evaluation evaluation = new Evaluation();
@@ -608,7 +599,7 @@ class InterviewControllerTest {
         String jsonRequest = new ObjectMapper().writeValueAsString(interviewEvaluationsRequest);
 
 
-        when(interviewEvaluationUtilServ.prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest)).thenReturn(List.of(evaluation));
+        when(interviewServ.prepareInterviewEvaluations(interviewId,interviewEvaluationsRequest)).thenReturn(List.of(evaluation));
 
         mockMvc.perform(post("/api/v1/interviews/{interviewId}/evaluations",interviewId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -618,7 +609,7 @@ class InterviewControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Evaluation is created and saved"));
 
-        verify(interviewEvaluationUtilServ).prepareInterviewEvaluation(interviewId,interviewEvaluationsRequest);
+        verify(interviewServ).prepareInterviewEvaluations(interviewId,interviewEvaluationsRequest);
     }
 
 

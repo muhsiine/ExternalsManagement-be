@@ -17,6 +17,7 @@ import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationTypeRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
+import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -105,10 +106,10 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public List<EvaluationsAIResponseDTO> prepareEvaluationsDTOFromAiResponse(InterviewEvaluationsRequestDTO interviewEvaluationsRequest,PlaceholdersForInterviewEvaluationPromptDTO  placeholders){
+    public List<EvaluationsAIResponseDTO> prepareEvaluationsDTOFromAiResponse(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO  placeholders, PromptDTO prompt){
         try{
             String generatedEvaluation = mockFlag ? InterviewEvaluationPromptConstants.JSON_MOCK
-                    :getInterviewsEvaluationsFromAiByPrompt(interviewEvaluationsRequest,placeholders);
+                    :getInterviewsEvaluationsFromAiByPrompt(interviewEvaluationsRequest,placeholders,prompt);
 
             ObjectMapper objectMapper = new ObjectMapper();
             List<EvaluationsAIResponseDTO> evaluation = objectMapper.readValue(generatedEvaluation, new TypeReference<List<EvaluationsAIResponseDTO>>() {});
@@ -121,19 +122,19 @@ public class EvaluationServImpl implements EvaluationServ {
     }
 
     @Override
-    public String getInterviewsEvaluationsFromAiByPrompt(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO placeholders){
-        String prompt  = InterviewEvaluationPromptConstants.INTERVIEW_EVALUATION_PROMPT;
+    public String getInterviewsEvaluationsFromAiByPrompt(InterviewEvaluationsRequestDTO interviewEvaluationsRequest, PlaceholdersForInterviewEvaluationPromptDTO placeholders,PromptDTO prompt){
+        String promptDesc  = prompt.promptDesc();
 
-        prompt.replace(InterviewEvaluationPromptConstants.CANDIDATE_PLACEHOLDER,placeholders.candidate().toString())
+        promptDesc.replace(InterviewEvaluationPromptConstants.CANDIDATE_PLACEHOLDER,placeholders.candidate().toString())
                 .replace(InterviewEvaluationPromptConstants.OFFER_PLACEHOLDER,placeholders.offer().toString())
-                .replace(InterviewEvaluationPromptConstants.JSON_SCHEMA_PLACEHOLDER,InterviewEvaluationPromptConstants.JS0N_SCHEMA)
+                .replace(InterviewEvaluationPromptConstants.JSON_SCHEMA_PLACEHOLDER,prompt.schema())
                 .replace(InterviewEvaluationPromptConstants.QUESTION_ANSWER_DTO_PLACEHOLDER,interviewEvaluationsRequest.questionsAndAnswersForEvaluation().toString())
                 .replace(InterviewEvaluationPromptConstants.EVALUATION_TYPES_PLACEHOLDER,placeholders.evaluationType().toString())
                 .replace(InterviewEvaluationPromptConstants.JSON_MOCK_PLACEHOLDER,InterviewEvaluationPromptConstants.JSON_MOCK_PLACEHOLDER);
 
         return aiRestClient.post()
                 .uri("/evaluationInterview")
-                .body(prompt)
+                .body(promptDesc)
                 .retrieve()
                 .body(String.class);
     }
