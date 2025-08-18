@@ -228,7 +228,7 @@ JOIN language_data ld ON ld.row_number = cl.lang_index;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- OFFERS
-INSERT INTO offers (id, title, description)
+INSERT INTO offers (id, title, description,formatted_description)
 SELECT
     uuid_generate_v4(),
     (ARRAY[
@@ -250,7 +250,15 @@ SELECT
         'Create cross-platform mobile applications.',
         'Design and implement scalable cloud infrastructure.',
         'Build robust backend services and APIs.'
-    ])[FLOOR(RANDOM() * 8) + 1]
+    ])[FLOOR(RANDOM() * 8) + 1],
+    CAST(
+        json_build_object(
+            'skills',       (ARRAY['Java','React','Kubernetes','SQL'])[FLOOR(RANDOM()*4)+1],
+            'education',    (ARRAY['Bachelor','Master','PhD'])[FLOOR(RANDOM()*3)+1],
+            'yearsOfExperience', FLOOR(RANDOM() * 10) + 1,
+            'languages',    (ARRAY['English','French','Spanish','German'])[FLOOR(RANDOM()*4)+1]
+        ) AS text
+    )
 FROM generate_series(1, 10);
 
 -- INTERVIEWS
