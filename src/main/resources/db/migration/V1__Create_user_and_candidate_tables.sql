@@ -131,290 +131,65 @@ CREATE TABLE IF NOT EXISTS languages
 );
 
 INSERT INTO prompts (prompt_code, prompt_desc, schema) VALUES (
-                                                                  'CV_EXTRACTION',
-                                                                  'I''ll give you this cv/resume, please give me the candidate data, please try to put the maximum amount of data in the description fields,please take into account skill and natural languages rankings/levels could be  represented by either a star-based system or a progress bar, where the number of stars or the filled percentage of the progress bar indicates the proficiency level. The representation might be visually styled differently,but the number of stars or the progress bar''s filled portion remains the key to determining the level.It could be more complex than that, then you should interpret it visually the part around it to deduce the level.Try your best to deduce levels by any means visually contextually..',
-                                                                  '{
-                                                                "type": "object",
-                                                                "properties": {
-                                                                  "fullName": {
-                                                                    "type": "string"
-                                                                  },
-                                                                  "birthDate": {
-                                                                    "type": "string",
-                                                                    "description": "the date should be in the form of YYYY-MM-DD"
-                                                                  },
-                                                                  "yearsOfExperience": {
-                                                                    "type": "number"
-                                                                  },
-                                                                  "gender": {
-                                                                    "type": "string",
-                                                                    "enum": [
-                                                                      "F",
-                                                                      "M"
-                                                                    ]
-                                                                  },
-                                                                  "summary": {
-                                                                    "type": "string"
-                                                                  },
-                                                                  "mainTech": {
-                                                                    "type": "string",
-                                                                    "description": "try to deduce the mainTech from the whole CV"
-                                                                  },
-                                                                  "contacts": {
-                                                                    "type": "array",
-                                                                    "items": {
-                                                                      "type": "object",
-                                                                      "properties": {
-                                                                        "contactType": {
-                                                                          "type": "string",
-                                                                          "enum": [
-                                                                            "EMAIL",
-                                                                            "PHONE",
-                                                                            "LINKEDIN"
-                                                                          ]
-                                                                        },
-                                                                        "contactValue": {
-                                                                          "type": "string"
-                                                                        }
-                                                                      },
-                                                                      "required": [
-                                                                        "contactType",
-                                                                        "contactValue"
-                                                                      ]
-                                                                    }
-                                                                  },
-                                                                  "experiences": {
-                                                                    "type": "array",
-                                                                    "items": {
-                                                                      "type": "object",
-                                                                      "properties": {
-                                                                        "companyName": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "position": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "startDate": {
-                                                                          "type": "string",
-                                                                          "description": "the date should be in the form of YYYY-MM-DD"
-                                                                        },
-                                                                        "endDate": {
-                                                                          "type": "string",
-                                                                          "description": "the date should be in the form of YYYY-MM-DD"
-                                                                        },
-                                                                        "description": {
-                                                                          "type": "string"
-                                                                        }
-                                                                      }
-                                                                    }
-                                                                  },
-                                                                  "skills": {
-                                                                    "type": "array",
-                                                                    "items": {
-                                                                      "type": "object",
-                                                                      "properties": {
-                                                                        "skillName": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "proficiencyLevel": {
-                                                                          "type": "string",
-                                                                          "description": "default to BEGINNER",
-                                                                          "enum": [
-                                                                            "BEGINNER",
-                                                                            "INTERMEDIATE",
-                                                                            "EXPERT"
-                                                                          ]
-                                                                        }
-                                                                      },
-                                                                      "required": [
-                                                                        "skillName",
-                                                                        "proficiencyLevel"
-                                                                      ]
-                                                                    }
-                                                                  },
-                                                                  "educations": {
-                                                                    "type": "array",
-                                                                    "items": {
-                                                                      "type": "object",
-                                                                      "properties": {
-                                                                        "institution": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "diploma": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "startDate": {
-                                                                          "type": "string",
-                                                                          "description": "the date should be in the form of YYYY-MM-DD"
-                                                                        },
-                                                                        "endDate": {
-                                                                          "type": "string",
-                                                                          "description": "the date should be in the form of YYYY-MM-DD"
-                                                                        }
-                                                                      }
-                                                                    }
-                                                                  },
-                                                                  "address": {
-                                                                    "type": "object",
-                                                                    "properties": {
-                                                                      "country": {
-                                                                        "type": "object",
-                                                                        "properties": {
-                                                                          "name": {
-                                                                            "type": "string"
-                                                                          },
-                                                                          "englishName": {
-                                                                            "type": "string"
-                                                                          }
-                                                                        },
-                                                                        "required": [
-                                                                          "name",
-                                                                          "englishName"
-                                                                        ]
-                                                                      },
-                                                                      "city": {
-                                                                        "type": "object",
-                                                                        "properties": {
-                                                                          "name": {
-                                                                            "type": "string"
-                                                                          }
-                                                                        },
-                                                                        "required": [
-                                                                          "name"
-                                                                        ]
-                                                                      },
-                                                                      "postalCode": {
-                                                                        "type": "string",
-                                                                        "description": "try you best to get it from the whole CV"
-                                                                      },
-                                                                      "street": {
-                                                                        "type": "string"
-                                                                      },
-                                                                      "fullAddress": {
-                                                                        "type": "string"
-                                                                      }
-                                                                    },
-                                                                    "required": [
-                                                                      "country",
-                                                                      "city",
-                                                                      "street"
-                                                                    ]
-                                                                  },
-                                                                  "naturalLanguages": {
-                                                                    "type": "array",
-                                                                    "items": {
-                                                                      "type": "object",
-                                                                      "properties": {
-                                                                        "language": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "level": {
-                                                                          "type": "string",
-                                                                          "enum": [
-                                                                            "BEGINNER",
-                                                                            "LOWER_INTERMEDIATE",
-                                                                            "INTERMEDIATE",
-                                                                            "UPPER_INTERMEDIATE",
-                                                                            "ADVANCED"
-                                                                          ],
-                                                                          "comment": "focus only in the part around the language, don''t consider the whole file, also consider (Between A1 and A2) or [*    ] -> BEGINNER, (Between A2 and B1) or [**   ]-> LOWER_INTERMEDIATE, (Between B1 and B2) or [***  ] -> INTERMEDIATE, (B2 and C1) or [**** ] -> UPPER_INTERMEDIATE, (More than C1 or native) or [*****] -> ADVANCED"
-                                                                        },
-                                                                        "englishDescription": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "fullDescription": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "description": {
-                                                                          "type": "string"
-                                                                        },
-                                                                        "isNative": {
-                                                                          "type": "boolean"
-                                                                        },
-                                                                        "languageInEnglish": {
-                                                                          "type": "string"
-                                                                        }
-                                                                      },
-                                                                      "required": [
-                                                                        "language",
-                                                                        "level",
-                                                                        "englishDescription",
-                                                                        "fullDescription",
-                                                                        "description",
-                                                                        "isNative",
-                                                                        "languageInEnglish"
-                                                                      ]
-                                                                    }
-                                                                  }
-                                                                },
-                                                                "required": [
-                                                                  "fullName",
-                                                                  "gender",
-                                                                  "contacts",
-                                                                  "skills",
-                                                                  "address",
-                                                                  "naturalLanguages"
-                                                                ]
-                                                              }'
-                                                              ),(
-                                                                  'INTERVIEW_EVALUATION_PROMPT',
-                                                                  'You''re an expert interviewing manager and talent acquisition specialist.
-                                                                            We''ve passed an interview for an #offer, to a #candidate, and we''ve gathered the information output and prepared a list of #Question/#answer from that interview,
-                                                                            I will provide you below the needed information for them.
-                                                                            Prepare a list of evaluations for that interview, each #evaluation_type is an entry in this list, I will also give you the list of #evaluation_types that we need to evaluate this candidate in.
+    'CV_EXTRACTION',
+    'I''ll give you this cv/resume, please give me the candidate data, please try to put the maximum amount of data in the description fields,please take into account skill and natural languages rankings/levels could be  represented by either a star-based system or a progress bar, where the number of stars or the filled percentage of the progress bar indicates the proficiency level. The representation might be visually styled differently,but the number of stars or the progress bar''s filled portion remains the key to determining the level.It could be more complex than that, then you should interpret it visually the part around it to deduce the level.Try your best to deduce levels by any means visually contextually..',
+    '{"type":"object","properties":{"fullName":{"type":"string"},"birthDate":{"type":"string","description":"the date should be in the form of YYYY-MM-DD"},"yearsOfExperience":{"type":"number"},"gender":{"type":"string","enum":["F","M"]},"summary":{"type":"string"},"mainTech":{"type":"string","description":"try to deduce the mainTech from the whole CV"},"contacts":{"type":"array","items":{"type":"object","properties":{"contactType":{"type":"string","enum":["EMAIL","PHONE","LINKEDIN"]},"contactValue":{"type":"string"}},"required":["contactType","contactValue"]}},"experiences":{"type":"array","items":{"type":"object","properties":{"companyName":{"type":"string"},"position":{"type":"string"},"startDate":{"type":"string","description":"the date should be in the form of YYYY-MM-DD"},"endDate":{"type":"string","description":"the date should be in the form of YYYY-MM-DD"},"description":{"type":"string"}}}},"skills":{"type":"array","items":{"type":"object","properties":{"skillName":{"type":"string"},"proficiencyLevel":{"type":"string","description":"default to BEGINNER","enum":["BEGINNER","INTERMEDIATE","EXPERT"]}},"required":["skillName","proficiencyLevel"]}},"educations":{"type":"array","items":{"type":"object","properties":{"institution":{"type":"string"},"diploma":{"type":"string"},"startDate":{"type":"string","description":"the date should be in the form of YYYY-MM-DD"},"endDate":{"type":"string","description":"the date should be in the form of YYYY-MM-DD"}}}},"address":{"type":"object","properties":{"country":{"type":"object","properties":{"name":{"type":"string"},"englishName":{"type":"string"}},"required":["name","englishName"]},"city":{"type":"object","properties":{"name":{"type":"string"}},"required":["name"]},"postalCode":{"type":"string","description":"try you best to get it from the whole CV"},"street":{"type":"string"},"fullAddress":{"type":"string"}},"required":["country","city","street"]},"naturalLanguages":{"type":"array","items":{"type":"object","properties":{"language":{"type":"string"},"level":{"type":"string","enum":["BEGINNER","LOWER_INTERMEDIATE","INTERMEDIATE","UPPER_INTERMEDIATE","ADVANCED"],"comment":"focus only in the part around the language, don''t consider the whole file, also consider (Between A1 and A2) or [*    ] -> BEGINNER, (Between A2 and B1) or [**   ]-> LOWER_INTERMEDIATE, (Between B1 and B2) or [***  ] -> INTERMEDIATE, (B2 and C1) or [**** ] -> UPPER_INTERMEDIATE, (More than C1 or native) or [*****] -> ADVANCED"},"englishDescription":{"type":"string"},"fullDescription":{"type":"string"},"description":{"type":"string"},"isNative":{"type":"boolean"},"languageInEnglish":{"type":"string"}},"required":["language","level","englishDescription","fullDescription","description","isNative","languageInEnglish"]}}},"required":["fullName","gender","contacts","skills","address","naturalLanguages"]}'
+),(
+  'INTERVIEW_EVALUATION_PROMPT',
+  'You''re an expert interviewing manager and talent acquisition specialist.
+            We''ve passed an interview for an #offer, to a #candidate, and we''ve gathered the information output and prepared a list of #Question/#answer from that interview,
+            I will provide you below the needed information for them.
+            Prepare a list of evaluations for that interview, each #evaluation_type is an entry in this list, I will also give you the list of #evaluation_types that we need to evaluate this candidate in.
 
-                                                                            #Take in consideration these instructions:
-                                                                             - The evaluations must be comprehensive and fair considering the job requirements in #offer_data and the #candidate_data
-                                                                             - In relevance to the #evaluation_type being assessed, look in the #answers for technical accuracy, depth of knowledge, problem-solving approaches, and communication skills.
-                                                                             - If the #answer is correct and the time of #answer is lower than the time given in the question, take it into account for positive assessment.
-                                                                             - Cross-reference #candidate answers with #job requirements to ensure role-specific #evaluation.
-                                                                             - Take evaluation type #coefficients in consideration
-                                                                             - Ensure fairness by matching evaluation difficulty and accuracy to candidate''s stated experience level
-                                                                             - Use the exact ''description'' value from each EvaluationTypes listFor the ''evaluationType'' field in the output.
-                                                                             - Ensure each evaluation in the output array corresponds exactly to one EvaluationType from the input list.
-                                                                             - Do not skip any evaluation types or add additional ones not provided in the Evaluation Types.
-                                                                             - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
-                                                                             - Use simple language: A2-B1-B2
-                                                                             - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting: "{JSON_SCHEMA}", here you have a mock example: "{JSON_MOCK}".
+            #Take in consideration these instructions:
+             - The evaluations must be comprehensive and fair considering the job requirements in #offer_data and the #candidate_data
+             - In relevance to the #evaluation_type being assessed, look in the #answers for technical accuracy, depth of knowledge, problem-solving approaches, and communication skills.
+             - If the #answer is correct and the time of #answer is lower than the time given in the question, take it into account for positive assessment.
+             - Cross-reference #candidate answers with #job requirements to ensure role-specific #evaluation.
+             - Take evaluation type #coefficients in consideration
+             - Ensure fairness by matching evaluation difficulty and accuracy to candidate''s stated experience level
+             - Use the exact ''description'' value from each EvaluationTypes listFor the ''evaluationType'' field in the output.
+             - Ensure each evaluation in the output array corresponds exactly to one EvaluationType from the input list.
+             - Do not skip any evaluation types or add additional ones not provided in the Evaluation Types.
+             - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
+             - Use simple language: A2-B1-B2
+             - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting:"{JSON_SCHEMA}", here you have a mock example:"{JSON_MOCK}".
 
-                                                                            I provide bellow the needed information:
-                                                                             - #Candidate Profile: "{CANDIDATE_DATA}",
-                                                                             - #Job Offer requirements: "{OFFER_DATA}",
-                                                                             - #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".
-                                                                             - #Questions And Answers with the estimated answer time and the real answer time: "{QuestionAnswer_DATA}"',
-                                                                  '[
-                                                                {
-                                                                  "score": "Double - between 0.00 and 100.00",
-                                                                  "feedback": "String - Try to give an overall feedback of the performance of the candidate in this evaluation type",
-                                                                  "evaluationTypeDescription": "String - use the exact ''description'' field value from the corresponding EvaluationType entity"
-                                                                }
-                                                              ]'
-                                                              ),
-                                                              (
-                                                                  'INTERVIEW_QUESTION_GENERATION_PROMPT',
-                                                                  'You are an expert interviewing manager and talent acquisition specialist. We need to prepare a list of interview Questions for candidates according to the candidates'' profile, Job Offer details, and the provided evaluation types .
-                                                                            I will give you the information for the candidate''s profile, job offer requirements, and evaluation types criteria, generate tailored interview questions based on it.
-                                                                            Generate exactly {NUMBER_OF_QUESTIONS
-                                                                } interview questions.
-                                                                            Take these Instructions into consideration:
-                                                                            - Distribute the {NUMBER_OF_QUESTIONS
-                                                                } questions across all evaluation types based on their coefficient weights. Higher coefficient evaluation types should receive proportionally more questions.
-                                                                            - Ensure questions align with the candidate''s experience level, main technology, and the job requirements.
-                                                                            - Each question should be relevant to both candidate''s background and job requirements.
-                                                                            - Assign realistic time durations (typically 2-5 minutes per question), taking into account that the duration estimated for the interview is {ESTIMATED_DURATION
-                                                                }.
-                                                                            - Match question complexity to the candidate''s years of experience
-                                                                            - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
-                                                                            - Use simple language: A2-B1-B2
-                                                                            - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting: "{JSON_SCHEMA}", here you have a mock example: "{JSON_MOCK}".
-                                                                            Here below I provide the needed information:
-                                                                            #Candidate Profile: "{CANDIDATE_DATA}",
-                                                                            #Job Offer requirements: "{OFFER_DATA}",
-                                                                            #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".',
-                                                                  '[
-                                                                  {
-                                                                    "description": "string - The interview question text",
-                                                                    "durationInMinutes": "integer - Duration in minutes (2-5)"
-                                                                  }
-                                                                ]'
-                                                              );
+            I provide bellow the needed information:
+             - #Candidate Profile: "{CANDIDATE_DATA}",
+             - #Job Offer requirements: "{OFFER_DATA}",
+             - #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".
+             - #Questions And Answers with the estimated answer time and the real answer time: "{QuestionAnswer_DATA}"',
+    '[
+              {
+                "score": "Double - between 0.00 and 100.00",
+                "feedback": "String - Try to give an overall feedback of the performance of the candidate in this evaluation type",
+                "evaluationTypeDescription": "String - use the exact ''description'' field value from the corresponding EvaluationType entity"
+              }
+            ]'
+),
+(
+  'INTERVIEW_QUESTION_GENERATION_PROMPT',
+  'You are an expert interviewing manager and talent acquisition specialist. We need to prepare a list of interview Questions for candidates according to the candidates'' profile, Job Offer details, and the provided evaluation types .
+            I will give you the information for the candidate''s profile, job offer requirements, and evaluation types criteria, generate tailored interview questions based on it.
+            Generate exactly {NUMBER_OF_QUESTIONS} interview questions.
+            Take these Instructions into consideration:
+            - Distribute the {NUMBER_OF_QUESTIONS} questions across all evaluation types based on their coefficient weights. Higher coefficient evaluation types should receive proportionally more questions.
+            - Ensure questions align with the candidate''s experience level, main technology, and the job requirements.
+            - Each question should be relevant to both candidate''s background and job requirements.
+            - Assign realistic time durations (typically 2-5 minutes per question), taking into account that the duration estimated for the interview is {ESTIMATED_DURATION}.
+            - Match question complexity to the candidate''s years of experience
+            - Reference specific technologies, skills, or experiences mentioned in the candidate profile when relevant.
+            - Use simple language: A2-B1-B2
+            - Return ONLY a valid JSON array with exactly this structure, no additional text or formatting:"{JSON_SCHEMA}", here you have a mock example:"{JSON_MOCK}".
+            Here below I provide the needed information:
+            #Candidate Profile: "{CANDIDATE_DATA}",
+            #Job Offer requirements: "{OFFER_DATA}",
+            #Evaluation Types criteria: "{EVALUATION_TYPES_DATA}".',
+  '[
+              {
+                "description": "string - The interview question text",
+                "durationInMinutes": "integer - Duration in minutes (2-5)"
+              }
+            ]'
+);
