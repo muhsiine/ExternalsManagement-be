@@ -29,7 +29,7 @@ public final class OfferFormattedDescriptionPromptConstants {
           "description": "string - The job description text",
           "mainTech": "string - Primary technology stack or focus, e.g., 'Java,ADVANCED'",
           "skills": "string - Comma-separated skills with levels, e.g., 'Java,ADVANCED - Spring Boot,INTERMEDIATE'",
-          "languages": "array of objects - [{'language': 'English', 'level': 'ADVANCED'}]",
+          "languages": "array of objects - [{'languageName': 'English', 'level': 'ADVANCED'}]",
           "yearsOfExperience": "integer - Minimum years of experience",
           "mainResponsibilities": "string - Core tasks separated by ' - '",
           "education": "string - Education requirements separated by ' - '",
@@ -43,8 +43,8 @@ public final class OfferFormattedDescriptionPromptConstants {
           "mainTech": "Java,ADVANCED",
           "skills": "Java,ADVANCED - Spring Boot,ADVANCED - Docker,INTERMEDIATE - Kubernetes,INTERMEDIATE - AWS,INTERMEDIATE - MySQL,ADVANCED - Git,ADVANCED - Agile,INTERMEDIATE - Team Leadership,ADVANCED - Communication,ADVANCED",
           "languages": [
-            {"language": "English", "level": "ADVANCED"},
-            {"language": "French", "level": "INTERMEDIATE"}
+            {"languageName": "English", "level": "ADVANCED"},
+            {"languageName": "French", "level": "INTERMEDIATE"}
           ],
           "yearsOfExperience": 6,
           "mainResponsibilities": "Design and implement microservices architecture - Optimize application performance - Maintain CI/CD pipelines - Conduct code reviews and mentor junior developers - Collaborate with product managers and QA team - Participate in on-call rotation",

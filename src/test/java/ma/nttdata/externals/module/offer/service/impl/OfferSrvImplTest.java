@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.client.RestClient;
 
 import java.util.*;
 
@@ -22,6 +23,11 @@ class OfferSrvImplTest {
 
     @Mock
     private OfferMapper offerMapper;
+
+     private boolean mockFlag ;
+
+    @Mock
+    private RestClient aiRestClient;
 
     @InjectMocks
     private OfferServImpl offerServImpl;
