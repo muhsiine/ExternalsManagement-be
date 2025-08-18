@@ -306,7 +306,7 @@ class InterviewSrvImplTest {
         interview.setEvaluations(evaluations);
 
         CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
-        OfferDTO offerDTO = new OfferDTO(offer.getId(), null, null, null);
+        OfferDTO offerDTO = new OfferDTO(offer.getId(), null, null, null, null);
 
         when(interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)).thenReturn(Optional.of(interview));
         when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
@@ -355,7 +355,7 @@ class InterviewSrvImplTest {
         interview.setEstimatedDuration(30);
         interview.setNumberOfQuestions(15);
         CandidateDTO candidateDTO = new CandidateDTO(candidate.getId(), "habib", null, 0, null, null, null, null, null, null, null, null, null, null, null);
-        OfferDTO offerDTO = new OfferDTO(offer.getId(), "Backend Engineer", null, null);
+        OfferDTO offerDTO = new OfferDTO(offer.getId(), "Backend Engineer", null, null,null);
 
         when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
         when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
@@ -483,6 +483,7 @@ class InterviewSrvImplTest {
                 UUID.randomUUID(),
                 "Backend Developer",
                 "just testing",
+                null,
                 null
         );
 

@@ -85,7 +85,7 @@ public class QuestionServiceImplTest {
                 true,
                 aiRestClient);
         CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
-        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), null, null, null);
+        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), null, null, null,null);
 
         placeholdersForInterviewQuestionsPromptDTO generateQuestionsInfo = new placeholdersForInterviewQuestionsPromptDTO(
                 candidateDTO,

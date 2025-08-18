@@ -192,4 +192,34 @@ INSERT INTO prompts (prompt_code, prompt_desc, schema) VALUES (
                 "durationInMinutes": "integer - Duration in minutes (2-5)"
               }
             ]'
+),
+(
+'OFFER_FORMATTED_DESCRIPTION_EXTRACTION_PROMPT',
+ 'You are an expert HR data extraction specialist. Your task is to extract key information from job offer descriptions to create structured, formatted data for frontend display in our interview system.
+        I will give you the the information for the #offerDescription, #JSON_MOCK an example of the data we want and #JSON_SCHEMA you should respect when extracting information.
+        Take these instructions into consideration:
+        - description: The main job description and company information (keep the original descriptive content for display)
+        - mainTech: The primary technology stack or focus of the job, formatted like skills (format: "Tech,Level"), e.g., "Java,ADVANCED"
+        - skills: Technical and professional skills required with proficiency levels (format: "Skill,Level - Skill,Level"), e.g., "Java,ADVANCED - Spring Boot,INTERMEDIATE - Docker,BEGINNER"
+        - languages: Required languages with proficiency levels converted to enum values using mapping: A1, A2, Basic, Elementary → BEGINNER; B1, Lower Intermediate → LOWER_INTERMEDIATE; B2, Intermediate → INTERMEDIATE; C1, Upper Intermediate → UPPER_INTERMEDIATE; C2, Advanced, Fluent, Native → ADVANCED, and for the names of languages they should be in english.
+        - yearsOfExperience: Minimum years of experience (from "3-5 years" extract 3, from "5+ years" extract 5)
+        - mainResponsibilities: Core day-to-day tasks and duties the candidate will perform, separated by " - "
+        - education: Required degree level and field of study, separated by " - "
+        - keywords: Key terms from job title, critical skills, and industry-specific terminology that don''t fit in other categories
+
+        Return ONLY a valid JSON object with exactly this structure, no additional text or formatting: "{JSON_SCHEMA}"
+
+        Here is an example of the expected output: "{JSON_MOCK}"
+
+        Job Offer Description to extract from: "{OFFER_DESCRIPTION}". ',
+ '{
+    "description": "string - The job description text",
+    "mainTech": "string - Primary technology stack or focus, e.g., ''Java,ADVANCED''",
+    "skills": "string - Comma-separated skills with levels, e.g., ''Java,ADVANCED - Spring Boot,INTERMEDIATE''",
+    "languages": "array of objects - [{''languageName'': ''English'', ''level'': ''ADVANCED''}]",
+    "yearsOfExperience": "integer - Minimum years of experience",
+    "mainResponsibilities": "string - Core tasks separated by '' - ''",
+    "education": "string - Education requirements separated by '' - ''",
+    "keywords": "string - Key terms separated by '' - ''"
+ }'
 );
