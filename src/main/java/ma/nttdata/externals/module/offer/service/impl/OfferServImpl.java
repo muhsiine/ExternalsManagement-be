@@ -40,6 +40,7 @@ public class OfferServImpl implements OfferServ {
         this.promptService = promptService;
     }
 
+
     // create srv
     @Override
     public OfferDTO createOffer(OfferDTO offerDTO) {
@@ -52,6 +53,7 @@ public class OfferServImpl implements OfferServ {
     public OfferDTO getOfferById(UUID id) {
         Offer offer = offerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Offer not found with id: " + id));
+        System.out.println("Offer : "+offer);
         return offerMapper.toDto(offer);
     }
 
@@ -104,17 +106,19 @@ public class OfferServImpl implements OfferServ {
     public OfferFormattedDescriptionDTO prepareFormattedDescriptionByPrompt(UUID offerID){
         PromptDTO prompt = promptService.findByPromptCode(OfferFormattedDescriptionPromptConstants.OFFER_FORMATTED_DESCRIPTION_EXTRACTION_PROMPT_CODE);
         OfferDTO offer ;
+
         try {
             offer = getOfferById(offerID);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found with id: " + offerID, e);
         }
+        System.out.println("Interviews: " + offer.interviews());
+
         String offerDescription = offer.description();
         String formattedDescription = mockFlag ? OfferFormattedDescriptionPromptConstants.JSON_MOCK
                 : getOfferFormattedDescriptionFromAIByPrompt(prompt,offerDescription);
-        OfferDTO offerWithFormattedDescription = new OfferDTO(offerID,offer.title(),offerDescription,formattedDescription,offer.interviews());
-        OfferDTO savedOffer = updateOffer(offerID,offerWithFormattedDescription);
-        return offerMapper.mapJsonToDTO(savedOffer.formattedDescription());
+        setFormattedDescription(offerID,formattedDescription);
+        return offerMapper.mapJsonToDTO(formattedDescription);
     }
 
     @Override
@@ -126,5 +130,17 @@ public class OfferServImpl implements OfferServ {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found with id: " + offerId, e);
         }
         return offerMapper.mapJsonToDTO(offer.formattedDescription());
+    }
+
+    @Override
+    public int setFormattedDescription(UUID offerID, String formattedDescription){
+        int updatedRows = offerRepository.updateFormattedDescriptionById(offerID,formattedDescription);
+        if (updatedRows == 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to update formatted description for offer with id: " + offerID
+            );
+        }
+        return updatedRows;
     }
 }

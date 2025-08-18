@@ -26,4 +26,6 @@ public interface OfferServ {
     OfferFormattedDescriptionDTO prepareFormattedDescriptionByPrompt(UUID offerID);
 
     OfferFormattedDescriptionDTO getFormattedDescription(UUID OfferId);
+
+    int setFormattedDescription(UUID offerID, String formattedDescription);
 }

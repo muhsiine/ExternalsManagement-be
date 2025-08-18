@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.interview.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.offer.entity.Offer;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "interviews")
 @Getter
-@Setter
+@Setter@ToString
 public class Interview {
     @Id
     @GeneratedValue

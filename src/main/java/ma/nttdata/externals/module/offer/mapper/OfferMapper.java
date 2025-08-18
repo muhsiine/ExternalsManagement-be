@@ -23,7 +23,6 @@ public interface OfferMapper {
     @Mapping(target = "id", source = "id")
     OfferDTO toDto(Offer offer);
 
-
     // to entity
     @Mapping(target = "title", source = "title")
     @Mapping(target = "description", source = "description")
