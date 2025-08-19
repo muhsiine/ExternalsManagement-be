@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.prompt.controller;
 
+import jakarta.validation.Valid;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,7 @@ public class PromptController {
     }
 
     @PostMapping
-    public ResponseEntity<PromptDTO> createPrompt(@RequestBody PromptDTO promptDTO) {
+    public ResponseEntity<PromptDTO> createPrompt(@Valid @RequestBody PromptDTO promptDTO) {
         PromptDTO createdPrompt = promptService.createPrompt(promptDTO);
         return new ResponseEntity<>(createdPrompt, HttpStatus.CREATED);
     }
@@ -48,7 +49,7 @@ public class PromptController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PromptDTO> updatePrompt(@PathVariable UUID id, @RequestBody PromptDTO promptDTO) {
+    public ResponseEntity<PromptDTO> updatePrompt(@Valid @PathVariable UUID id, @RequestBody PromptDTO promptDTO) {
         if (!promptService.getPromptById(id).isPresent()) {
             return ResponseEntity.notFound().build();
         }
