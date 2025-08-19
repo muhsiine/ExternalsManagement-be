@@ -273,7 +273,7 @@ public class EvaluationServImplTest {
         );
 
         CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), "John Doe", null, 0, null, null, null, null, null, null, null, null, null, null, null);
-        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), "Java Developer", null, null);
+        OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), "Java Developer", null, null, null);
         EvaluationType tech = new EvaluationType();
         tech.setId(UUID.randomUUID());
         tech.setDescription("Technical");

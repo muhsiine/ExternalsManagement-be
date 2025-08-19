@@ -4,11 +4,13 @@ import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import ma.nttdata.externals.module.offer.repository.OfferRepository;
+import ma.nttdata.externals.module.prompt.service.PromptService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.client.RestClient;
 
 import java.util.*;
 
@@ -22,8 +24,12 @@ class OfferSrvImplTest {
 
     @Mock
     private OfferMapper offerMapper;
+    @Mock
+    private RestClient aiRestClient;
+    @Mock
+    private PromptService promptService;
 
-    @InjectMocks
+
     private OfferServImpl offerServImpl;
 
     private Offer offer;
@@ -44,12 +50,20 @@ class OfferSrvImplTest {
                 offerId,
                 "Frontend Developer",
                 "Looking for a React expert" ,
+                null,
                 Collections.emptyList()
         );
     }
 
     @Test
     void testCreateOffer() {
+        offerServImpl = new OfferServImpl(
+                offerRepository,
+                offerMapper,
+                true,
+                aiRestClient,
+                promptService
+        );
         when(offerMapper.toEntity(offerDTO)).thenReturn(offer);
         when(offerRepository.save(offer)).thenReturn(offer);
         when(offerMapper.toDto(offer)).thenReturn(offerDTO);
@@ -63,6 +77,14 @@ class OfferSrvImplTest {
 
     @Test
     void testGetOfferById() {
+        offerServImpl = new OfferServImpl(
+                offerRepository,
+                offerMapper,
+                true,
+                aiRestClient,
+                promptService
+        );
+
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
         when(offerMapper.toDto(offer)).thenReturn(offerDTO);
 
@@ -75,6 +97,14 @@ class OfferSrvImplTest {
 
     @Test
     void testGetAllOffers() {
+        offerServImpl = new OfferServImpl(
+                offerRepository,
+                offerMapper,
+                true,
+                aiRestClient,
+                promptService
+        );
+
         List<Offer> offers = Arrays.asList(offer);
         List<OfferDTO> offerDTOs = Arrays.asList(offerDTO);
 
@@ -90,6 +120,14 @@ class OfferSrvImplTest {
 
     @Test
     void testUpdateOffer() {
+        offerServImpl = new OfferServImpl(
+                offerRepository,
+                offerMapper,
+                true,
+                aiRestClient,
+                promptService
+        );
+
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
         when(offerMapper.toEntity(offerDTO)).thenReturn(offer);
         when(offerRepository.save(offer)).thenReturn(offer);
@@ -104,6 +142,14 @@ class OfferSrvImplTest {
 
     @Test
     void testDeleteOffer() {
+        offerServImpl = new OfferServImpl(
+                offerRepository,
+                offerMapper,
+                true,
+                aiRestClient,
+                promptService
+        );
+
         when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         offerServImpl.deleteOffer(offerId);

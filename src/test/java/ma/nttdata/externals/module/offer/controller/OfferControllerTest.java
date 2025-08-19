@@ -7,10 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -35,7 +35,7 @@ class OfferControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockitoBean
     private OfferServ offerService;
 
     private OfferDTO offerDTO;
@@ -48,6 +48,7 @@ class OfferControllerTest {
                 offerId,
                 "Java Developer",
                 "Looking for a senior Java developer.",
+                "null",
                 Collections.emptyList()
         );
     }
@@ -62,6 +63,7 @@ class OfferControllerTest {
                 null,
                 "Java Developer",
                 "Looking for a senior Java developer.",
+                "null",
                 Collections.emptyList()
         );
 
@@ -70,6 +72,7 @@ class OfferControllerTest {
                 fixedOfferId,
                 "Java Developer",
                 "Looking for a senior Java developer.",
+                "null",
                 Collections.emptyList()
         );
 
@@ -113,6 +116,7 @@ class OfferControllerTest {
                 offerId,
                 "Senior Java Developer",
                 "Looking for a senior Java developer with 5+ years experience.",
+                "null",
                 Collections.emptyList()
         );
 
@@ -155,7 +159,7 @@ class OfferControllerTest {
         //w
         List<OfferDTO> offers = Arrays.asList(
                 offerDTO,
-                new OfferDTO(UUID.randomUUID(), "Python Developer", "Need a Python expert." ,     Collections.emptyList())
+                new OfferDTO(UUID.randomUUID(), "Python Developer", "Need a Python expert." , null,    Collections.emptyList())
 
         );
 

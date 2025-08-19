@@ -148,6 +148,7 @@ class InterviewControllerTest {
                 offerId,
                 "Backend Engineer",
                 "We need a backend engineer with solid experience in Node js and spring boot",
+                null,
                 List.of(interviewDTO)
         );
     }

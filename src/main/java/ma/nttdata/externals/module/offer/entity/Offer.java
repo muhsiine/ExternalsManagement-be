@@ -25,6 +25,9 @@ public class Offer {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "formatted_description")
+    String formattedDescription;
+
     // offer have many inter
     @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Interview> interviews;

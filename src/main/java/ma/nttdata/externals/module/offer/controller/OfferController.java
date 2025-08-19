@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
 import ma.nttdata.externals.module.offer.service.OfferServ;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -99,5 +100,33 @@ public class OfferController {
         List<String> titles = offerServ.getDistinctTitles();
         return ResponseEntity.ok(titles);
     }
+
+    @PostMapping("/{id}/prepare-formatted-description")
+    @Operation(summary = "Prepare formatted description for an offer",
+            description = "Generates a structured and formatted description for a specific job offer using AI and saves it.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Formatted description generated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferFormattedDescriptionDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<OfferFormattedDescriptionDTO> prepareFormattedDescription(@PathVariable UUID id) {
+        OfferFormattedDescriptionDTO formattedDescriptionDTO = offerServ.prepareFormattedDescriptionByPrompt(id);
+        return ResponseEntity.ok(formattedDescriptionDTO);
+    }
+
+    @GetMapping("/{id}/formatted-description")
+    @Operation(summary = "Get formatted description for an offer",
+            description = "Retrieves the previously generated formatted description of a specific job offer.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Formatted description retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferFormattedDescriptionDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found")
+    })
+    public ResponseEntity<OfferFormattedDescriptionDTO> getFormattedDescription(@PathVariable UUID id) {
+        OfferFormattedDescriptionDTO formattedDescriptionDTO = offerServ.getFormattedDescription(id);
+        return ResponseEntity.ok(formattedDescriptionDTO);
+    }
+
 
 }
