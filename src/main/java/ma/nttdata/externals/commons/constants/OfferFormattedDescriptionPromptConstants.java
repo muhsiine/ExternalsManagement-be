@@ -27,13 +27,13 @@ public final class OfferFormattedDescriptionPromptConstants {
     public static final String JSON_SCHEMA = """
         {
           "description": "string - The job description text",
-          "mainTech": "string - Primary technology stack or focus, e.g., 'Java,ADVANCED'",
-          "skills": "string - Comma-separated skills with levels, e.g., 'Java,ADVANCED - Spring Boot,INTERMEDIATE'",
+          "mainTech": "string - Primary technology stack or focus, e.g., 'Full stack Java SpringBoot'",
+          "skills": "string - Offer required skills separated by ' - ' e.g., 'Java - Spring Boot - Docker'",
           "languages": "array of objects - [{'languageName': 'English', 'level': 'ADVANCED'}]",
-          "yearsOfExperience": "integer - Minimum years of experience",
-          "mainResponsibilities": "string - Core tasks separated by ' - '",
-          "education": "string - Education requirements separated by ' - '",
-          "keywords": "string - Key terms separated by ' - '"
+          "yearsOfExperience": "integer - Minimum required years of experience",
+          "mainResponsibilities": "string - offer tasks separated by ' - '",
+          "education": "string - Education requirements",
+          "keywords": "string - Offer Keywords separated by ' - '"
         }
         """;
 
