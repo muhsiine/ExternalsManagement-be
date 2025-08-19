@@ -252,13 +252,25 @@ SELECT
         'Build robust backend services and APIs.'
     ])[FLOOR(RANDOM() * 8) + 1],
     CAST(
-        json_build_object(
-            'skills',       (ARRAY['Java','React','Kubernetes','SQL'])[FLOOR(RANDOM()*4)+1],
-            'education',    (ARRAY['Bachelor','Master','PhD'])[FLOOR(RANDOM()*3)+1],
-            'yearsOfExperience', FLOOR(RANDOM() * 10) + 1,
-            'languages',    (ARRAY['English','French','Spanish','German'])[FLOOR(RANDOM()*4)+1]
-        ) AS text
-    )
+    json_build_object(
+        'description', 'We are seeking a highly skilled Senior Java Developer...',
+        'mainTech', 'Full Stack Javascript',
+        'skills', (ARRAY[
+            'Java - Spring Boot - Docker - Kubernetes - AWS',
+            'React - Node.js - MongoDB - Docker - Git',
+            'Python - Django - PostgresSQL - Kubernetes - AWS',
+            'C# - .NET - SQL Server - Azure - Agile'
+        ])[FLOOR(RANDOM() * 4) + 1],
+        'languages', json_build_array(
+            json_build_object('languageName', (ARRAY['English','French','Spanish','German'])[FLOOR(RANDOM()*4)+1], 'level', 'ADVANCED'),
+            json_build_object('languageName', (ARRAY['English','French','Spanish','German'])[FLOOR(RANDOM()*4)+1], 'level', 'INTERMEDIATE')
+        ),
+        'yearsOfExperience', FLOOR(RANDOM() * 10) + 1,
+        'mainResponsibilities', 'Design and implement microservices architecture...',
+        'education', 'Bachelor in Computer Science - Master in Software Engineering',
+        'keywords', 'Java - Spring Boot - Microservices - Docker - Kubernetes - Fintech - Agile - DevOps - AWS - Backend Development'
+    ) AS text
+  )
 FROM generate_series(1, 10);
 
 -- INTERVIEWS
