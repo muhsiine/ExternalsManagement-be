@@ -8,9 +8,9 @@ public final class OfferFormattedDescriptionPromptConstants {
             You are an expert HR data extraction specialist.
              I will give you an #Offer_Description, Extract the key information from it, and return a structured, formatted Json like provided in #JSON_SCHEMA, when extracting information, respect the schema we want an exact match, we'll provide also a and #JSON_MOCK to help with that.
             Take these instructions into consideration:
-            -For all the fields, keep the original text from the provided description just extract from it what matches the criteria.
-            -description: The main offer description and company information (keep the original text from the provided description just extract from it).
-            - skills: The required technical and professional skills.
+             -For all the fields, keep the original text from the provided description just extract from it what matches the criteria.
+             -description: The main offer description and company information (keep the original text from the provided description just extract from it).
+             - skills: The required technical and professional skills.
              - languages: The required language names and the proficiency levels. the names should be in English, the proficiency level should be one of these words: [BEGINNER, LOWER_INTERMEDIATE ,INTERMEDIATE, UPPER_INTERMEDIATE, ADVANCED], it might not be present in the description with the exact name, detect the required language level, and convert it accordignly to one of these values.
              - yearsOfExperience: The required years of experience in the offer description (from "3-5 years" extract 3, from "5+ years" extract 5).
              - mainResponsibilities: The tasks and duties mentioned in the offer description, that the candidate will perform if he got accepted in the offer.
@@ -23,13 +23,13 @@ public final class OfferFormattedDescriptionPromptConstants {
 
     public static final String JSON_SCHEMA = """
         {
-          "description": "string - The job description text",
+          "description": "string ",
           "mainTech": "string - Primary technology stack or focus, e.g., 'Full stack Java SpringBoot'",
           "skills": "string - Offer required skills separated by ' - ' e.g., 'Java - Spring Boot - Docker'",
           "languages": "array of objects - [{'languageName': 'English', 'level': 'ADVANCED'}]",
           "yearsOfExperience": "integer - Minimum required years of experience",
           "mainResponsibilities": "string - offer tasks separated by ' - '",
-          "education": "string - Education requirements",
+          "education": "string - Education requirements separated by ' - '",
           "keywords": "string - Offer Keywords separated by ' - '"
         }
         """;
