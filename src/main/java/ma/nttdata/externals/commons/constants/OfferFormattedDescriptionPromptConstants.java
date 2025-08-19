@@ -37,8 +37,8 @@ public final class OfferFormattedDescriptionPromptConstants {
     public static final String JSON_MOCK = """
         {
           "description": "We are seeking a highly skilled Senior Java Developer to join our dynamic fintech team. The role involves designing and implementing scalable microservices, collaborating with cross-functional teams, and ensuring high-quality code standards. The candidate will contribute to architecture decisions, mentor junior developers, and help drive the adoption of best practices.",
-          "mainTech": "Java,ADVANCED",
-          "skills": "Java,ADVANCED - Spring Boot,ADVANCED - Docker,INTERMEDIATE - Kubernetes,INTERMEDIATE - AWS,INTERMEDIATE - MySQL,ADVANCED - Git,ADVANCED - Agile,INTERMEDIATE - Team Leadership,ADVANCED - Communication,ADVANCED",
+          "mainTech": "Full Stack Javascript",
+          "skills": "Java - Spring Boot - Docker - Kubernetes - AWS - MySQL - Git - Agile - Team Leadership - Communication",
           "languages": [
             {"languageName": "English", "level": "ADVANCED"},
             {"languageName": "French", "level": "INTERMEDIATE"}
