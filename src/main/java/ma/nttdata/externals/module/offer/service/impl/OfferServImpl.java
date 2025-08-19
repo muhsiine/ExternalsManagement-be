@@ -96,7 +96,7 @@ public class OfferServImpl implements OfferServ {
                 .replace(OfferFormattedDescriptionPromptConstants.OFFER_DESCRIPTION_PLACEHOLDER,offerDescription);
 
         return aiRestClient.post()
-                .uri("/extractFormattedDescription")
+                .uri("/extractOfferFormattedDescription")
                 .body(promptDesc)
                 .retrieve()
                 .body(String.class);
@@ -112,7 +112,6 @@ public class OfferServImpl implements OfferServ {
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found with id: " + offerID, e);
         }
-        System.out.println("Interviews: " + offer.interviews());
 
         String offerDescription = offer.description();
         String formattedDescription = mockFlag ? OfferFormattedDescriptionPromptConstants.JSON_MOCK
