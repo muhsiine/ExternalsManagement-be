@@ -18,7 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/offers")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 @Tag(name = "Candidate Matching API", description = "This API exposes endpoints for matching offers with candidates")
 public class CandidateMatchingController {
 

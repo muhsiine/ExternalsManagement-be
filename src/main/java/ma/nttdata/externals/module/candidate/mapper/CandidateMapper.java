@@ -4,6 +4,7 @@ import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.candidate.entity.*;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.entity.CvFile;
+import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -56,6 +57,15 @@ public interface CandidateMapper {
     @Mapping(target = "candidate", ignore = true)
     @Mapping(target = "native", source = "isNative")
     Language languageDTOToLanguage(LanguageDTO languageDTO);
+
+    @Mapping(target = "skills", source = "skills")
+    @Mapping(target = "languages", source = "languages")
+    @Mapping(target = "educations", source = "educations")
+    @Mapping(target = "contacts", source = "contacts")
+    @Mapping(target = "experiences", source = "experiences")
+    @Mapping(target = "address", source = "address")
+    OfferCandidatesDTO toOfferCandidatesDTO(Candidate candidate);
+
 
     @AfterMapping
     default void setCandidateInRelatedEntities(CandidateDTO candidateDTO, @MappingTarget Candidate candidate) {

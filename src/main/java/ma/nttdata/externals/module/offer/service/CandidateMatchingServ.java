@@ -2,6 +2,8 @@ package ma.nttdata.externals.module.offer.service;
 
 
 
+import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.entity.Candidate;
 import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
 import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
 
@@ -16,4 +18,5 @@ public interface CandidateMatchingServ {
      * @return a list of candidates that match the offer, mapped to OfferCandidatesDTO for frontend display
      */
     List<OfferCandidatesDTO> findRecommendedCandidates(OfferFormattedDescriptionDTO offer);
+
 }
