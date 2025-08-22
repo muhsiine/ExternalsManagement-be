@@ -45,7 +45,6 @@ public class CandidateMatchingServImpl implements CandidateMatchingServ {
                 .map(candidateMapper::toOfferCandidatesDTO)
                 .filter(c -> matchLanguagesWithLevel(c, offerDTO))
                 .toList();
-
         return candidateDTOs;
     }
 
