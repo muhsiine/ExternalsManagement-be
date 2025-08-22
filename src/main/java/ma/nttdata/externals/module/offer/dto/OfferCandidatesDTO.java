@@ -3,6 +3,7 @@ package ma.nttdata.externals.module.offer.dto;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.candidate.entity.*;
 
+
 import java.util.List;
 import java.util.UUID;
 
