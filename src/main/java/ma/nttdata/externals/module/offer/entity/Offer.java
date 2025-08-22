@@ -29,7 +29,7 @@ public class Offer {
     String formattedDescription;
 
     // offer have many inter
-    @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "offer", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Interview> interviews;
 
 
