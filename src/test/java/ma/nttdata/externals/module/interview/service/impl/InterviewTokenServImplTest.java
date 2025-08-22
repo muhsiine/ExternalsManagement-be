@@ -2,6 +2,8 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -194,16 +196,37 @@ class InterviewTokenServImplTest {
     }
 
     @Test
-    void extractInterviewId_WithTokenMissingInterviewId_ShouldThrowException() {
-        // Create a token without the interviewId claim (this would require a modified service)
-        // For this test, we'll just use an invalid format that would cause the UUID parsing to fail
-        LocalDateTime scheduledAt = LocalDateTime.now();
-        String token = tokenService.generateToken(scheduledAt, testInterviewId);
+    void extractInterviewId_WithInvalidUuidInToken_ShouldThrowException() {
+        // Create a token with manually crafted claims containing invalid UUID
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + testExpirationMillis);
 
-        // This test assumes the implementation works correctly;
-        // if we wanted to test the missing claim scenario, we'd need to create a token manually
-        UUID extractedId = tokenService.extractInterviewId(token);
-        assertEquals(testInterviewId, extractedId);
+        String tokenWithInvalidUuid = Jwts.builder()
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .setId(UUID.randomUUID().toString())
+                .claim("interviewId", "invalid-uuid-format") // Invalid UUID format
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+
+        assertThrows(JwtException.class, () -> tokenService.extractInterviewId(tokenWithInvalidUuid));
+    }
+
+    @Test
+    void extractInterviewId_WithTokenMissingInterviewIdClaim_ShouldThrowException() {
+        // Create a token without the interviewId claim
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + testExpirationMillis);
+
+        String tokenWithoutInterviewId = Jwts.builder()
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .setId(UUID.randomUUID().toString())
+                // Note: No interviewId claim added here
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+
+        assertThrows(JwtException.class, () -> tokenService.extractInterviewId(tokenWithoutInterviewId));
     }
 
     @Test
@@ -279,5 +302,13 @@ class InterviewTokenServImplTest {
         // But they should have the same interview ID
         assertEquals(testInterviewId, tokenService.extractInterviewId(token1));
         assertEquals(testInterviewId, tokenService.extractInterviewId(token2));
+    }
+
+    /**
+     * Helper method to create signing key for manual token creation in tests
+     */
+    private SecretKey getSigningKey() {
+        byte[] keyBytes = Base64.getDecoder().decode(testSecretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
