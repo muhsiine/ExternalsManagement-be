@@ -26,8 +26,11 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
     @Value("${interview.token.expirationMillis:86400000}")
     private long tokenExpirationMillis;
 
+    private static final String INTERVIEW_ID_CLAIM = "interviewId";
+
+
     @Override
-    public String generateToken(LocalDateTime scheduledAt) {
+    public String generateToken(LocalDateTime scheduledAt, UUID interviewId) {
         Date now = new Date();
         Instant instant = scheduledAt.atZone(ZoneId.systemDefault()).toInstant();
         Date expiryDate = Date.from(instant.plusMillis(tokenExpirationMillis));
@@ -35,10 +38,12 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
         return Jwts.builder()
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .setId(UUID.randomUUID().toString())  // I added this to make the token unique because if two tokens are generated at the same time they will be the same
+                .setId(UUID.randomUUID().toString())
+                .claim(INTERVIEW_ID_CLAIM, interviewId.toString())  // Use the interviewId parameter
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
 
     @Override
     public boolean validateToken(String token) {
@@ -64,7 +69,6 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
         }
     }
 
-
     @Override
     public Date getIssuedAt(String token) {
         return extractClaim(token, Claims::getIssuedAt);
@@ -82,6 +86,20 @@ public class InterviewTokenServImpl implements InterviewTokenServ {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    @Override
+    public UUID extractInterviewId(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            String interviewIdStr = claims.get(INTERVIEW_ID_CLAIM, String.class);
+            if (interviewIdStr == null) {
+                throw new JwtException("Interview ID not found in token");
+            }
+            return UUID.fromString(interviewIdStr);
+        } catch (Exception e) {
+            throw new JwtException("Invalid token or unable to extract interview ID", e);
+        }
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> resolver) {

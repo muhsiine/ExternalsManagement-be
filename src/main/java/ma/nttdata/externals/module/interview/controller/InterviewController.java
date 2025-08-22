@@ -145,17 +145,86 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewServ.getEvaluationTypeOfEvaluation(id));
     }
 
+
     @Operation(
             summary = "Generate and save interview link",
             description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
     )
     @PostMapping("/{interviewId}/generateAndSaveLink")
-    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId){
+    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId) {
         LocalDateTime scheduledAt = interviewServ.getInterviewById(interviewId).scheduledAt();
-        String token = interviewTokenServ.generateToken(scheduledAt);
-        String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
+        // Updated to pass interviewId to the token generation
+        String token = interviewTokenServ.generateToken(scheduledAt, interviewId);
+        String interviewLink = interviewServ.saveInterviewLink(token, interviewId);
         return ResponseEntity.ok(interviewLink);
     }
+
+    @Operation(
+            summary = "Get interview ID from token",
+            description = "Extracts and returns the interview ID from a valid interview token"
+    )
+    @GetMapping("/token/{token}/interview-id")
+    public ResponseEntity<UUID> getInterviewIdFromToken(@PathVariable String token) {
+        try {
+            if (!interviewTokenServ.validateToken(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+            }
+
+            if (interviewTokenServ.isTokenExpired(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token has expired");
+            }
+
+            UUID interviewId = interviewTokenServ.extractInterviewId(token);
+            return ResponseEntity.ok(interviewId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to extract interview ID from token", e);
+        }
+    }
+    @Operation(
+            summary = "Get interview details by token",
+            description = "Retrieves complete interview information using a valid interview token"
+    )
+    @GetMapping("/token/{token}")
+    public ResponseEntity<InterviewDTO> getInterviewByToken(@PathVariable String token) {
+        try {
+            if (!interviewTokenServ.validateToken(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+            }
+
+            if (interviewTokenServ.isTokenExpired(token)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token has expired");
+            }
+
+            UUID interviewId = interviewTokenServ.extractInterviewId(token);
+            InterviewDTO interview = interviewServ.getInterviewById(interviewId);
+            return ResponseEntity.ok(interview);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to process token", e);
+        }
+    }
+
+    @Operation(
+            summary = "Validate interview token",
+            description = "Validates an interview token and returns true if the token is valid and not expired, false otherwise"
+    )
+    @GetMapping("/token/{token}/validate")
+    public ResponseEntity<Boolean> validateInterviewToken(@PathVariable String token) {
+        try {
+            // Check if token is structurally valid
+            if (!interviewTokenServ.validateToken(token)) {
+                return ResponseEntity.ok(false);
+            }
+            if (interviewTokenServ.isTokenExpired(token)) {
+                return ResponseEntity.ok(false);
+            }
+            return ResponseEntity.ok(true);
+        } catch (Exception e) {
+            return ResponseEntity.ok(false);
+        }
+    }
+
 
     @Operation(
             summary = "Send interview invitation email",
