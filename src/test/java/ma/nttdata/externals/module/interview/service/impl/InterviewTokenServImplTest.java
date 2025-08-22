@@ -149,11 +149,14 @@ class InterviewTokenServImplTest {
         Date expiration = tokenService.extractExpiration(token);
         assertNotNull(expiration);
 
-        // The expiration should be scheduledAt + tokenExpirationMillis
-        long expectedExpirationTime = scheduledAt.atZone(java.time.ZoneId.systemDefault())
+        // JWT stores timestamps with second-level precision, so we need to account for this truncation
+        // Calculate expected expiration time and truncate to seconds
+        long expectedExpirationMillis = scheduledAt.atZone(java.time.ZoneId.systemDefault())
                 .toInstant().toEpochMilli() + testExpirationMillis;
+        long expectedExpirationSeconds = expectedExpirationMillis / 1000;
+        long actualExpirationSeconds = expiration.getTime() / 1000;
 
-        assertEquals(expectedExpirationTime, expiration.getTime());
+        assertEquals(expectedExpirationSeconds, actualExpirationSeconds);
     }
 
     @Test
@@ -263,10 +266,14 @@ class InterviewTokenServImplTest {
         String token = tokenService.generateToken(scheduledAt, testInterviewId);
 
         Date expiration = tokenService.extractExpiration(token);
-        long expectedExpirationTime = scheduledAt.atZone(java.time.ZoneId.systemDefault())
-                .toInstant().toEpochMilli() + customExpiration;
 
-        assertEquals(expectedExpirationTime, expiration.getTime());
+        // JWT stores timestamps with second-level precision, so we need to account for this truncation
+        long expectedExpirationMillis = scheduledAt.atZone(java.time.ZoneId.systemDefault())
+                .toInstant().toEpochMilli() + customExpiration;
+        long expectedExpirationSeconds = expectedExpirationMillis / 1000;
+        long actualExpirationSeconds = expiration.getTime() / 1000;
+
+        assertEquals(expectedExpirationSeconds, actualExpirationSeconds);
     }
 
     @Test
