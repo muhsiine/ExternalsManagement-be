@@ -5,6 +5,7 @@ import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.interview.dto.InterviewDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
+import ma.nttdata.externals.module.offer.service.OfferServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,9 @@ class CandidateControllerTest {
 
     @MockitoBean
     private CandidateSrv candidateSrv;
+
+    @MockitoBean
+    private OfferServ offerServ;
 
     private CandidateDTO candidateDTO;
     private UUID candidateId;
