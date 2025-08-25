@@ -33,6 +33,3 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
     );
 
 }
-//    WHERE LOWER(c.mainTech) LIKE LOWER(CONCAT('%', :mainTech, '%'))
-//      AND c.yearsOfExperience >= :minYears
-//      AND LOWER(l.languageInEnglish) IN :languages
