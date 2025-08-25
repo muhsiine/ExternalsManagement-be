@@ -1,4 +1,4 @@
-package ma.nttdata.externals.module.offer.service.impl;
+package ma.nttdata.externals.module.candidate.service.impl;
 
 import ma.nttdata.externals.module.candidate.constants.LanguageLevel;
 import ma.nttdata.externals.module.candidate.dto.OfferFormattedDescriptionLanguageDTO;
@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Locale;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +29,7 @@ class CandidateMatchingServiceTest {
     private CandidateRepository candidateRepository;
 
     @Autowired
-    private CandidateMatchingServImpl candidateMatchingService;
+    private CandidateSrvImpl candidateMatchingService;
 
     @BeforeEach
     void cleanDb() {

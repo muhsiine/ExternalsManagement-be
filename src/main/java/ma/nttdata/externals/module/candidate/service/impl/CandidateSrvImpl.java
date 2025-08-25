@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import ma.nttdata.externals.commons.exception.BadRequestException;
 import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
+import ma.nttdata.externals.module.candidate.constants.LanguageLevel;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.entity.*;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
@@ -13,13 +14,11 @@ import ma.nttdata.externals.module.candidate.repository.CityRepository;
 import ma.nttdata.externals.module.candidate.repository.CountryRepository;
 import ma.nttdata.externals.module.candidate.repository.LanguageRepository;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
+import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
+import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -207,6 +206,57 @@ public class CandidateSrvImpl implements CandidateSrv {
     @Override
     public List<String> getDistinctMainTechs() {
         return candidateRepository.findDistinctMainTechs();
+    }
+
+
+    @Override
+    public List<OfferCandidatesDTO> findRecommendedCandidates(OfferFormattedDescriptionDTO offerDTO) {
+        List<String> offerLanguageNames = offerDTO.languages() == null ? List.of() :
+                offerDTO.languages().stream()
+                        .map(l -> l.languageName().toLowerCase(Locale.ROOT).trim())
+                        .toList();
+
+        List<Candidate> roughMatches = candidateRepository.findCandidatesRoughMatch(
+                offerDTO.mainTech(),
+                offerDTO.yearsOfExperience(),
+                offerLanguageNames
+        );
+        List<OfferCandidatesDTO> candidateDTOs = roughMatches.stream()
+                .map(mapper::toOfferCandidatesDTO)
+                .filter(c -> matchLanguagesWithLevel(c, offerDTO))
+                .toList();
+        return candidateDTOs;
+    }
+
+    private boolean matchLanguagesWithLevel(OfferCandidatesDTO candidateDTO, OfferFormattedDescriptionDTO offerDTO) {
+        if (offerDTO.languages() == null || offerDTO.languages().isEmpty()) {
+            return true; // no language requirement
+        }
+        if (candidateDTO.languages() == null || candidateDTO.languages().isEmpty()) {
+            return false; // candidate has no languages
+        }
+
+        for (var offerLang : offerDTO.languages()) {
+            String offerName = offerLang.languageName().toLowerCase(Locale.ROOT).trim();
+            LanguageLevel offerLevel = offerLang.level();
+
+            for (var candidateLang : candidateDTO.languages()) {
+                String candidateName = candidateLang.languageInEnglish().toLowerCase(Locale.ROOT).trim();
+                LanguageLevel candidateLevel = candidateLang.level();
+
+                if (candidateName.equals(offerName)) {
+                    if (isLevelSufficient(candidateLevel, offerLevel)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isLevelSufficient(LanguageLevel candidateLevel, LanguageLevel offerLevel) {
+        // relies on the enum order (BEGINNER < INTERMEDIATE < ADVANCED < NATIVE)
+        return candidateLevel.ordinal() >= offerLevel.ordinal();
     }
 
 }
