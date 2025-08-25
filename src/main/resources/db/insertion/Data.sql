@@ -254,7 +254,7 @@ SELECT
     CAST(
     json_build_object(
         'description', 'We are seeking a highly skilled Senior Java Developer...',
-        'mainTech', 'Full Stack Javascript',
+        'mainTech', 'Laravel',
         'skills', (ARRAY[
             'Java - Spring Boot - Docker - Kubernetes - AWS',
             'React - Node.js - MongoDB - Docker - Git',
