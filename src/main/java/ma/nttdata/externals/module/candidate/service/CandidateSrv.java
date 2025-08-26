@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.UUID;
 
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
+import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
+
 import java.util.Map;
 
 public interface CandidateSrv {
@@ -19,5 +22,7 @@ public interface CandidateSrv {
     Map<String, Long> getCandidatesBySkill();
     Long getTotalCandidates();
     List<String> getDistinctMainTechs();
+    List<OfferCandidatesDTO> findRecommendedCandidates(OfferFormattedDescriptionDTO offer);
+
 
 }

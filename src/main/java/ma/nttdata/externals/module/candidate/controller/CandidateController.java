@@ -13,9 +13,13 @@ import ma.nttdata.externals.commons.exception.BadRequestException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
+import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
+import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
+import ma.nttdata.externals.module.offer.service.OfferServ;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ma.nttdata.externals.module.offer.service.OfferServ;
 
 import java.util.List;
 import java.util.Map;
@@ -30,9 +34,11 @@ import java.util.stream.Collectors;
 public class CandidateController {
 
     private final CandidateSrv candidateSrv;
+    private final OfferServ offerServ;
 
-    public CandidateController(CandidateSrv candidateSrv) {
+    public CandidateController(CandidateSrv candidateSrv, OfferServ offerServ) {
         this.candidateSrv = candidateSrv;
+        this.offerServ = offerServ;
     }
 
     @Operation(summary = "Create a new candidate", description = "Creates a new candidate and returns its details")
@@ -266,6 +272,24 @@ public class CandidateController {
     public ResponseEntity<List<String>> getAllMainTechs() {
         List<String> mainTechs = candidateSrv.getDistinctMainTechs();
         return ResponseEntity.ok(mainTechs);
+    }
+
+    @GetMapping("/recommended-candidates/{offerId}")
+    @Operation(
+            summary = "Find recommended candidates for an offer",
+            description = "Fetches the top recommended candidates that match the given offer's formatted description"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Recommended candidates retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Offer not found")
+    })
+    public ResponseEntity<List<OfferCandidatesDTO>> getRecommendedCandidates(@PathVariable UUID offerId) {
+
+        OfferFormattedDescriptionDTO offerDesc = offerServ.getFormattedDescription(offerId);
+
+        List<OfferCandidatesDTO> recommendedCandidates = candidateSrv.findRecommendedCandidates(offerDesc);
+
+        return ResponseEntity.ok(recommendedCandidates);
     }
 
 }
