@@ -72,6 +72,4 @@ public interface InterviewServ {
                                                  GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest);
 
     ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException;
-
-    ResponseEntity<byte[]> generateInterviewQuestionAudio(String text);
 }

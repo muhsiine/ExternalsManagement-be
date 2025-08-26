@@ -76,4 +76,9 @@ public class QuestionController {
         questionServ.deleteQuestion(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/generateAudio")
+    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody TtsRequestDTO ttsRequestDTO){
+        return questionServ.generateInterviewQuestionAudio(ttsRequestDTO.text());
+    }
 }

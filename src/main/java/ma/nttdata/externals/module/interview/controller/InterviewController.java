@@ -264,9 +264,5 @@ public class InterviewController  {
         return interviewServ.generateInterviewQuestionsAudios(interviewId);
     }
 
-    @GetMapping("/generateAudio")
-    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody TtsRequestDTO ttsRequestDTO){
-        return interviewServ.generateInterviewQuestionAudio(ttsRequestDTO.text());
-    }
 
 }

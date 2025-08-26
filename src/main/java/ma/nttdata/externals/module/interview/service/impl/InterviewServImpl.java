@@ -370,16 +370,6 @@ public class InterviewServImpl implements InterviewServ {
         return ResponseEntity.ok().headers(headers).body(audiosZipped);
     }
 
-    @Override
-    public  ResponseEntity<byte[]> generateInterviewQuestionAudio(String text) {
-        byte[] audio = textToSpeechServ.speak(text);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.valueOf("audio/mpeg"));
-        headers.setContentLength(audio.length);
-
-        return ResponseEntity.ok().headers(headers).body(audio);
-    }
 }
 
 

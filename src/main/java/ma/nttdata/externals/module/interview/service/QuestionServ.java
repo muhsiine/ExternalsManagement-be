@@ -5,6 +5,7 @@ import ma.nttdata.externals.module.interview.dto.placeholdersForInterviewQuestio
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
 import ma.nttdata.externals.module.interview.entity.Question;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,4 +31,6 @@ public interface QuestionServ {
     List<Question> findAllQuestionsByInterviewId(UUID interviewId);
 
     List<QuestionDTO> findAllQuestionsDTOSByInterviewId(UUID interviewId);
+
+    ResponseEntity<byte[]> generateInterviewQuestionAudio(String text);
 }
