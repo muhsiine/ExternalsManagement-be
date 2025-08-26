@@ -71,6 +71,15 @@ app:
       url: http://localhost:8080
   mail:
     from: ${L_APP_MAIL_FROM}
+  tts:
+    apiKey: ${L_TTS_MODEL_API_KEY=}
+    modelId: eleven_monolingual_v1
+    voiceId: ${L_TTS_VOICE_ID}
+    stability: 0.5
+    similarityBoost: 0.5
+    style: 0.0
+    useSpeakerBoost: true
+    speed: 1.0
 
 interview:
   token:
