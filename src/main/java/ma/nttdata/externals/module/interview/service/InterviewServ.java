@@ -5,8 +5,10 @@ import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.ResponseEntity;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,5 +71,7 @@ public interface InterviewServ {
     List<QuestionDTO> generateInterviewQuestions(UUID interviewId,
                                                  GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest);
 
-    List<byte[]> generateInterviewQuestionsAudios(UUID interviewId);
+    ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException;
+
+    ResponseEntity<byte[]> generateInterviewQuestionAudio(String text);
 }

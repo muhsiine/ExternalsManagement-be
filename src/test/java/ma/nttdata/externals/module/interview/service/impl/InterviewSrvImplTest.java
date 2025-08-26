@@ -13,6 +13,7 @@ import ma.nttdata.externals.module.interview.repository.*;
 import ma.nttdata.externals.module.interview.service.EvaluationServ;
 import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.interview.service.TextToSpeechServ;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.offer.mapper.OfferMapper;
@@ -58,6 +59,7 @@ class InterviewSrvImplTest {
     @Mock private  PromptService promptServ;
     @Mock private  EvaluationTypeServ evaluationTypeServ;
     @Mock private QuestionServ questionServ;
+    @Mock private TextToSpeechServ textToSpeechServ;
 
     @BeforeEach
     void setUp() {
@@ -78,7 +80,8 @@ class InterviewSrvImplTest {
                 evaluationServ,
                 promptServ,
                 evaluationTypeServ,
-                questionServ
+                questionServ,
+                textToSpeechServ
         );
     }
 

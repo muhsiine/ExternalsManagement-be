@@ -25,7 +25,6 @@ import java.util.UUID;
 public class QuestionController {
 
     private final QuestionServ questionServ;
-    private final TextToSpeechServ textToSpeechServ;
 
     @Operation(summary = "Get all questions")
     @ApiResponses({
@@ -77,16 +76,4 @@ public class QuestionController {
         questionServ.deleteQuestion(id);
         return ResponseEntity.noContent().build();
     }
-
-    @PostMapping("/generateAudio")
-    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody TtsRequestDTO ttsRequestDTO){
-        byte[] audio = textToSpeechServ.speak(ttsRequestDTO.text());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.valueOf("audio/mpeg"));
-        headers.setContentLength(audio.length);
-
-        return new ResponseEntity<>(audio,headers, HttpStatus.OK);
-    }
-
 }

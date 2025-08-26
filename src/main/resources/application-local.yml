@@ -73,8 +73,7 @@ app:
     from: ${L_APP_MAIL_FROM}
   tts:
     apiKey: ${L_TTS_MODEL_API_KEY}
-    #apiKey: sk_6485dc84bda2f3124f4a48626c4e85fb85b0b3516cb67a6f
-    modelId: eleven_monolingual_v1
+    modelId: ${MODEL_ID}
     voiceId: ${L_TTS_VOICE_ID}
     stability: 0.5
     similarityBoost: 0.5

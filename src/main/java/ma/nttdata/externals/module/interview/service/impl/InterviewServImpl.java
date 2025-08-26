@@ -26,13 +26,20 @@ import org.springframework.beans.factory.annotation.Value;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
+import org.springframework.http.MediaType;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Transactional
@@ -77,7 +84,7 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationTypeMapper evaluationTypeMapper ,
             CandidateMapper candidateMapper,
             @Value("${interview.baseLink}") String interviewBaseLink,
-            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ, EvaluationTypeServ evaluationTypeServ, QuestionServ questionServ
+            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ, EvaluationTypeServ evaluationTypeServ, QuestionServ questionServ, TextToSpeechServ textToSpeechServ
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -95,6 +102,7 @@ public class InterviewServImpl implements InterviewServ {
         this.promptServ = promptServ;
         this.evaluationTypeServ = evaluationTypeServ;
         this.questionServ = questionServ;
+        this.textToSpeechServ = textToSpeechServ;
     }
 
     // new interview
@@ -339,14 +347,38 @@ public class InterviewServImpl implements InterviewServ {
     }
 
     @Override
-    public  List<byte[]> generateInterviewQuestionsAudios(UUID interviewId){
+    public  ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException {
         List<QuestionDTO> questions = questionServ.findAllQuestionsDTOSByInterviewId(interviewId);
-        List<byte[]> audios = new ArrayList<>();
 
-        for(int i=0;i<questions.size();i++){
-            audios.add(textToSpeechServ.speak(questions.get(i).description()));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (int i = 0; i < questions.size(); i++) {
+                byte[] audio = textToSpeechServ.speak(questions.get(i).description());
+
+                ZipEntry entry = new ZipEntry("question_" + (i + 1) + ".mp3");
+                zos.putNextEntry(entry);
+                zos.write(audio);
+                zos.closeEntry();
+            }
         }
-        return audios;
+
+        byte[] audiosZipped = baos.toByteArray();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentLength(audiosZipped.length);
+
+        return ResponseEntity.ok().headers(headers).body(audiosZipped);
+    }
+
+    @Override
+    public  ResponseEntity<byte[]> generateInterviewQuestionAudio(String text) {
+        byte[] audio = textToSpeechServ.speak(text);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("audio/mpeg"));
+        headers.setContentLength(audio.length);
+
+        return ResponseEntity.ok().headers(headers).body(audio);
     }
 }
 

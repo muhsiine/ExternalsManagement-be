@@ -10,11 +10,14 @@ import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
 import ma.nttdata.externals.module.interview.service.*;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -257,10 +260,13 @@ public class InterviewController  {
     }
 
     @GetMapping("/{interviewId}/generateQuestionsAudios")
-    public ResponseEntity<List<byte[]>> getInterviewQuestionsAudios(@PathVariable UUID interviewId){
+    public ResponseEntity<byte[]> getInterviewQuestionsAudios(@PathVariable UUID interviewId) throws IOException {
+        return interviewServ.generateInterviewQuestionsAudios(interviewId);
+    }
 
-
-
+    @GetMapping("/generateAudio")
+    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody TtsRequestDTO ttsRequestDTO){
+        return interviewServ.generateInterviewQuestionAudio(ttsRequestDTO.text());
     }
 
 }
