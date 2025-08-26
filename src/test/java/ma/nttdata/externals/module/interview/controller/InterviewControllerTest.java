@@ -614,4 +614,28 @@ class InterviewControllerTest {
     }
 
 
+
+
+
+
+    @Test
+    void printTokenForInterview() {
+        // use the real interview UUID
+        UUID interviewId = UUID.fromString("d6ed54e4-946f-4f1e-b363-2a559956fdbf");
+
+        // use the real scheduledAt from your record
+        LocalDateTime scheduledAt = LocalDateTime.parse("2025-08-28T10:40:58.201097");
+
+        // generate token
+        String token = interviewTokenServ.generateToken(scheduledAt, interviewId);
+
+        // print results
+        System.out.println("Interview ID: " + interviewId);
+        System.out.println("Scheduled At: " + scheduledAt);
+        System.out.println("Token: " + token);
+    }
+
+
+
+
 }

@@ -145,18 +145,49 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewServ.getEvaluationTypeOfEvaluation(id));
     }
 
+
     @Operation(
             summary = "Generate and save interview link",
             description = "Generates a secure interview token, saves the interview link, and returns the full URL for the given interview ID"
     )
     @PostMapping("/{interviewId}/generateAndSaveLink")
-    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId){
+    public ResponseEntity<String> generateAndSaveInterviewLink(@PathVariable UUID interviewId) {
         LocalDateTime scheduledAt = interviewServ.getInterviewById(interviewId).scheduledAt();
-        String token = interviewTokenServ.generateToken(scheduledAt);
-        String interviewLink =  interviewServ.saveInterviewLink(token,interviewId);
+        // Updated to pass interviewId to the token generation
+        String token = interviewTokenServ.generateToken(scheduledAt, interviewId);
+        String interviewLink = interviewServ.saveInterviewLink(token, interviewId);
         return ResponseEntity.ok(interviewLink);
     }
 
+    @Operation(
+            summary = "Get interview ID from token",
+            description = "Extracts and returns the interview ID from a valid interview token"
+    )
+    @GetMapping("/token/{token}/interview-id")
+    public ResponseEntity<UUID> getInterviewIdFromToken(@PathVariable String token) {
+        UUID interviewId = interviewTokenServ.getInterviewIdFromValidToken(token);
+        return ResponseEntity.ok(interviewId);
+    }
+
+    @Operation(
+            summary = "Get interview details by token",
+            description = "Retrieves complete interview information using a valid interview token"
+    )
+    @GetMapping("/token/{token}")
+    public ResponseEntity<InterviewDTO> getInterviewByToken(@PathVariable String token) {
+        InterviewDTO interview = interviewTokenServ.getInterviewByValidToken(token);
+        return ResponseEntity.ok(interview);
+    }
+
+    @Operation(
+            summary = "Validate interview token",
+            description = "Validates an interview token and returns true if the token is valid and not expired, false otherwise"
+    )
+    @GetMapping("/token/{token}/validate")
+    public ResponseEntity<Boolean> validateInterviewToken(@PathVariable String token) {
+        boolean isValid = interviewTokenServ.isValidAndNotExpired(token);
+        return ResponseEntity.ok(isValid);
+    }
     @Operation(
             summary = "Send interview invitation email",
             description = "Sends an email to the candidate containing the interview link and scheduled date."
