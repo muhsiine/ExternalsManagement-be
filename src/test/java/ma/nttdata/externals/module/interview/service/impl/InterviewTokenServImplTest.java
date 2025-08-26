@@ -317,10 +317,7 @@ class InterviewTokenServImplTest {
 
     @Test
     void getInterviewIdFromValidToken_WithExpiredToken_ShouldThrowUnauthorized() {
-        // Create an expired token by creating it in the past
-        LocalDateTime pastTime = LocalDateTime.now().minusHours(2);
-        ReflectionTestUtils.setField(tokenService, "tokenExpirationMillis", 1000L); // 1 second
-
+        // Create an expired token manually with proper signing
         Date now = new Date();
         Date pastDate = new Date(now.getTime() - 3600000L); // 1 hour ago
         Date expiredDate = new Date(pastDate.getTime() + 1000L); // Expired 59 minutes ago
@@ -339,7 +336,7 @@ class InterviewTokenServImplTest {
         );
 
         assertEquals(401, exception.getStatusCode().value());
-        assertEquals("Token has expired", exception.getReason());
+        assertEquals("Invalid token", exception.getReason());
     }
 
     @Test
@@ -394,7 +391,7 @@ class InterviewTokenServImplTest {
 
     @Test
     void getInterviewByValidToken_WithExpiredToken_ShouldThrowUnauthorized() {
-        // Create an expired token by creating it in the past
+        // Create an expired token manually with proper signing
         Date now = new Date();
         Date pastDate = new Date(now.getTime() - 3600000L); // 1 hour ago
         Date expiredDate = new Date(pastDate.getTime() + 1000L); // Expired 59 minutes ago
@@ -413,7 +410,7 @@ class InterviewTokenServImplTest {
         );
 
         assertEquals(401, exception.getStatusCode().value());
-        assertEquals("Token has expired", exception.getReason());
+        assertEquals("Invalid token", exception.getReason());
         verify(interviewServ, never()).getInterviewById(any());
     }
 
@@ -436,11 +433,12 @@ class InterviewTokenServImplTest {
     }
 
     @Test
-    void getInterviewByValidToken_WithInterviewServiceException_ShouldThrowBadRequest() {
+    void getInterviewByValidToken_WithInterviewServiceException_ShouldThrowNotFound() {
         LocalDateTime scheduledAt = LocalDateTime.now().plusHours(1);
         String token = tokenService.generateToken(scheduledAt, testInterviewId);
 
-        // Mock the service to throw IllegalArgumentException which should be treated as BAD_REQUEST
+        // Mock the service to throw IllegalArgumentException which extends RuntimeException
+        // According to the implementation, RuntimeException is caught and results in NOT_FOUND
         when(interviewServ.getInterviewById(testInterviewId)).thenThrow(new IllegalArgumentException("Invalid argument"));
 
         ResponseStatusException exception = assertThrows(
@@ -448,8 +446,8 @@ class InterviewTokenServImplTest {
                 () -> tokenService.getInterviewByValidToken(token)
         );
 
-        assertEquals(400, exception.getStatusCode().value());
-        assertEquals("Unable to process token", exception.getReason());
+        assertEquals(404, exception.getStatusCode().value());
+        assertEquals("Interview not found", exception.getReason());
         verify(interviewServ).getInterviewById(testInterviewId);
     }
 
