@@ -159,50 +159,27 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewLink);
     }
 
+
+    // Replace these three endpoints in your InterviewController with the simplified versions:
+
     @Operation(
             summary = "Get interview ID from token",
             description = "Extracts and returns the interview ID from a valid interview token"
     )
     @GetMapping("/token/{token}/interview-id")
     public ResponseEntity<UUID> getInterviewIdFromToken(@PathVariable String token) {
-        try {
-            if (!interviewTokenServ.validateToken(token)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-            }
-
-            if (interviewTokenServ.isTokenExpired(token)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token has expired");
-            }
-
-            UUID interviewId = interviewTokenServ.extractInterviewId(token);
-            return ResponseEntity.ok(interviewId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to extract interview ID from token", e);
-        }
+        UUID interviewId = interviewTokenServ.getInterviewIdFromValidToken(token);
+        return ResponseEntity.ok(interviewId);
     }
+
     @Operation(
             summary = "Get interview details by token",
             description = "Retrieves complete interview information using a valid interview token"
     )
     @GetMapping("/token/{token}")
     public ResponseEntity<InterviewDTO> getInterviewByToken(@PathVariable String token) {
-        try {
-            if (!interviewTokenServ.validateToken(token)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-            }
-
-            if (interviewTokenServ.isTokenExpired(token)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token has expired");
-            }
-
-            UUID interviewId = interviewTokenServ.extractInterviewId(token);
-            InterviewDTO interview = interviewServ.getInterviewById(interviewId);
-            return ResponseEntity.ok(interview);
-        } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Interview not found", e);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to process token", e);
-        }
+        InterviewDTO interview = interviewTokenServ.getInterviewByValidToken(token);
+        return ResponseEntity.ok(interview);
     }
 
     @Operation(
@@ -211,21 +188,9 @@ public class InterviewController  {
     )
     @GetMapping("/token/{token}/validate")
     public ResponseEntity<Boolean> validateInterviewToken(@PathVariable String token) {
-        try {
-            // Check if token is structurally valid
-            if (!interviewTokenServ.validateToken(token)) {
-                return ResponseEntity.ok(false);
-            }
-            if (interviewTokenServ.isTokenExpired(token)) {
-                return ResponseEntity.ok(false);
-            }
-            return ResponseEntity.ok(true);
-        } catch (Exception e) {
-            return ResponseEntity.ok(false);
-        }
+        boolean isValid = interviewTokenServ.isValidAndNotExpired(token);
+        return ResponseEntity.ok(isValid);
     }
-
-
     @Operation(
             summary = "Send interview invitation email",
             description = "Sends an email to the candidate containing the interview link and scheduled date."
