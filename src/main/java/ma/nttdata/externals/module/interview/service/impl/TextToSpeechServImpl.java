@@ -7,8 +7,6 @@ import org.springframework.ai.audio.tts.TextToSpeechPrompt;
 import org.springframework.ai.elevenlabs.ElevenLabsTextToSpeechModel;
 import org.springframework.ai.elevenlabs.ElevenLabsTextToSpeechOptions;
 import org.springframework.ai.elevenlabs.api.ElevenLabsApi;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,14 +14,16 @@ import org.springframework.stereotype.Service;
 public class TextToSpeechServImpl implements TextToSpeechServ {
 
     private final TextToSpeechPropertiesConfig textToSpeechPropertiesConfig;
+    private final ElevenLabsApi elevenLabsApi;
+
 
     @Override
     public byte[] speak(String text) {
 
-        ElevenLabsApi elevenLabsApi = ElevenLabsApi.builder()
-                .apiKey(System.getenv("ELEVEN_LABS_API_KEY"))
+        /*ElevenLabsApi elevenLabsApi = ElevenLabsApi.builder()
+                .apiKey(textToSpeechPropertiesConfig.getApiKey())
                 .build();
-
+*/
         ElevenLabsTextToSpeechModel textToSpeechModel = ElevenLabsTextToSpeechModel.builder()
                 .elevenLabsApi(elevenLabsApi)
                 .defaultOptions(ElevenLabsTextToSpeechOptions.builder()
@@ -45,7 +45,7 @@ public class TextToSpeechServImpl implements TextToSpeechServ {
                 .model(textToSpeechPropertiesConfig.getModelId())
                 .voiceId(textToSpeechPropertiesConfig.getVoiceId())
                 .voiceSettings(voiceSettings)
-                .outputFormat("mp3_44100_192")
+                .outputFormat("mp3_44100_128")
                 .build();
 
         var prompt = new TextToSpeechPrompt(text, options);

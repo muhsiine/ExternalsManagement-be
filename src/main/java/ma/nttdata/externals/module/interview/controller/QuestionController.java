@@ -7,6 +7,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.interview.service.TextToSpeechServ;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +24,7 @@ import java.util.UUID;
 public class QuestionController {
 
     private final QuestionServ questionServ;
+    private final TextToSpeechServ textToSpeechServ;
 
     @Operation(summary = "Get all questions")
     @ApiResponses({
@@ -70,6 +75,17 @@ public class QuestionController {
     public ResponseEntity<Void> deleteQuestion(@PathVariable UUID id) {
         questionServ.deleteQuestion(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/generateAudio")
+    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody String text){
+        byte[] audio = textToSpeechServ.speak(text);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("audio/mpeg"));
+        headers.setContentLength(audio.length);
+
+        return new ResponseEntity<>(audio,headers, HttpStatus.OK);
     }
 
 }
