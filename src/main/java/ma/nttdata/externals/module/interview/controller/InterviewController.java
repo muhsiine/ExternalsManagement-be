@@ -225,4 +225,11 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewServ.getInterviewEvaluations(interviewId));
     }
 
+    @GetMapping("/{interviewId}/generateQuestionsAudios")
+    public ResponseEntity<List<byte[]>> getInterviewQuestionsAudios(@PathVariable UUID interviewId){
+
+
+
+    }
+
 }

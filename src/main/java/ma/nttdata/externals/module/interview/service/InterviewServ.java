@@ -68,4 +68,6 @@ public interface InterviewServ {
 
     List<QuestionDTO> generateInterviewQuestions(UUID interviewId,
                                                  GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest);
+
+    List<byte[]> generateInterviewQuestionsAudios(UUID interviewId);
 }

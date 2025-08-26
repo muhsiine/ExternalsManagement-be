@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.interview.dto.QuestionDTO;
+import ma.nttdata.externals.module.interview.dto.TtsRequestDTO;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.interview.service.TextToSpeechServ;
 import org.springframework.http.HttpHeaders;
@@ -78,8 +79,8 @@ public class QuestionController {
     }
 
     @PostMapping("/generateAudio")
-    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody String text){
-        byte[] audio = textToSpeechServ.speak(text);
+    public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody TtsRequestDTO ttsRequestDTO){
+        byte[] audio = textToSpeechServ.speak(ttsRequestDTO.text());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("audio/mpeg"));

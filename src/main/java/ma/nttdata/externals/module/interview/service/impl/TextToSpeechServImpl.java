@@ -19,11 +19,6 @@ public class TextToSpeechServImpl implements TextToSpeechServ {
 
     @Override
     public byte[] speak(String text) {
-
-        /*ElevenLabsApi elevenLabsApi = ElevenLabsApi.builder()
-                .apiKey(textToSpeechPropertiesConfig.getApiKey())
-                .build();
-*/
         ElevenLabsTextToSpeechModel textToSpeechModel = ElevenLabsTextToSpeechModel.builder()
                 .elevenLabsApi(elevenLabsApi)
                 .defaultOptions(ElevenLabsTextToSpeechOptions.builder()

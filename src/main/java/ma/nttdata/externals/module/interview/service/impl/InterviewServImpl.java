@@ -17,11 +17,8 @@ import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
-import ma.nttdata.externals.module.interview.service.EvaluationServ;
-import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
-import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.*;
 
-import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
@@ -66,6 +63,7 @@ public class InterviewServImpl implements InterviewServ {
     private final PromptService promptServ;
     private final EvaluationTypeServ evaluationTypeServ;
     private final QuestionServ questionServ;
+    private final TextToSpeechServ textToSpeechServ;
 
     public InterviewServImpl(
             InterviewMapper interviewMapper,
@@ -338,6 +336,17 @@ public class InterviewServImpl implements InterviewServ {
     public InterviewEvaluationDTO getInterviewEvaluations(UUID interviewId){
         List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
         return evaluationMapper.mapEvaluationToInterviewEvaluation(evaluations);
+    }
+
+    @Override
+    public  List<byte[]> generateInterviewQuestionsAudios(UUID interviewId){
+        List<QuestionDTO> questions = questionServ.findAllQuestionsDTOSByInterviewId(interviewId);
+        List<byte[]> audios = new ArrayList<>();
+
+        for(int i=0;i<questions.size();i++){
+            audios.add(textToSpeechServ.speak(questions.get(i).description()));
+        }
+        return audios;
     }
 }
 
