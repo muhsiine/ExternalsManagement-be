@@ -159,9 +159,6 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewLink);
     }
 
-
-    // Replace these three endpoints in your InterviewController with the simplified versions:
-
     @Operation(
             summary = "Get interview ID from token",
             description = "Extracts and returns the interview ID from a valid interview token"

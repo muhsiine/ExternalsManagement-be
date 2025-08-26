@@ -317,20 +317,25 @@ class InterviewTokenServImplTest {
 
     @Test
     void getInterviewIdFromValidToken_WithExpiredToken_ShouldThrowUnauthorized() {
-        // Set a very short expiration time
-        ReflectionTestUtils.setField(tokenService, "tokenExpirationMillis", 1L);
-        LocalDateTime scheduledAt = LocalDateTime.now();
-        String token = tokenService.generateToken(scheduledAt, testInterviewId);
+        // Create an expired token by creating it in the past
+        LocalDateTime pastTime = LocalDateTime.now().minusHours(2);
+        ReflectionTestUtils.setField(tokenService, "tokenExpirationMillis", 1000L); // 1 second
 
-        try {
-            Thread.sleep(10); // Wait for token to expire
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        Date now = new Date();
+        Date pastDate = new Date(now.getTime() - 3600000L); // 1 hour ago
+        Date expiredDate = new Date(pastDate.getTime() + 1000L); // Expired 59 minutes ago
+
+        String expiredToken = Jwts.builder()
+                .setIssuedAt(pastDate)
+                .setExpiration(expiredDate)
+                .setId(UUID.randomUUID().toString())
+                .claim("interviewId", testInterviewId.toString())
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> tokenService.getInterviewIdFromValidToken(token)
+                () -> tokenService.getInterviewIdFromValidToken(expiredToken)
         );
 
         assertEquals(401, exception.getStatusCode().value());
@@ -389,20 +394,22 @@ class InterviewTokenServImplTest {
 
     @Test
     void getInterviewByValidToken_WithExpiredToken_ShouldThrowUnauthorized() {
-        // Set a very short expiration time
-        ReflectionTestUtils.setField(tokenService, "tokenExpirationMillis", 1L);
-        LocalDateTime scheduledAt = LocalDateTime.now();
-        String token = tokenService.generateToken(scheduledAt, testInterviewId);
+        // Create an expired token by creating it in the past
+        Date now = new Date();
+        Date pastDate = new Date(now.getTime() - 3600000L); // 1 hour ago
+        Date expiredDate = new Date(pastDate.getTime() + 1000L); // Expired 59 minutes ago
 
-        try {
-            Thread.sleep(10); // Wait for token to expire
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        String expiredToken = Jwts.builder()
+                .setIssuedAt(pastDate)
+                .setExpiration(expiredDate)
+                .setId(UUID.randomUUID().toString())
+                .claim("interviewId", testInterviewId.toString())
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
 
         ResponseStatusException exception = assertThrows(
                 ResponseStatusException.class,
-                () -> tokenService.getInterviewByValidToken(token)
+                () -> tokenService.getInterviewByValidToken(expiredToken)
         );
 
         assertEquals(401, exception.getStatusCode().value());
@@ -415,6 +422,7 @@ class InterviewTokenServImplTest {
         LocalDateTime scheduledAt = LocalDateTime.now().plusHours(1);
         String token = tokenService.generateToken(scheduledAt, testInterviewId);
 
+        // Mock the service to throw a specific exception that should result in NOT_FOUND
         when(interviewServ.getInterviewById(testInterviewId)).thenThrow(new RuntimeException("Interview not found"));
 
         ResponseStatusException exception = assertThrows(
@@ -432,6 +440,7 @@ class InterviewTokenServImplTest {
         LocalDateTime scheduledAt = LocalDateTime.now().plusHours(1);
         String token = tokenService.generateToken(scheduledAt, testInterviewId);
 
+        // Mock the service to throw IllegalArgumentException which should be treated as BAD_REQUEST
         when(interviewServ.getInterviewById(testInterviewId)).thenThrow(new IllegalArgumentException("Invalid argument"));
 
         ResponseStatusException exception = assertThrows(
