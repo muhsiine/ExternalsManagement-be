@@ -77,6 +77,11 @@ public class QuestionController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Generate audio of a question")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Audio generated successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/generateAudio")
     public ResponseEntity<byte[]> generateQuestionAudio(@RequestBody TtsRequestDTO ttsRequestDTO){
         return questionServ.generateInterviewQuestionAudio(ttsRequestDTO.text());
