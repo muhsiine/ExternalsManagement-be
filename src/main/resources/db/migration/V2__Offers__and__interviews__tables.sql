@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS interviews (
     startTime TIMESTAMP,
     endTime TIMESTAMP,
     description TEXT,
-    link VARCHAR(255),
+    link VARCHAR(500),
     feedback_general VARCHAR(255),
     scheduled_at TIMESTAMP,
     comment VARCHAR(255),
@@ -40,7 +40,6 @@ CREATE TABLE IF NOT EXISTS interviews (
         REFERENCES offers(id)
         ON DELETE CASCADE
 );
-ALTER TABLE interviews ALTER COLUMN link TYPE VARCHAR(500);
 
 -- Evaluation types
 CREATE TABLE IF NOT EXISTS evaluation_types (
