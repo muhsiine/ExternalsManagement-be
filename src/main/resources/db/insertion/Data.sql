@@ -405,3 +405,7 @@ SELECT
 FROM random_interviews ri
     JOIN inserted_answers ia ON TRUE
     LIMIT 50;
+
+ALTER TABLE interviews ALTER COLUMN link TYPE VARCHAR(500);
+ALTER TABLE interviews ALTER COLUMN link TYPE TEXT;
+

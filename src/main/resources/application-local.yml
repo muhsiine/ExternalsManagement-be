@@ -29,7 +29,6 @@ spring:
     enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
-
   security:
     user:
       name: admin
@@ -54,7 +53,6 @@ spring:
           starttls:
             enable: true
 
-
 logging:
   level:
     org:
@@ -75,7 +73,7 @@ app:
 interview:
   token:
     expirationMillis: 86400000
-    secret: OWSJytPLVnDkgwLd7NbZKaxIA63VOE+R8suNr8n7bIqvGzUvHTZLOlqX4x6fBmw6udTuBENk6plQwY+fg/5ZGw==
+    secret: dGhpc2lzYXZlcnlzZWN1cmVzZWNyZXRrZXlmb3JKV1R0b2tlbmdlbmVyYXRpb24=
   email:
     template:
       path: templates/interviewsInvitation.html
