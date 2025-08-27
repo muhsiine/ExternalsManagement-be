@@ -58,6 +58,15 @@ app:
       url: http://localhost:8080
   mail:
     from: mohamedtaha.elyakoubi@nttdata.com
+  tts:
+    apiKey: test-api-key
+    modelId: test-model
+    voiceId: test-voice
+    stability: 0.5
+    similarityBoost: 0.5
+    style: 0.0
+    useSpeakerBoost: true
+    speed: 1.0
 
 interview:
   token:

@@ -17,11 +17,8 @@ import ma.nttdata.externals.module.interview.repository.AnswerRepository;
 import ma.nttdata.externals.module.interview.repository.EvaluationRepository;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
-import ma.nttdata.externals.module.interview.service.EvaluationServ;
-import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
-import ma.nttdata.externals.module.interview.service.InterviewServ;
+import ma.nttdata.externals.module.interview.service.*;
 
-import ma.nttdata.externals.module.interview.service.QuestionServ;
 import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import ma.nttdata.externals.module.prompt.service.PromptService;
@@ -29,13 +26,20 @@ import org.springframework.beans.factory.annotation.Value;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.mapper.OfferMapper;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 
+import org.springframework.http.MediaType;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Transactional
@@ -66,6 +70,7 @@ public class InterviewServImpl implements InterviewServ {
     private final PromptService promptServ;
     private final EvaluationTypeServ evaluationTypeServ;
     private final QuestionServ questionServ;
+    private final TextToSpeechServ textToSpeechServ;
 
     public InterviewServImpl(
             InterviewMapper interviewMapper,
@@ -79,7 +84,7 @@ public class InterviewServImpl implements InterviewServ {
             EvaluationTypeMapper evaluationTypeMapper ,
             CandidateMapper candidateMapper,
             @Value("${interview.baseLink}") String interviewBaseLink,
-            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ, EvaluationTypeServ evaluationTypeServ, QuestionServ questionServ
+            OfferMapper offerMapper, EvaluationServ evaluationServ, PromptService promptServ, EvaluationTypeServ evaluationTypeServ, QuestionServ questionServ, TextToSpeechServ textToSpeechServ
     ) {
         this.interviewMapper = interviewMapper;
         this.interviewRepository = interviewRepository;
@@ -97,6 +102,7 @@ public class InterviewServImpl implements InterviewServ {
         this.promptServ = promptServ;
         this.evaluationTypeServ = evaluationTypeServ;
         this.questionServ = questionServ;
+        this.textToSpeechServ = textToSpeechServ;
     }
 
     // new interview
@@ -339,6 +345,31 @@ public class InterviewServImpl implements InterviewServ {
         List<Evaluation> evaluations = evaluationServ.getAllEvaluationsByInterviewID(interviewId);
         return evaluationMapper.mapEvaluationToInterviewEvaluation(evaluations);
     }
+
+    @Override
+    public  ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException {
+        List<QuestionDTO> questions = questionServ.findAllQuestionsDTOSByInterviewId(interviewId);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (int i = 0; i < questions.size(); i++) {
+                byte[] audio = textToSpeechServ.speak(questions.get(i).description());
+
+                ZipEntry entry = new ZipEntry("question_" + (i + 1) + ".mp3");
+                zos.putNextEntry(entry);
+                zos.write(audio);
+                zos.closeEntry();
+            }
+        }
+
+        byte[] audiosZipped = baos.toByteArray();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentLength(audiosZipped.length);
+
+        return ResponseEntity.ok().headers(headers).body(audiosZipped);
+    }
+
 }
 
 

@@ -15,9 +15,13 @@ import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
 import ma.nttdata.externals.module.interview.service.QuestionServ;
+import ma.nttdata.externals.module.interview.service.TextToSpeechServ;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -33,17 +37,19 @@ public class QuestionServImpl implements QuestionServ {
     private final InterviewRepository interviewRepository;
     private final boolean mockFlag;
     private final RestClient aiRestClient;
+    private final TextToSpeechServ textToSpeechServ;
 
     public QuestionServImpl(QuestionRepository questionRepository,
                             QuestionMapper questionMapper,
                             InterviewRepository interviewRepository,
                             @Value("${app.mock.flag}") boolean mockFlag,
-                            @Qualifier("aiServiceClient") RestClient aiRestClient) {
+                            @Qualifier("aiServiceClient") RestClient aiRestClient, TextToSpeechServ textToSpeechServ) {
         this.questionRepository = questionRepository;
         this.questionMapper = questionMapper;
         this.interviewRepository = interviewRepository;
         this.mockFlag = mockFlag;
         this.aiRestClient = aiRestClient;
+        this.textToSpeechServ = textToSpeechServ;
     }
 
     @Override
@@ -161,5 +167,16 @@ public class QuestionServImpl implements QuestionServ {
     public List<QuestionDTO> findAllQuestionsDTOSByInterviewId(UUID interviewId){
         List<Question> questions = questionRepository.findByInterviewId(interviewId);
         return questionMapper.toDtoList(questions);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> generateInterviewQuestionAudio(String text) {
+        byte[] audio = textToSpeechServ.speak(text);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("audio/mpeg"));
+        headers.setContentLength(audio.length);
+
+        return ResponseEntity.ok().headers(headers).body(audio);
     }
 }

@@ -8,6 +8,7 @@ import ma.nttdata.externals.module.interview.dto.AIQuestionResponseDTO;
 import ma.nttdata.externals.module.interview.mapper.QuestionMapper;
 import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.QuestionRepository;
+import ma.nttdata.externals.module.interview.service.TextToSpeechServ;
 import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.prompt.dto.PromptDTO;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,8 @@ public class QuestionServiceImplTest {
     private InterviewRepository interviewRepository;
     @Mock
     private RestClient aiRestClient;
+    @Mock
+    private TextToSpeechServ textToSpeechServ;
 
     private QuestionServImpl questionServ;
 
@@ -83,7 +86,7 @@ public class QuestionServiceImplTest {
                 questionMapper,
                 interviewRepository,
                 true,
-                aiRestClient);
+                aiRestClient,textToSpeechServ);
         CandidateDTO candidateDTO = new CandidateDTO(UUID.randomUUID(), null, null, 0, null, null, null, null, null, null, null, null, null, null, null);
         OfferDTO offerDTO = new OfferDTO(UUID.randomUUID(), null, null, null,null);
 
@@ -116,7 +119,7 @@ public class QuestionServiceImplTest {
                 questionMapper,
                 interviewRepository,
                 false,
-                aiRestClient);
+                aiRestClient,textToSpeechServ);
         List<AIQuestionResponseDTO> aiResponses = List.of(
                 new AIQuestionResponseDTO("What is Java?", "3"),
                 new AIQuestionResponseDTO("Explain REST APIs.", "4"),
