@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS interviews (
         REFERENCES offers(id)
         ON DELETE CASCADE
 );
+ALTER TABLE interviews ALTER COLUMN link TYPE VARCHAR(500);
 
 -- Evaluation types
 CREATE TABLE IF NOT EXISTS evaluation_types (
