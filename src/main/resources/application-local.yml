@@ -73,7 +73,7 @@ app:
 interview:
   token:
     expirationMillis: 86400000
-    secret: dGhpc2lzYXZlcnlzZWN1cmVzZWNyZXRrZXlmb3JKV1R0b2tlbmdlbmVyYXRpb24=
+    secret: OWSJytPLVnDkgwLd7NbZKaxIA63VOE+R8suNr8n7bIqvGzUvHTZLOlqX4x6fBmw6udTuBENk6plQwY+fg/5ZGw==
   email:
     template:
       path: templates/interviewsInvitation.html
