@@ -30,10 +30,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -812,5 +817,45 @@ class InterviewSrvImplTest {
         verify(promptServ).findByPromptCode(InterviewPromptConstants.INTERVIEW_GENERATE_QUESTIONS_PROMPT_CODE);
         verify(questionServ).prepareQuestionsFromAIResponse(placeholders, evaluationTypes, prompt);
         verify(questionServ).saveAllQuestions(anyList());
+    }
+
+    @Test
+    void testGenerateInterviewQuestionsAudios() throws IOException {
+        UUID interviewId = UUID.randomUUID();
+
+        List<QuestionDTO> questions = List.of(
+                new QuestionDTO(null, "Question 1", 10, interviewId, null),
+                new QuestionDTO(null, "Question 2", 15, interviewId, null)
+        );
+
+        when(questionServ.findAllQuestionsDTOSByInterviewId(interviewId)).thenReturn(questions);
+        when(textToSpeechServ.speak("Question 1")).thenReturn("audio1".getBytes());
+        when(textToSpeechServ.speak("Question 2")).thenReturn("audio2".getBytes());
+
+        ResponseEntity<byte[]> response = interviewServ.generateInterviewQuestionsAudios(interviewId);
+
+        assertNotNull(response);
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().length > 0);
+
+        assertEquals(response.getBody().length, response.getHeaders().getContentLength());
+        assertEquals("application/octet-stream", response.getHeaders().getContentType().toString());
+
+        try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(response.getBody()))) {
+            ZipEntry entry = zis.getNextEntry();
+            assertNotNull(entry);
+            assertEquals("question_1.mp3", entry.getName());
+
+            entry = zis.getNextEntry();
+            assertNotNull(entry);
+            assertEquals("question_2.mp3", entry.getName());
+
+            assertNull(zis.getNextEntry());
+        }
+
+        verify(questionServ, times(1)).findAllQuestionsDTOSByInterviewId(interviewId);
+        verify(textToSpeechServ, times(1)).speak("Question 1");
+        verify(textToSpeechServ, times(1)).speak("Question 2");
     }
 }
