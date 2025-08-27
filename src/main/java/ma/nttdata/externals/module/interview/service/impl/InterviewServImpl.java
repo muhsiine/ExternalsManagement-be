@@ -228,7 +228,7 @@ public class InterviewServImpl implements InterviewServ {
     @Override
     public String saveInterviewLink(String token, UUID interviewId) {
         Interview interview = interviewRepository.findById(interviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));
+                .orElseThrow(() -> new ResourceNotFoundException("Interview",interviewId));
 
 
         String interviewLink = interviewBaseLink+token;
@@ -239,7 +239,7 @@ public class InterviewServImpl implements InterviewServ {
     @Override
     public placeholdersForInterviewQuestionsPromptDTO getPlaceholdersForInterviewQuestionsPrompt(UUID interviewId){
         Interview interview = interviewRepository.findWithCandidateWithoutContactsAndOfferById(interviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Interview not found with ID: " + interviewId));
+                .orElseThrow(() -> new ResourceNotFoundException("Interview" + interviewId));
 
         CandidateDTO candidate = candidateMapper.candidateToCandidateDTO(interview.getCandidate());
 
@@ -258,7 +258,7 @@ public class InterviewServImpl implements InterviewServ {
     @Override
     public SendEmailDTO getEmailInfo(UUID interviewId){
         Interview interview = interviewRepository.findWithCandidateAndOfferById(interviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Interview not found",interviewId));;
+                .orElseThrow(() -> new ResourceNotFoundException("Interview",interviewId));;
 
         Candidate candidate = interview.getCandidate();
         Offer offer = interview.getOffer();

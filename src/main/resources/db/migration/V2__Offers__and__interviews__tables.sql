@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS interviews (
     startTime TIMESTAMP,
     endTime TIMESTAMP,
     description TEXT,
-    link VARCHAR(255),
+    link VARCHAR(500),
     feedback_general VARCHAR(255),
     scheduled_at TIMESTAMP,
     comment VARCHAR(255),

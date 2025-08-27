@@ -259,6 +259,10 @@ public class InterviewController  {
         return ResponseEntity.ok(interviewServ.getInterviewEvaluations(interviewId));
     }
 
+    @Operation(
+            summary = "Get all the audios of the questions of an interview",
+            description = "Returns the zip of the list of the audios"
+    )
     @GetMapping("/{interviewId}/generateQuestionsAudios")
     public ResponseEntity<byte[]> getInterviewQuestionsAudios(@PathVariable UUID interviewId) throws IOException {
         return interviewServ.generateInterviewQuestionsAudios(interviewId);

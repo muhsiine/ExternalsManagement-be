@@ -287,4 +287,44 @@ class EvaluationMapperTest {
         assertThat(evaluationTypeId2).isEqualTo( secondEval.evaluationType().id());
 
     }
+
+    @Test
+    void testToEntity_shouldSetInterviewAndEvaluationType() {
+        UUID interviewId = UUID.randomUUID();
+        UUID evaluationTypeId = UUID.randomUUID();
+
+        EvaluationDTO dto = new EvaluationDTO(
+                UUID.randomUUID(),
+                5.0,
+                "Strong skills",
+                interviewId,
+                evaluationTypeId
+        );
+
+        Evaluation entity = evaluationMapper.toEntity(dto);
+
+        assertNotNull(entity);
+        assertEquals(dto.id(), entity.getId());
+        assertEquals(dto.score(), entity.getScore());
+        assertEquals(dto.feedback(), entity.getFeedback());
+
+        assertNotNull(entity.getInterview());
+        assertEquals(interviewId, entity.getInterview().getId());
+
+        assertNotNull(entity.getEvaluationType());
+        assertEquals(evaluationTypeId, entity.getEvaluationType().getId());
+    }
+
+    @Test
+    void mapEvaluationToInterviewEvaluation_shouldReturnNull_whenListIsNull() {
+        InterviewEvaluationDTO dto = evaluationMapper.mapEvaluationToInterviewEvaluation(null);
+        assertNull(dto);
+    }
+
+    @Test
+    void mapEvaluationToInterviewEvaluation_shouldReturnNull_whenListIsEmpty() {
+        InterviewEvaluationDTO dto = evaluationMapper.mapEvaluationToInterviewEvaluation(List.of());
+        assertNull(dto);
+    }
+
 }
