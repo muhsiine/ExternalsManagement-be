@@ -58,8 +58,8 @@ public class RecordController {
     @GetMapping("/{id}")
     public ResponseEntity<RecordDTO> findRecordById(@PathVariable UUID id){
         try {
-            RecordDTO updatedRecord = recordServ.findRecordById(id);
-            return ResponseEntity.ok(updatedRecord);
+            RecordDTO record = recordServ.findRecordById(id);
+            return ResponseEntity.ok(record);
         } catch (ResourceNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -71,8 +71,30 @@ public class RecordController {
     })
     @GetMapping
     public ResponseEntity<List<RecordDTO>> findAllRecords(){
-        List<RecordDTO> updatedRecord = recordServ.findAllRecords();
-        return ResponseEntity.ok(updatedRecord);
+        List<RecordDTO> records = recordServ.findAllRecords();
+        return ResponseEntity.ok(records);
+    }
+
+    @Operation(summary = "fetch record by interview Id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Record found"),
+            @ApiResponse(responseCode = "404", description = "Record not found")
+    })
+    @GetMapping("/by-interview/{interviewId}")
+    public ResponseEntity<RecordDTO> findRecordByInterviewId(@PathVariable UUID interviewId) {
+        RecordDTO record = recordServ.findRecordByInterviewId(interviewId);
+        return record != null
+                ? ResponseEntity.ok(record)
+                : ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "fetch all records by offer id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Records found")
+    })
+    @GetMapping("/by-offer/{offerId}")
+    public ResponseEntity<List<RecordDTO>> findAllRecordsByOfferId(@PathVariable UUID offerId) {
+        return ResponseEntity.ok(recordServ.findAllRecordsByOfferId(offerId));
     }
 
     @Operation(summary = "delete a record")
