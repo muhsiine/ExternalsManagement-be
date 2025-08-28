@@ -101,7 +101,7 @@ class InterviewTokenServImplTest {
     void validateToken_WithTamperedToken_ShouldReturnFalse() {
         LocalDateTime scheduledAt = LocalDateTime.now();
         String validToken = tokenService.generateToken(scheduledAt, testInterviewId);
-        String tamperedToken = validToken.substring(0, validToken.length() - 1) + "X";
+        String tamperedToken = validToken.substring(0, validToken.length() - 1) + "Y";
 
         boolean isValid = tokenService.validateToken(tamperedToken);
 
