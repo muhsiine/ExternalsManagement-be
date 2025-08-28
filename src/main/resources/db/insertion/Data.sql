@@ -18,16 +18,15 @@ FROM (VALUES
      ) AS cities(city_name)
     ON CONFLICT (name) DO NOTHING;
 
-
 -- candidates
 INSERT INTO candidates (id, full_name, birth_date, years_of_experience, gender, main_tech, summary)
 SELECT
     uuid_generate_v4(),
     first_name || ' ' || last_name,
     DATE '1990-01-01' - (FLOOR(RANDOM() * 365 * 25) || ' days')::INTERVAL,
-    FLOOR(RANDOM() * 15) + 1,
+        FLOOR(RANDOM() * 7) + 2, -- 2–8 years
     gender,
-    (ARRAY['Java','Python','JavaScript','Spring Boot','React','Angular','Node.js','PHP','Laravel','Django','Flask','.NET','AWS','Docker','Kubernetes','Android','iOS'])[FLOOR(RANDOM()*17)+1],
+    (ARRAY['Java','Python','React','Angular'])[FLOOR(RANDOM()*4)+1],
     (ARRAY[
         'Full-stack developer with strong problem-solving skills',
         'Passionate about clean code and agile methodologies',
@@ -56,7 +55,7 @@ FROM (
     ('Houda', 'Makhfi', 'F'), ('Marouane', 'Mabrouk', 'M'), ('Nihal', 'Saidi', 'F')
     ) AS names(first_name, last_name, gender);
 
--- adrss
+-- address
 INSERT INTO address (id, street, postal_code, full_address, city_id, country_id, candidate_id)
 SELECT
     uuid_generate_v4(),
@@ -80,13 +79,12 @@ FROM candidates cand
     CROSS JOIN LATERAL (
 SELECT id, name FROM city ORDER BY RANDOM() LIMIT 1
     ) c
-WHERE NOT EXISTS (
-    SELECT 1 FROM address a WHERE a.candidate_id = cand.id
-    );
+WHERE NOT EXISTS (SELECT 1 FROM address a WHERE a.candidate_id = cand.id);
 
 -- contacts
 INSERT INTO contacts (id, candidate_id, contact_type, contact_value)
-SELECT uuid_generate_v4(), id, 'Email', LOWER(SPLIT_PART(full_name, ' ', 1) || '.' || SPLIT_PART(full_name, ' ', 2) || FLOOR(RANDOM()*10)::TEXT || '@domain.ma')
+SELECT uuid_generate_v4(), id, 'Email',
+       LOWER(SPLIT_PART(full_name, ' ', 1) || '.' || SPLIT_PART(full_name, ' ', 2) || FLOOR(RANDOM()*10)::TEXT || '@domain.ma')
 FROM candidates
 UNION ALL
 SELECT uuid_generate_v4(), id, 'Phone', '+2126' || LPAD(FLOOR(RANDOM()*100000000)::TEXT, 8, '0')
@@ -97,15 +95,13 @@ INSERT INTO experiences (id, candidate_id, company_name, position, start_date, e
 SELECT
     uuid_generate_v4(),
     id,
-    (ARRAY[
-         'OCP Group','Attijariwafa Bank','Maroc Telecom','ONCF','Royal Air Maroc',
+    (ARRAY['OCP Group','Attijariwafa Bank','Maroc Telecom','ONCF','Royal Air Maroc',
      'Saham Assurance','Yazaki Morocco','Managem','SNTL','Cosumar',
      'BMCE Bank','LafargeHolcim','Intelcia','Dell Technologies Morocco',
      'IBM Morocco','Capgemini Morocco','HPS Morocco','Inwi','Orange Morocco'
          ])[FLOOR(RANDOM()*19)+1],
-    (ARRAY[
-        'Software Engineer','Senior Developer','DevOps Specialist','Tech Lead',
-        'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'
+    (ARRAY['Software Engineer','Senior Developer','DevOps Specialist','Tech Lead',
+           'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'
     ])[FLOOR(RANDOM()*8)+1],
     CURRENT_DATE - (years_of_experience + FLOOR(RANDOM()*3) || ' years')::INTERVAL,
     CASE WHEN RANDOM() > 0.3 THEN CURRENT_DATE - (FLOOR(RANDOM()*12) || ' months')::INTERVAL END,
@@ -160,7 +156,14 @@ SELECT
     ])[FLOOR(RANDOM()*6)+1]
 FROM candidates;
 
--- languages
+-- 🔧 languages (force English + random others)
+-- English (ADVANCED, native) for every candidate
+INSERT INTO languages (id, candidate_id, description, english_description, full_description, language, language_in_english, level, is_native)
+SELECT
+    uuid_generate_v4(), id, 'English', 'English', 'English Language', 'English', 'English', 'ADVANCED', true
+FROM candidates;
+
+-- Additional random languages
 INSERT INTO languages (id, candidate_id, description, english_description, full_description, language, language_in_english, level, is_native)
 WITH language_data AS (
     SELECT *, ROW_NUMBER() OVER () - 1 AS row_number
@@ -171,75 +174,32 @@ WITH language_data AS (
               ('Español', 'Spanish', 'Idioma Español', 'Spanish', 'Spanish')
          ) AS langs (description, english_description, full_description, language, language_in_english)
 ),
-     candidate_language_counts AS (
-         SELECT id AS candidate_id, (FLOOR(RANDOM() * 3) + 1)::integer AS num_languages
+     candidate_languages AS (
+         SELECT id AS candidate_id, (FLOOR(RANDOM() * 2))::integer AS num_languages
          FROM candidates
-     ),
-     candidate_english AS (
-         SELECT candidate_id, 2 AS lang_index
-         FROM candidate_language_counts
-         WHERE RANDOM() < 0.7
-     ),
-     candidate_other_languages AS (
-         SELECT
-             c.candidate_id,
-             l.row_number AS lang_index,
-             ROW_NUMBER() OVER (PARTITION BY c.candidate_id ORDER BY RANDOM()) AS rn,
-             c.num_languages
-         FROM candidate_language_counts c
-                  CROSS JOIN generate_series(1, c.num_languages) g
-                  CROSS JOIN LATERAL (
-             SELECT row_number
-             FROM language_data
-             WHERE row_number != 2
-    ) l
-WHERE NOT EXISTS (
-    SELECT 1 FROM candidate_english ce WHERE ce.candidate_id = c.candidate_id AND ce.lang_index = l.row_number
-    )
-  AND (c.num_languages > 1 OR NOT EXISTS (SELECT 1 FROM candidate_english ce WHERE ce.candidate_id = c.candidate_id))
-    ),
-    candidate_languages AS (
-SELECT candidate_id, lang_index
-FROM candidate_english
-UNION ALL
-SELECT candidate_id, lang_index
-FROM candidate_other_languages col
-WHERE rn <= col.num_languages - (SELECT COUNT(*) FROM candidate_english ce WHERE ce.candidate_id = col.candidate_id)
-    )
+     )
 SELECT
-    uuid_generate_v4() AS id,
-    cl.candidate_id,
+    uuid_generate_v4(),
+    c.candidate_id,
     ld.description,
     ld.english_description,
     ld.full_description,
     ld.language,
     ld.language_in_english,
-    CASE (RANDOM() * 5)::integer
-        WHEN 0 THEN 'BEGINNER'
-        WHEN 1 THEN 'LOWER_INTERMEDIATE'
-        WHEN 2 THEN 'INTERMEDIATE'
-        WHEN 3 THEN 'UPPER_INTERMEDIATE'
-        ELSE 'ADVANCED'
-END AS level,
-    (RANDOM() < 0.5) AS is_native
-FROM candidate_languages cl
-JOIN language_data ld ON ld.row_number = cl.lang_index;
+    (ARRAY['BEGINNER','LOWER_INTERMEDIATE','INTERMEDIATE','UPPER_INTERMEDIATE','ADVANCED'])[FLOOR(RANDOM()*5)+1],
+    (RANDOM() < 0.2)
+FROM candidate_languages c
+    JOIN language_data ld ON RANDOM() < 0.5
+WHERE c.num_languages > 0;
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
--- OFFERS
-INSERT INTO offers (id, title, description,formatted_description)
+-- OFFERS (aligned mainTech + biased languages)
+INSERT INTO offers (id, title, description, formatted_description)
 SELECT
     uuid_generate_v4(),
     (ARRAY[
-         'Junior Java Developer',
-     'Senior Frontend Engineer',
-     'DevOps Specialist',
-     'Full Stack Developer',
-     'Data Scientist',
-     'Mobile App Developer',
-     'Cloud Solutions Architect',
-     'Backend Engineer'
+         'Junior Java Developer','Senior Frontend Engineer','DevOps Specialist',
+     'Full Stack Developer','Data Scientist','Mobile App Developer',
+     'Cloud Solutions Architect','Backend Engineer'
          ])[FLOOR(RANDOM() * 8) + 1],
     (ARRAY[
         'Work on exciting projects with international clients.',
@@ -252,26 +212,27 @@ SELECT
         'Build robust backend services and APIs.'
     ])[FLOOR(RANDOM() * 8) + 1],
     CAST(
-    json_build_object(
-        'description', 'We are seeking an experienced, highly motivated, and technically proficient Senior Java Developer to join our growing technology team. The ideal candidate will have a deep understanding of Java development and a passion for building scalable, high-performance, and reliable software applications. You will play a critical role in designing, developing, and maintaining enterprise-level solutions that power our business operations and drive innovation.
-                       In this role, you will be responsible for collaborating with cross-functional teams to analyze requirements, create technical specifications, and implement end-to-end solutions. You will ensure code quality, maintainability, and adherence to best practices while mentoring junior developers and contributing to architectural decisions. Your work will directly impact the performance, scalability, and reliability of our software products.',
-        'mainTech', 'Laravel',
-        'skills', (ARRAY[
-            'Java - Spring Boot - Docker - Kubernetes - AWS',
-            'React - Node.js - MongoDB - Docker - Git',
-            'Python - Django - PostgresSQL - Kubernetes - AWS',
-            'C# - .NET - SQL Server - Azure - Agile'
-        ])[FLOOR(RANDOM() * 4) + 1],
-        'languages', json_build_array(
-            json_build_object('languageName', (ARRAY['English','French','Spanish','German'])[FLOOR(RANDOM()*4)+1], 'level', 'ADVANCED'),
-            json_build_object('languageName', (ARRAY['English','French','Spanish','German'])[FLOOR(RANDOM()*4)+1], 'level', 'INTERMEDIATE')
-        ),
-        'yearsOfExperience', FLOOR(RANDOM() * 10) + 1,
-        'mainResponsibilities', 'Design and implement microservices architecture...',
-        'education', 'Bachelor in Computer Science - Master in Software Engineering',
-        'keywords', 'Java - Spring Boot - Microservices - Docker - Kubernetes - Fintech - Agile - DevOps - AWS - Backend Development'
-    ) AS text
-  )
+        json_build_object(
+            'description', 'We are seeking a highly skilled developer...',
+            -- 🔧 Reduced pool, aligned with candidates
+            'mainTech', (ARRAY['Java','Python','React','Angular'])[FLOOR(RANDOM()*4)+1],
+            'skills', (ARRAY[
+                'Java - Spring Boot - Docker - Kubernetes - AWS',
+                'React - Node.js - MongoDB - Docker - Git',
+                'Python - Django - PostgresSQL - Kubernetes - AWS',
+                'C# - .NET - SQL Server - Azure - Agile'
+            ])[FLOOR(RANDOM() * 4) + 1],
+            -- 🔧 Always English + maybe French/Spanish
+            'languages', json_build_array(
+                json_build_object('languageName', 'English', 'level', 'INTERMEDIATE'),
+                json_build_object('languageName', (ARRAY['French','Spanish'])[FLOOR(RANDOM()*2)+1], 'level', 'ADVANCED')
+            ),
+            'yearsOfExperience', FLOOR(RANDOM() * 5) + 2,
+            'mainResponsibilities', 'Design and implement scalable systems...',
+            'education', 'Bachelor in Computer Science - Master in Software Engineering',
+            'keywords', 'Java - Spring Boot - Microservices - Docker - Kubernetes - Agile - DevOps - AWS - Backend Development'
+        ) AS text
+    )
 FROM generate_series(1, 10);
 
 -- Records

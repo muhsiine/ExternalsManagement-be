@@ -20,10 +20,10 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
     WHERE LOWER(l.languageInEnglish) IN :languages
     AND c.yearsOfExperience >= :minYears
     AND (
-            LOWER(c.mainTech) = LOWER(:mainTech)
-            OR LOWER(c.mainTech) LIKE LOWER(CONCAT('%', :mainTech, '%'))
-            OR LOWER(:mainTech) LIKE CONCAT('%', LOWER(c.mainTech), '%')
-        )
+       LOWER(c.mainTech) = LOWER(:mainTech)
+    OR LOWER(c.mainTech) LIKE LOWER(CONCAT('%', :mainTech, '%'))
+    OR LOWER(:mainTech) LIKE CONCAT('%', LOWER(c.mainTech), '%')
+            )
     ORDER BY c.yearsOfExperience DESC
     """)
     List<Candidate> findCandidatesRoughMatch(
@@ -31,5 +31,6 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
             @Param("minYears") int minYears,
             @Param("languages") List<String> languages
     );
+
 
 }
