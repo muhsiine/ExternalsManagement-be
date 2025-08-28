@@ -273,6 +273,15 @@ SELECT
   )
 FROM generate_series(1, 10);
 
+-- Records
+INSERT INTO records (id, recorded_at, file_url, transcript)
+SELECT
+    uuid_generate_v4(),
+    CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
+        'https://storage.example.com/recordings/' || uuid_generate_v4()::TEXT || '.mp3',
+        'Transcript for recording ' || uuid_generate_v4()::TEXT
+FROM generate_series(1, 20);
+
 -- INTERVIEWS
 WITH offer_ids AS (
     SELECT id FROM offers ORDER BY RANDOM() LIMIT 10
@@ -284,6 +293,9 @@ SELECT id FROM candidates ORDER BY RANDOM() LIMIT 20
 SELECT
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL AS starttime,
     (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute' AS duration
+    ),
+    record_ids AS (
+SELECT id FROM records ORDER BY RANDOM() LIMIT 20
     )
 INSERT INTO interviews (
     id,
@@ -297,7 +309,8 @@ INSERT INTO interviews (
     scheduled_at,
     comment,
     number_of_questions,
-    estimated_duration
+    estimated_duration,
+    record_id
 )
 SELECT
     uuid_generate_v4(),
@@ -311,10 +324,12 @@ SELECT
     CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
     'Auto-generated comment for testing',
     15,
-    60
+    60,
+    r.id
 FROM offer_ids o
          CROSS JOIN candidate_ids c
          CROSS JOIN interview_times t
+         CROSS JOIN record_ids r
     LIMIT 20;
 
 -- EVALUATION_TYPES

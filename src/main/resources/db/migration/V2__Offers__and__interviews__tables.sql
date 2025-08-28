@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS offers (
     formatted_description TEXT
 );
 
+-- Records table
+CREATE TABLE IF NOT EXISTS records(
+    id UUID PRIMARY KEY,
+    recorded_at TIMESTAMP,
+    file_url VARCHAR(255),
+    transcript Text
+);
+
 -- Interviews table
 CREATE TABLE IF NOT EXISTS interviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,6 +37,7 @@ CREATE TABLE IF NOT EXISTS interviews (
 
     candidate_id UUID NOT NULL,
     offer_id UUID NOT NULL,
+    record_id UUID,
 
     CONSTRAINT fk_candidate
         FOREIGN KEY (candidate_id)
@@ -38,7 +47,12 @@ CREATE TABLE IF NOT EXISTS interviews (
     CONSTRAINT fk_offer
         FOREIGN KEY (offer_id)
         REFERENCES offers(id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_record
+       FOREIGN KEY (record_id)
+       REFERENCES records(id)
+       ON DELETE CASCADE
 );
 
 -- Evaluation types
