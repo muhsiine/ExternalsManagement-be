@@ -26,8 +26,4 @@ public class Record {
 
     @Column(name = "transcript")
     private String transcript;
-
-    @OneToOne
-    @JoinColumn(name = "interview_id",nullable = false,unique = true)
-    private Interview interview;
 }

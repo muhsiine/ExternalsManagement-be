@@ -62,5 +62,7 @@ public class Interview {
     @OneToMany(mappedBy = "interview", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
-
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @JoinColumn(name = "record_id", nullable = true)
+    private Record record;
 }
