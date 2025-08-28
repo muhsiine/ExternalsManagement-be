@@ -282,9 +282,9 @@ SELECT
         '[' ||
         string_agg(
                 json_build_object(
-                        'Question', 'Sample question ' || gs,
+                        'Question', 'Sample question ' || generate_series,
                         'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
-                        'Answer', 'Sample answer ' || gs,
+                        'Answer', 'Sample answer ' || generate_series,
                         'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
                 )::TEXT,
                 ','
