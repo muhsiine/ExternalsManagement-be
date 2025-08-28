@@ -1,5 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- countries
 INSERT INTO country (id, name, english_name)
 VALUES (uuid_generate_v4(), 'Maroc', 'Morocco')
@@ -171,6 +170,7 @@ WITH language_data AS (
     FROM (VALUES
               ('العربية', 'Arabic', 'اللغة العربية الفصحى', 'Arabic', 'Arabic'),
               ('Français', 'French', 'Langue Française', 'French', 'French'),
+              ('English', 'English', 'English Language', 'English', 'English'),
               ('Español', 'Spanish', 'Idioma Español', 'Spanish', 'Spanish')
          ) AS langs (description, english_description, full_description, language, language_in_english)
 ),
@@ -213,7 +213,8 @@ SELECT
     ])[FLOOR(RANDOM() * 8) + 1],
     CAST(
         json_build_object(
-            'description', 'We are seeking a highly skilled developer...',
+            'description', 'We are seeking an experienced, highly motivated, and technically proficient Senior Java Developer to join our growing technology team. The ideal candidate will have a deep understanding of Java development and a passion for building scalable, high-performance, and reliable software applications. You will play a critical role in designing, developing, and maintaining enterprise-level solutions that power our business operations and drive innovation.
+                            In this role, you will be responsible for collaborating with cross-functional teams to analyze requirements, create technical specifications, and implement end-to-end solutions. You will ensure code quality, maintainability, and adherence to best practices while mentoring junior developers and contributing to architectural decisions. Your work will directly impact the performance, scalability, and reliability of our software products.',
             -- 🔧 Reduced pool, aligned with candidates
             'mainTech', (ARRAY['Java','Python','React','Angular'])[FLOOR(RANDOM()*4)+1],
             'skills', (ARRAY[
@@ -235,6 +236,45 @@ SELECT
     )
 FROM generate_series(1, 10);
 
+-- Records
+INSERT INTO recording (id, recorded_at, file_url, transcript)
+SELECT
+    uuid_generate_v4(),
+    CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
+        'https://storage.example.com/recordings/' || uuid_generate_v4()::TEXT || '.mp3',
+        '[' || string_agg(
+                json_build_object(
+                        'Question', questions[FLOOR(RANDOM() * array_length(questions,1) + 1)::INT],
+                        'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
+                        'Answer', answers[FLOOR(RANDOM() * array_length(answers,1) + 1)::INT],
+                        'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
+                )::TEXT,
+                ','
+               ) || ']'
+FROM generate_series(1,20) AS gs,
+     LATERAL (
+              SELECT ARRAY[
+                         'What is your name?',
+                     'Where are you from?',
+                     'What do you do?',
+                     'How was your day?',
+                     'Describe your experience.',
+                     'Tell me about your hobbies.',
+                     'What is your favorite book?',
+                     'What are your goals?'
+    ] AS questions,
+    ARRAY[
+    'My name is John.',
+    'I am from Morocco.',
+    'I work as an engineer.',
+    'It was great!',
+    'I had an amazing experience.',
+    'I enjoy reading.',
+    'I love science fiction.',
+    'My goal is to become a developer.'
+    ] AS answers
+    ) AS q_and_a;
+
 -- INTERVIEWS
 WITH offer_ids AS (
     SELECT id FROM offers ORDER BY RANDOM() LIMIT 10
@@ -246,6 +286,9 @@ SELECT id FROM candidates ORDER BY RANDOM() LIMIT 20
 SELECT
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL AS starttime,
     (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute' AS duration
+    ),
+    recording_ids AS (
+SELECT id FROM recording ORDER BY RANDOM() LIMIT 20
     )
 INSERT INTO interviews (
     id,
@@ -259,7 +302,8 @@ INSERT INTO interviews (
     scheduled_at,
     comment,
     number_of_questions,
-    estimated_duration
+    estimated_duration,
+    recording_id
 )
 SELECT
     uuid_generate_v4(),
@@ -269,14 +313,16 @@ SELECT
     t.starttime + t.duration AS endtime,
     'Interview for the position',
     'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
-        NULL,
+    NULL,
     CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
-        'Auto-generated comment for testing',
+    'Auto-generated comment for testing',
     15,
-    60
+    60,
+    r.id
 FROM offer_ids o
          CROSS JOIN candidate_ids c
          CROSS JOIN interview_times t
+         CROSS JOIN recording_ids r
     LIMIT 20;
 
 -- EVALUATION_TYPES
