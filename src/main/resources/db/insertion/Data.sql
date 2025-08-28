@@ -279,7 +279,16 @@ SELECT
     uuid_generate_v4(),
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
         'https://storage.example.com/recordings/' || uuid_generate_v4()::TEXT || '.mp3',
-        'Transcript for recording ' || uuid_generate_v4()::TEXT
+        '[' ||
+        string_agg(
+                json_build_object(
+                        'Question', 'Sample question ' || gs,
+                        'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
+                        'Answer', 'Sample answer ' || gs,
+                        'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
+                )::TEXT,
+                ','
+        ) || ']'
 FROM generate_series(1, 20);
 
 -- INTERVIEWS
