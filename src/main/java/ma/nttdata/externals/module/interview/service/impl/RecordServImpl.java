@@ -2,6 +2,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.interview.dto.CreateRecordRequestDTO;
+import ma.nttdata.externals.module.interview.dto.RecordDTO;
 import ma.nttdata.externals.module.interview.entity.Record;
 import ma.nttdata.externals.module.interview.mapper.RecordMapper;
 import ma.nttdata.externals.module.interview.repository.RecordRepository;
@@ -17,6 +18,13 @@ public class RecordServImpl implements RecordServ {
 
     @Override
     public Record createRecord(CreateRecordRequestDTO request) {
-        return null;
+        Record record = recordMapper.fromCreateRecordRequestDtoToEntity(request);
+        return recordRepository.save(record);
+    }
+
+    @Override
+    public RecordDTO createRecordAndReturnDTO(CreateRecordRequestDTO request) {
+        Record record = recordMapper.fromCreateRecordRequestDtoToEntity(request);
+        return recordMapper.toDto(recordRepository.save(record));
     }
 }
