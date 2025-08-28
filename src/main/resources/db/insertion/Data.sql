@@ -279,17 +279,33 @@ SELECT
     uuid_generate_v4(),
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
         'https://storage.example.com/recordings/' || uuid_generate_v4()::TEXT || '.mp3',
-        '[' ||
-        string_agg(
-                json_build_object(
-                        'Question', 'Sample question ' || generate_series,
-                        'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
-                        'Answer', 'Sample answer ' || generate_series,
-                        'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
-                )::TEXT,
-                ','
-        ) || ']'
-FROM generate_series(1, 20);
+        json_array::TEXT
+FROM generate_series(1, 20) AS r
+         CROSS JOIN LATERAL (
+    SELECT '[' || string_agg(
+            json_build_object(
+                    'Question', sample_questions[FLOOR(RANDOM() * array_length(sample_questions,1) + 1)::INT],
+                    'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
+                    'Answer', sample_answers[FLOOR(RANDOM() * array_length(sample_answers,1) + 1)::INT],
+                    'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
+            )::TEXT, ','
+                  ) || ']' AS json_array
+    FROM generate_series(1, 5) AS gs,
+         LATERAL (SELECT ARRAY[
+                             'What is your name?',
+                         'Where are you from?',
+                         'What do you do?',
+                         'How was your day?',
+                         'Describe your experience.'
+    ]) AS sample_questions,
+    LATERAL (SELECT ARRAY[
+    'My name is John.',
+    'I am from Morocco.',
+    'I work as an engineer.',
+    'It was great!',
+    'I had an amazing experience.'
+    ]) AS sample_answers
+    ) sub;
 
 -- INTERVIEWS
 WITH offer_ids AS (
