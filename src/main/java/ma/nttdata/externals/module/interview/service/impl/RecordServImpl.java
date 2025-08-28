@@ -73,11 +73,18 @@ public class RecordServImpl implements RecordServ {
 
     @Override
     public void deleteRecordById(UUID id) {
+        if (!recordRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Record", id);
+        }
         recordRepository.deleteById(id);
     }
 
     @Override
     public void deleteRecord(RecordDTO record){
+        UUID id = record.id();
+        if (!recordRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Record", id);
+        }
         recordRepository.delete(recordMapper.toEntity(record));
     }
 }
