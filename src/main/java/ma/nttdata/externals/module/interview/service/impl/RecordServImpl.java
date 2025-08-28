@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.CreateRecordRequestDTO;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RecordServImpl implements RecordServ {
 
     private final RecordRepository recordRepository;
@@ -55,5 +57,27 @@ public class RecordServImpl implements RecordServ {
     public List<RecordDTO> findAllRecordsByOfferId(UUID offerId) {
         List<Record> records = recordRepository.findAllRecordsByOfferId(offerId);
         return recordMapper.toListDto(records);
+    }
+
+    @Override
+    public RecordDTO updateRecord(RecordDTO recordDTO) {
+        Record record = recordRepository.findById(recordDTO.id())
+                .orElseThrow(() -> new ResourceNotFoundException("Record",recordDTO.id()));
+
+        if (recordDTO.transcript() != null) record.setTranscript(recordDTO.transcript());
+        if (recordDTO.fileUrl() != null) record.setFileUrl(recordDTO.fileUrl());
+        if (recordDTO.recordedAt() != null) record.setRecordedAt(recordDTO.recordedAt());
+
+        return recordMapper.toDto(recordRepository.save(record));
+    }
+
+    @Override
+    public void deleteRecordById(UUID id) {
+        recordRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteRecord(RecordDTO record){
+        recordRepository.delete(recordMapper.toEntity(record));
     }
 }

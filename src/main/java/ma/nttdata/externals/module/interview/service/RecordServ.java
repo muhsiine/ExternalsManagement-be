@@ -19,4 +19,10 @@ public interface RecordServ {
     List<RecordDTO> findAllRecords();
 
     List<RecordDTO> findAllRecordsByOfferId(UUID offerId);
+
+    RecordDTO updateRecord(RecordDTO recordDTO);
+
+    void deleteRecordById(UUID id);
+
+    void deleteRecord(RecordDTO recordDTO);
 }
