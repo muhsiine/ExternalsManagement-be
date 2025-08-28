@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS offers (
 );
 
 -- Records table
-CREATE TABLE IF NOT EXISTS records(
+CREATE TABLE IF NOT EXISTS recording(
     id UUID PRIMARY KEY,
     recorded_at TIMESTAMP,
     file_url VARCHAR(255),
@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS interviews (
         REFERENCES offers(id)
         ON DELETE CASCADE,
 
-    CONSTRAINT fk_record
-       FOREIGN KEY (record_id)
-       REFERENCES records(id)
+    CONSTRAINT fk_recording
+       FOREIGN KEY (recording_id)
+       REFERENCES recording(id)
        ON DELETE CASCADE
 );
 

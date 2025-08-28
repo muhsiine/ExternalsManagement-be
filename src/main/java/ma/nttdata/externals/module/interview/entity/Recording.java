@@ -8,10 +8,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "records")
+@Table(name = "recording")
 @Getter
 @Setter
-public class Record {
+public class Recording {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

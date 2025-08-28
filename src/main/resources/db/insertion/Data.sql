@@ -237,7 +237,7 @@ SELECT
 FROM generate_series(1, 10);
 
 -- Records
-INSERT INTO records (id, recorded_at, file_url, transcript)
+INSERT INTO recording (id, recorded_at, file_url, transcript)
 SELECT
     uuid_generate_v4(),
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
@@ -287,8 +287,8 @@ SELECT
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL AS starttime,
     (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute' AS duration
     ),
-    record_ids AS (
-SELECT id FROM records ORDER BY RANDOM() LIMIT 20
+    recording_ids AS (
+SELECT id FROM recording ORDER BY RANDOM() LIMIT 20
     )
 INSERT INTO interviews (
     id,
@@ -303,7 +303,7 @@ INSERT INTO interviews (
     comment,
     number_of_questions,
     estimated_duration,
-    record_id
+    recording_id
 )
 SELECT
     uuid_generate_v4(),
@@ -322,7 +322,7 @@ SELECT
 FROM offer_ids o
          CROSS JOIN candidate_ids c
          CROSS JOIN interview_times t
-         CROSS JOIN record_ids r
+         CROSS JOIN recording_ids r
     LIMIT 20;
 
 -- EVALUATION_TYPES

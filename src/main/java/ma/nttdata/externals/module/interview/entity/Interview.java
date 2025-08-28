@@ -63,6 +63,6 @@ public class Interview {
     private List<Question> questions;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
-    @JoinColumn(name = "record_id", nullable = true)
-    private Record record;
+    @JoinColumn(name = "recording_id", nullable = true)
+    private Recording recording;
 }
