@@ -67,6 +67,11 @@ app:
     style: 0.0
     useSpeakerBoost: true
     speed: 1.0
+  recordingUploading:
+    secrets:
+      tenantId: test
+      clientId: test
+      clientSecret: test
 
 interview:
   token:

@@ -81,6 +81,12 @@ app:
     useSpeakerBoost: true
     speed: 1.0
 
+  recordingUploading:
+    secrets:
+      tenantId: ${UPLOADING_TENANT_ID}
+      clientId: ${UPLOADING_CLIENT_ID}
+      clientSecret: ${UPLOADING_CLIENT_SECRET}
+
 interview:
   token:
     expirationMillis: 86400000
