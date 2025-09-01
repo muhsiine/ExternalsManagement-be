@@ -190,8 +190,22 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
                 return Integer.compare(seqA, seqB);
             });
 
-            return null;
+            List<byte[]> chunkData = new java.util.ArrayList<>();
+            for (DriveItem item : children) {
+                byte[] data = getGraphClient()
+                        .sites(siteName)
+                        .drives()
+                        .byId(sharePointConfig.getDocumentLibrary())
+                        .items(item.id)
+                        .content()
+                        .buildRequest()
+                        .get().readAllBytes();
+                chunkData.add(data);
+            }
 
+            byte[] mergedBytes = mergeBytes(chunkData);
+
+            return uploadLargeFile(mergedFileName,mergedBytes);
         } catch (Exception e) {
             throw new RuntimeException("Failed to merge chunks: " + e.getMessage(), e);
         }
@@ -208,7 +222,4 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
         }
         return merged;
     }
-
-
-
 }
