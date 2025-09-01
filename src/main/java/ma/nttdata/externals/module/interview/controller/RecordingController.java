@@ -132,11 +132,19 @@ public class RecordingController {
         }
     }
 
+    @Operation(summary = "mergeRecording and save to the database")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Recording saved"),
+            @ApiResponse(responseCode = "404", description = "Interview not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/merge")
     public ResponseEntity<?> mergeRecordingsAndCreateRecording(@Valid @RequestBody MergeRecordingsRequestDTO req){
         try {
             String fullRecordingUrl = recordingServ.mergeRecordingsAndCreateRecording(req);
             return ResponseEntity.status(HttpStatus.CREATED).body("Merged chunks into full recording and saved the recording to the database"+fullRecordingUrl);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
             return ResponseEntity.status(500).body( e.getMessage());
         }
