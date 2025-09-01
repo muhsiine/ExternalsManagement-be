@@ -4,13 +4,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
+import ma.nttdata.externals.module.interview.dto.MergeRecordingsRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
+import ma.nttdata.externals.module.interview.dto.RecordingUploadRequestDTO;
 import ma.nttdata.externals.module.interview.entity.Recording;
 import ma.nttdata.externals.module.interview.mapper.RecordingMapper;
 import ma.nttdata.externals.module.interview.repository.RecordingRepository;
+import ma.nttdata.externals.module.interview.service.InterviewServ;
 import ma.nttdata.externals.module.interview.service.RecordingServ;
+import ma.nttdata.externals.module.interview.service.RecordingUploadServ;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +27,8 @@ public class RecordingServImpl implements RecordingServ {
 
     private final RecordingRepository recordingRepository;
     private final RecordingMapper recordingMapper;
+    private final RecordingUploadServ recordingUploadServ;
+    private final InterviewServ interviewServ;
 
     @Override
     public Recording createRecording(CreateRecordingRequestDTO request) {
@@ -86,5 +94,27 @@ public class RecordingServImpl implements RecordingServ {
             throw new ResourceNotFoundException("Record", id);
         }
         recordingRepository.delete(recordingMapper.toEntity(record));
+    }
+
+    @Override
+    public String uploadChunk(RecordingUploadRequestDTO req){
+        try {
+            return recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public String mergeRecordingsAndCreateRecording(MergeRecordingsRequestDTO req) {
+        String fullRecordingUrl = this.recordingUploadServ.mergeChunks(req.interviewId().toString());
+        Recording recording = new Recording();
+        recording.setTranscript(req.transcript());
+        recording.setFileUrl(fullRecordingUrl);
+        recording.setRecordedAt(LocalDateTime.now());
+
+        interviewServ.setRecordingForInterview(req.interviewId(), recording);
+
+        return fullRecordingUrl;
     }
 }

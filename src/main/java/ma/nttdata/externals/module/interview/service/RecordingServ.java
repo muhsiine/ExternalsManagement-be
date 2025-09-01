@@ -1,7 +1,9 @@
 package ma.nttdata.externals.module.interview.service;
 
 import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
+import ma.nttdata.externals.module.interview.dto.MergeRecordingsRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
+import ma.nttdata.externals.module.interview.dto.RecordingUploadRequestDTO;
 import ma.nttdata.externals.module.interview.entity.Recording;
 
 import java.util.List;
@@ -25,4 +27,8 @@ public interface RecordingServ {
     void deleteRecordingById(UUID id);
 
     void deleteRecording(RecordingDTO recordDTO);
+
+    String uploadChunk(RecordingUploadRequestDTO req);
+
+    String mergeRecordingsAndCreateRecording(MergeRecordingsRequestDTO req);
 }

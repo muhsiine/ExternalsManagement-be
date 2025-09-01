@@ -51,14 +51,13 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
             createFolder(folderPath);
 
             if(audioData.length <4*1024*1024) {
-                uploadSmallFile(folderPath+"/"+fileName,audioData);
+                return uploadSmallFile(folderPath+"/"+fileName,audioData);
             }else{
-                uploadLargeFile(folderPath+"/"+fileName,audioData);
+                return uploadLargeFile(folderPath+"/"+fileName,audioData);
             }
         }catch (Exception e){
             throw new RuntimeException("Failed to upload chunk: " + e.getMessage(), e);
         }
-        return "";
     }
 
     @Override
@@ -116,7 +115,7 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
                 .buildRequest()
                 .put(data);
 
-        return uploadedItem.id;
+        return uploadedItem.webUrl;
     }
 
     @Override
@@ -125,7 +124,6 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
         String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
 
         try {
-            // Create upload session
             DriveItemUploadableProperties uploadProps = new DriveItemUploadableProperties();
             uploadProps.name = fileName;
 
@@ -155,8 +153,8 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
 
             LargeFileUploadResult<DriveItem> result = uploadTask.upload();
 
-            if (result.responseBody != null && result.responseBody.id!=null) {
-                return result.responseBody.id;
+            if (result.responseBody != null && result.responseBody.id!=null && result.responseBody.webUrl!=null) {
+                return result.responseBody.webUrl;
             } else {
                 throw new RuntimeException("Upload failed - no response body returned");
             }
@@ -205,7 +203,7 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
 
             byte[] mergedBytes = mergeBytes(chunkData);
 
-            return uploadLargeFile(mergedFileName,mergedBytes);
+            return uploadLargeFile(folderPath + "/" + mergedFileName,mergedBytes);
         } catch (Exception e) {
             throw new RuntimeException("Failed to merge chunks: " + e.getMessage(), e);
         }

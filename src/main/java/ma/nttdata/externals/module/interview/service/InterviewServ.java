@@ -4,6 +4,7 @@ package ma.nttdata.externals.module.interview.service;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
 import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Evaluation;
+import ma.nttdata.externals.module.interview.entity.Recording;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 
@@ -72,4 +73,6 @@ public interface InterviewServ {
                                                  GenerateInterviewQuestionsRequest generateInterviewQuestionsRequest);
 
     ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException;
+
+    void setRecordingForInterview(UUID interviewId, Recording recording);
 }

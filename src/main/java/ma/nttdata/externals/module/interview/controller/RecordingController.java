@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
+import ma.nttdata.externals.module.interview.dto.MergeRecordingsRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingUploadRequestDTO;
 import ma.nttdata.externals.module.interview.service.RecordingServ;
@@ -26,7 +27,6 @@ import java.util.UUID;
 public class RecordingController {
 
     private final RecordingServ recordingServ;
-    private final RecordingUploadServ recordingUploadServ;
 
     @Operation(summary = "create a record")
     @ApiResponses({
@@ -117,11 +117,26 @@ public class RecordingController {
         }
     }
 
+    @Operation(summary = "upload a chunk")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "chunk uploaded"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     @PostMapping("/upload")
     public ResponseEntity<?> uploadRecording(@Valid @RequestBody RecordingUploadRequestDTO req){
         try {
-            recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes());
+            recordingServ.uploadChunk(req);
             return ResponseEntity.status(HttpStatus.CREATED).body("chunk uploaded");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body( e.getMessage());
+        }
+    }
+
+    @PostMapping("/merge")
+    public ResponseEntity<?> mergeRecordingsAndCreateRecording(@Valid @RequestBody MergeRecordingsRequestDTO req){
+        try {
+            String fullRecordingUrl = recordingServ.mergeRecordingsAndCreateRecording(req);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Merged chunks into full recording and saved the recording to the database"+fullRecordingUrl);
         } catch (Exception e) {
             return ResponseEntity.status(500).body( e.getMessage());
         }
