@@ -6,5 +6,4 @@ public record CreateRecordingRequestDTO(
         LocalDateTime recordedAt,
         String fileUrl,
         String transcript
-) {
-}
+) { }

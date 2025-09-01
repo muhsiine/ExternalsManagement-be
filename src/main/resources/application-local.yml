@@ -87,6 +87,7 @@ app:
     clientSecret: ${SHAREPOINT_CLIENT_SECRET}
     siteUrl: ${SHAREPOINT_SITE_URL}
     documentLibrary: ${SHAREPOINT_DOCUMENT_LIBRARY}
+    recordingsFolderName: InterviewsRecording
 
 interview:
   token:

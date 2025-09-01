@@ -8,12 +8,16 @@ import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
+import ma.nttdata.externals.module.interview.dto.RecordingUploadRequestDTO;
 import ma.nttdata.externals.module.interview.service.RecordingServ;
+import ma.nttdata.externals.module.interview.service.RecordingUploadServ;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,6 +26,7 @@ import java.util.UUID;
 public class RecordingController {
 
     private final RecordingServ recordingServ;
+    private final RecordingUploadServ recordingUploadServ;
 
     @Operation(summary = "create a record")
     @ApiResponses({
@@ -29,7 +34,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<RecordingDTO> createRecord(@Valid @RequestBody CreateRecordingRequestDTO request){
+    public ResponseEntity<RecordingDTO> createRecording(@Valid @RequestBody CreateRecordingRequestDTO request){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(recordingServ.createRecordingAndReturnDTO(request));
     }
@@ -41,7 +46,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping
-    public ResponseEntity<RecordingDTO> updateRecord(@Valid @RequestBody RecordingDTO request){
+    public ResponseEntity<RecordingDTO> updateRecording(@Valid @RequestBody RecordingDTO request){
         try {
             RecordingDTO updatedRecord = recordingServ.updateRecording(request);
             return ResponseEntity.ok(updatedRecord);
@@ -56,7 +61,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "404", description = "Record not found"),
     })
     @GetMapping("/{id}")
-    public ResponseEntity<RecordingDTO> findRecordById(@PathVariable UUID id){
+    public ResponseEntity<RecordingDTO> findRecordingById(@PathVariable UUID id){
         try {
             RecordingDTO record = recordingServ.findRecordingById(id);
             return ResponseEntity.ok(record);
@@ -70,7 +75,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "200", description = "Record found")
     })
     @GetMapping
-    public ResponseEntity<List<RecordingDTO>> findAllRecords(){
+    public ResponseEntity<List<RecordingDTO>> findAllRecordings(){
         List<RecordingDTO> records = recordingServ.findAllRecordings();
         return ResponseEntity.ok(records);
     }
@@ -81,7 +86,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "404", description = "Record not found")
     })
     @GetMapping("/by-interview/{interviewId}")
-    public ResponseEntity<RecordingDTO> findRecordByInterviewId(@PathVariable UUID interviewId) {
+    public ResponseEntity<RecordingDTO> findRecordingByInterviewId(@PathVariable UUID interviewId) {
         RecordingDTO record = recordingServ.findRecordingByInterviewId(interviewId);
         return record != null
                 ? ResponseEntity.ok(record)
@@ -93,7 +98,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "200", description = "Records found")
     })
     @GetMapping("/by-offer/{offerId}")
-    public ResponseEntity<List<RecordingDTO>> findAllRecordsByOfferId(@PathVariable UUID offerId) {
+    public ResponseEntity<List<RecordingDTO>> findAllRecordingsByOfferId(@PathVariable UUID offerId) {
         return ResponseEntity.ok(recordingServ.findAllRecordingsByOfferId(offerId));
     }
 
@@ -103,12 +108,22 @@ public class RecordingController {
             @ApiResponse(responseCode = "404", description = "Record not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRecordById(@PathVariable UUID id){
+    public ResponseEntity<?> deleteRecordingById(@PathVariable UUID id){
         try {
             recordingServ.deleteRecordingById(id);
             return ResponseEntity.noContent().build();
         }catch(ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadRecording(@Valid @RequestBody RecordingUploadRequestDTO req){
+        try {
+            recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes());
+            return ResponseEntity.status(HttpStatus.CREATED).body("chunk uploaded");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body( e.getMessage());
         }
     }
 }

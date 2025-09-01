@@ -14,4 +14,5 @@ public class SharePointConfig {
     private String clientSecret;
     private String siteUrl;
     private String documentLibrary;
+    private String recordingsFolderName;
 }
