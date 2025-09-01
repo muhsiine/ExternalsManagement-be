@@ -97,12 +97,10 @@ public class RecordingServImpl implements RecordingServ {
     }
 
     @Override
-    public String uploadChunk(RecordingUploadRequestDTO req){
-        try {
-            return recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public String uploadChunk(RecordingUploadRequestDTO req,byte[] chunk){
+
+        return recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), chunk);
+
     }
 
     @Override

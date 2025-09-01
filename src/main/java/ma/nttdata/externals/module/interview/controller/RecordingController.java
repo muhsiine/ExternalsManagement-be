@@ -123,9 +123,9 @@ public class RecordingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadRecording(@Valid @RequestBody RecordingUploadRequestDTO req){
+    public ResponseEntity<?> uploadRecording(@Valid @RequestBody RecordingUploadRequestDTO req, @RequestParam("chunk") MultipartFile chunk){
         try {
-            recordingServ.uploadChunk(req);
+            recordingServ.uploadChunk(req,chunk.getBytes());
             return ResponseEntity.status(HttpStatus.CREATED).body("chunk uploaded");
         } catch (Exception e) {
             return ResponseEntity.status(500).body( e.getMessage());

@@ -28,7 +28,7 @@ public interface RecordingServ {
 
     void deleteRecording(RecordingDTO recordDTO);
 
-    String uploadChunk(RecordingUploadRequestDTO req);
+    String uploadChunk(RecordingUploadRequestDTO req, byte[] chunk);
 
     String mergeRecordingsAndCreateRecording(MergeRecordingsRequestDTO req);
 }
