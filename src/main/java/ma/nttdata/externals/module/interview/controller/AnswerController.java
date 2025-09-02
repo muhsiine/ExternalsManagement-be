@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.module.interview.dto.AnswerDTO;
+import ma.nttdata.externals.module.interview.dto.CreateAnswerForQuestionDTO;
 import ma.nttdata.externals.module.interview.service.AnswerServ;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,17 @@ public class AnswerController {
     @PostMapping
     public ResponseEntity<AnswerDTO> createAnswer(@RequestBody AnswerDTO answerDTO) {
         return ResponseEntity.ok(answerServ.createAnswer(answerDTO));
+    }
+
+    @Operation(summary = "Create answer for a specific question")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Answer created and linked to question successfully"),
+            @ApiResponse(responseCode = "404", description = "Question not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or question already has an answer")
+    })
+    @PostMapping("/for-question")
+    public ResponseEntity<AnswerDTO> createAnswerForQuestion(@RequestBody CreateAnswerForQuestionDTO createAnswerDTO) {
+        return ResponseEntity.ok(answerServ.createAnswerForQuestion(createAnswerDTO));
     }
 
     @Operation(summary = "Update an existing answer")

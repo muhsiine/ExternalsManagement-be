@@ -42,18 +42,18 @@ spring:
         - classpath:db/migration/V2__Offers__and__interviews__tables.sql
       data-locations: classpath:db/insertion/Data.sql
       continue-on-error: false
+
   mail:
-    host: ${L_MAIL_HOST}
-    port: ${L_MAIL_PORT}
-    username: ${L_MAIL_USERNAME}
-    password: ${L_MAIL_PASSWORD}
+    host: smtp.yourprovider.com   # e.g. smtp.gmail.com
+    port: 587
+    username: your_user
+    password: your_pass
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-
 
 logging:
   level:
@@ -70,11 +70,11 @@ app:
     server:
       url: http://localhost:8080
   mail:
-    from: ${L_APP_MAIL_FROM}
+    from: no-reply@your-domain.com
   tts:
-    apiKey: ${L_TTS_MODEL_API_KEY}
-    modelId: ${MODEL_ID}
-    voiceId: ${L_TTS_VOICE_ID}
+    apiKey: sk_85057635cdb9f1c0f62bc9eec572268ed6ba80ffc4702cda
+    modelId: eleven_multilingual_v2
+    voiceId: 21m00Tcm4TlvDq8ikWAM
     stability: 0.5
     similarityBoost: 0.5
     style: 0.0
