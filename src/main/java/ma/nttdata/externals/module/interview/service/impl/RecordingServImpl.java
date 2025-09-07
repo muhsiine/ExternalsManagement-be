@@ -3,10 +3,7 @@ package ma.nttdata.externals.module.interview.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
-import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
-import ma.nttdata.externals.module.interview.dto.MergeRecordingsRequestDTO;
-import ma.nttdata.externals.module.interview.dto.RecordingDTO;
-import ma.nttdata.externals.module.interview.dto.RecordingUploadRequestDTO;
+import ma.nttdata.externals.module.interview.dto.*;
 import ma.nttdata.externals.module.interview.entity.Recording;
 import ma.nttdata.externals.module.interview.mapper.RecordingMapper;
 import ma.nttdata.externals.module.interview.repository.RecordingRepository;
@@ -99,8 +96,9 @@ public class RecordingServImpl implements RecordingServ {
     @Override
     public String uploadChunk(RecordingUploadRequestDTO req){
 
+        RecordingFileNamePlaceholdersDTO  placeholders= interviewServ.getRecordingFileNamePlaceholdersByInterviewId(req.interviewId());
         try {
-            return recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes());
+            return recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes(),placeholders);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -109,7 +107,13 @@ public class RecordingServImpl implements RecordingServ {
 
     @Override
     public String mergeChunksAndCreateRecording(MergeRecordingsRequestDTO req) {
-        String fullRecordingUrl = this.recordingUploadServ.mergeChunks(req.interviewId().toString());
+        String fullRecordingUrl = null;
+        RecordingFileNamePlaceholdersDTO  placeholders= interviewServ.getRecordingFileNamePlaceholdersByInterviewId(req.interviewId());
+        try {
+            fullRecordingUrl = this.recordingUploadServ.mergeChunks(req.interviewId().toString(),req.chunk().getBytes(),placeholders);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Recording recording = new Recording();
         recording.setTranscript(req.transcript());
         recording.setFileUrl(fullRecordingUrl);

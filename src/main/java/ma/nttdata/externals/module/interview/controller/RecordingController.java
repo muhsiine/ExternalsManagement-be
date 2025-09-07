@@ -139,7 +139,7 @@ public class RecordingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/merge")
-    public ResponseEntity<?> mergeChunksAndCreateRecording(@Valid @RequestBody MergeRecordingsRequestDTO req){
+    public ResponseEntity<?> mergeChunksAndCreateRecording(@ModelAttribute MergeRecordingsRequestDTO req){
         try {
             String fullRecordingUrl = recordingServ.mergeChunksAndCreateRecording(req);
             return ResponseEntity.status(HttpStatus.CREATED).body("Merged chunks into full recording and saved the recording to the database"+fullRecordingUrl);

@@ -9,12 +9,14 @@ import com.microsoft.graph.tasks.LargeFileUploadResult;
 import com.microsoft.graph.tasks.LargeFileUploadTask;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.config.SharePointConfig;
+import ma.nttdata.externals.module.interview.dto.RecordingFileNamePlaceholdersDTO;
 import ma.nttdata.externals.module.interview.service.RecordingUploadServ;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,11 +48,11 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
     }
 
     @Override
-    public String uploadChunk(String interviewId, int chunkSequence, byte[] audioData) {
+    public String uploadChunk(String interviewId, int chunkSequence, byte[] audioData, RecordingFileNamePlaceholdersDTO placeholders) {
         try{
-            String fileName = String.format("%s_chunk_%d.mp4", interviewId, chunkSequence);
+            String fileName = String.format("%s_chunk_%d.webm", interviewId, chunkSequence);
             String monthFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
-            String folderPath = sharePointConfig.getRecordingsFolderName()+monthFolder+"/interview_"+interviewId;
+            String folderPath = sharePointConfig.getRecordingsFolderName()+monthFolder;
             createFolder(folderPath);
 
             if(audioData.length <4*1024*1024) {
@@ -105,7 +107,7 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
     }
 
     @Override
-    public String uploadSmallFile(String filePath, byte[] data) throws Exception {
+    public String uploadSmallFile(String filePath, byte[] data)   {
         String siteName = extractSiteName(sharePointConfig.getSiteUrl());
 
         DriveItem uploadedItem = getGraphClient()
@@ -168,10 +170,12 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
     }
 
     @Override
-    public String mergeChunks(String interviewId) {
+    public String mergeChunks(String interviewId, byte[] lastChunk, RecordingFileNamePlaceholdersDTO placeholders) {
         try {
-            String folderPath = sharePointConfig.getRecordingsFolderName() + "/interview_" + interviewId;
-            String mergedFileName = interviewId + "_merged.webm";
+            String monthFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            String folderPath = sharePointConfig.getRecordingsFolderName() + monthFolder;
+            String mergedFileName = placeholders.CandidateName() + "_" + placeholders.offerTitle() + "_"
+                    + placeholders.dayOfTheMonth() + "_" + interviewId + ".webm";
 
             String siteName = extractSiteName(sharePointConfig.getSiteUrl());
             var children = getGraphClient()
@@ -185,14 +189,17 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
                     .get()
                     .getCurrentPage();
 
-            children.sort((a, b) -> {
-                int seqA = Integer.parseInt(a.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
-                int seqB = Integer.parseInt(b.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
-                return Integer.compare(seqA, seqB);
-            });
+            List<DriveItem> chunks = children.stream()
+                    .filter(c -> c.name.startsWith(interviewId + "_chunk_"))
+                    .sorted((a, b) -> {
+                        int seqA = Integer.parseInt(a.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
+                        int seqB = Integer.parseInt(b.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
+                        return Integer.compare(seqA, seqB);
+                    })
+                    .toList();
 
             List<byte[]> chunkData = new java.util.ArrayList<>();
-            for (DriveItem item : children) {
+            for (DriveItem item : chunks) {
                 byte[] data = getGraphClient()
                         .sites(siteName)
                         .drives()
@@ -202,6 +209,10 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
                         .buildRequest()
                         .get().readAllBytes();
                 chunkData.add(data);
+            }
+
+            if (lastChunk != null && (chunkData.isEmpty() || !Arrays.equals(chunkData.getLast(), lastChunk))) {
+                chunkData.add(lastChunk);
             }
 
             byte[] mergedBytes = mergeBytes(chunkData);

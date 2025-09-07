@@ -1,10 +1,12 @@
 package ma.nttdata.externals.module.interview.service;
 
+import ma.nttdata.externals.module.interview.dto.RecordingFileNamePlaceholdersDTO;
+
 import java.util.List;
 
 public interface RecordingUploadServ {
 
-    String uploadChunk(String interviewId, int chunkSequence, byte[] audioData);
+    String uploadChunk(String interviewId, int chunkSequence, byte[] audioData, RecordingFileNamePlaceholdersDTO placeholders) ;
 
     void createFolder(String folderName);
 
@@ -14,7 +16,7 @@ public interface RecordingUploadServ {
 
     String uploadLargeFile(String filePath, byte[] data) throws Exception;
 
-    String mergeChunks(String interviewId);
+    String mergeChunks(String interviewId, byte[] lastChunk, RecordingFileNamePlaceholdersDTO placeholders) ;
 
     byte[] mergeBytes(List<byte[]> chunks);
 }

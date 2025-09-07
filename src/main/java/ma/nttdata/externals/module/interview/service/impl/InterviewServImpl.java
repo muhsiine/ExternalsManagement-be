@@ -33,7 +33,7 @@ import org.springframework.http.MediaType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -379,6 +379,15 @@ public class InterviewServImpl implements InterviewServ {
         interviewRepository.save(interview);
     }
 
+    @Override
+    public RecordingFileNamePlaceholdersDTO getRecordingFileNamePlaceholdersByInterviewId(UUID interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview",interviewId));
+        LocalDate today = LocalDate.now();
+        int dayOfMonth = today.getDayOfMonth();
+
+        return new RecordingFileNamePlaceholdersDTO(interview.getOffer().getTitle(),interview.getCandidate().getFullName(),String.valueOf(dayOfMonth));
+    }
 }
 
 

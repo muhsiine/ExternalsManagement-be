@@ -75,4 +75,6 @@ public interface InterviewServ {
     ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException;
 
     void setRecordingForInterview(UUID interviewId, Recording recording);
+
+    RecordingFileNamePlaceholdersDTO getRecordingFileNamePlaceholdersByInterviewId(UUID interviewId);
 }
