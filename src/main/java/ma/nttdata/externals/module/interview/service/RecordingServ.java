@@ -30,5 +30,5 @@ public interface RecordingServ {
 
     String uploadChunk(RecordingUploadRequestDTO req, byte[] chunk);
 
-    String mergeRecordingsAndCreateRecording(MergeRecordingsRequestDTO req);
+    String mergeChunksAndCreateRecording(MergeRecordingsRequestDTO req);
 }

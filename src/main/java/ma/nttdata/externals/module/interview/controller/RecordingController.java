@@ -139,9 +139,9 @@ public class RecordingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/merge")
-    public ResponseEntity<?> mergeRecordingsAndCreateRecording(@Valid @RequestBody MergeRecordingsRequestDTO req){
+    public ResponseEntity<?> mergeChunksAndCreateRecording(@Valid @RequestBody MergeRecordingsRequestDTO req){
         try {
-            String fullRecordingUrl = recordingServ.mergeRecordingsAndCreateRecording(req);
+            String fullRecordingUrl = recordingServ.mergeChunksAndCreateRecording(req);
             return ResponseEntity.status(HttpStatus.CREATED).body("Merged chunks into full recording and saved the recording to the database"+fullRecordingUrl);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

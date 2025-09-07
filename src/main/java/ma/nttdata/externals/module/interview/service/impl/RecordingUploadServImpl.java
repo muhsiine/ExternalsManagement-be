@@ -46,7 +46,7 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
     @Override
     public String uploadChunk(String interviewId, int chunkSequence, byte[] audioData) {
         try{
-            String fileName = String.format("%s_chunk_%d.webm", interviewId, chunkSequence);
+            String fileName = String.format("%s_chunk_%d.mp4", interviewId, chunkSequence);
             String folderPath = sharePointConfig.getRecordingsFolderName()+"/interview_"+interviewId;
             createFolder(folderPath);
 

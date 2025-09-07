@@ -104,7 +104,7 @@ public class RecordingServImpl implements RecordingServ {
     }
 
     @Override
-    public String mergeRecordingsAndCreateRecording(MergeRecordingsRequestDTO req) {
+    public String mergeChunksAndCreateRecording(MergeRecordingsRequestDTO req) {
         String fullRecordingUrl = this.recordingUploadServ.mergeChunks(req.interviewId().toString());
         Recording recording = new Recording();
         recording.setTranscript(req.transcript());
