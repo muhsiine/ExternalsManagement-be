@@ -183,8 +183,8 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
                     .getCurrentPage();
 
             children.sort((a, b) -> {
-                int seqA = Integer.parseInt(a.name.replaceAll(".*_chunk_(\\d+)\\.webm", "$1"));
-                int seqB = Integer.parseInt(b.name.replaceAll(".*_chunk_(\\d+)\\.webm", "$1"));
+                int seqA = Integer.parseInt(a.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
+                int seqB = Integer.parseInt(b.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
                 return Integer.compare(seqA, seqB);
             });
 
