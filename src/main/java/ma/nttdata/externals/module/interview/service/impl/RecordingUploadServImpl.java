@@ -13,6 +13,8 @@ import ma.nttdata.externals.module.interview.service.RecordingUploadServ;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
 
             TokenCredentialAuthProvider authProvider =
                     new TokenCredentialAuthProvider(Collections.
-                            singletonList("https://graph.microsoft.com/.default"),
+                            singletonList(sharePointConfig.getScope()),
                             credential);
             graphClient = GraphServiceClient.builder()
                     .authenticationProvider(authProvider)
@@ -47,7 +49,8 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
     public String uploadChunk(String interviewId, int chunkSequence, byte[] audioData) {
         try{
             String fileName = String.format("%s_chunk_%d.mp4", interviewId, chunkSequence);
-            String folderPath = sharePointConfig.getRecordingsFolderName()+"/interview_"+interviewId;
+            String monthFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+            String folderPath = sharePointConfig.getRecordingsFolderName()+monthFolder+"/interview_"+interviewId;
             createFolder(folderPath);
 
             if(audioData.length <4*1024*1024) {

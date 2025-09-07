@@ -87,7 +87,8 @@ app:
     clientSecret: ${SHAREPOINT_CLIENT_SECRET}
     siteUrl: ${SHAREPOINT_SITE_URL}
     documentLibrary: ${SHAREPOINT_DOCUMENT_LIBRARY}
-    recordingsFolderName: InterviewsRecording
+    recordingsFolderName: External Management Interviews
+    scope: https://graph.microsoft.com/.default
 
 interview:
   token:

@@ -15,4 +15,5 @@ public class SharePointConfig {
     private String siteUrl;
     private String documentLibrary;
     private String recordingsFolderName;
+    private String scope;
 }
