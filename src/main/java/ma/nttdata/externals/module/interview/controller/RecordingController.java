@@ -125,8 +125,8 @@ public class RecordingController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadRecording(@ModelAttribute RecordingUploadRequestDTO req){
         try {
-            String url = recordingServ.uploadChunk(req);
-            return ResponseEntity.status(HttpStatus.CREATED).body("chunk uploaded with url "+url);
+             recordingServ.uploadChunk(req);
+            return ResponseEntity.status(HttpStatus.CREATED).body("chunk uploaded");
         } catch (Exception e) {
             return ResponseEntity.status(500).body( e.getMessage());
         }
@@ -139,12 +139,12 @@ public class RecordingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/merge")
-    public ResponseEntity<?> mergeChunksAndCreateRecording(@ModelAttribute MergeRecordingsRequestDTO req){
+    public ResponseEntity<String> mergeChunksAndCreateRecording(@ModelAttribute MergeRecordingsRequestDTO req){
         try {
             String fullRecordingUrl = recordingServ.mergeChunksAndCreateRecording(req);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Merged chunks into full recording and saved the recording to the database"+fullRecordingUrl);
+            return ResponseEntity.status(HttpStatus.CREATED).body(fullRecordingUrl);
         } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Interview not found");
         } catch (Exception e) {
             return ResponseEntity.status(500).body( e.getMessage());
         }

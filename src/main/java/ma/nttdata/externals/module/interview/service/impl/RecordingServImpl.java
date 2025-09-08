@@ -94,11 +94,11 @@ public class RecordingServImpl implements RecordingServ {
     }
 
     @Override
-    public String uploadChunk(RecordingUploadRequestDTO req){
+    public void uploadChunk(RecordingUploadRequestDTO req){
 
         RecordingFileNamePlaceholdersDTO  placeholders= interviewServ.getRecordingFileNamePlaceholdersByInterviewId(req.interviewId());
         try {
-            return recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes(),placeholders);
+            recordingUploadServ.uploadChunk(req.interviewId().toString(), req.sequence(), req.chunk().getBytes(),placeholders);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

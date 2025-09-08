@@ -53,6 +53,10 @@ spring:
           auth: true
           starttls:
             enable: true
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
 
 
 logging:
@@ -89,6 +93,8 @@ app:
     documentLibrary: ${SHAREPOINT_DOCUMENT_LIBRARY}
     recordingsFolderName: External Management Interviews
     scope: https://graph.microsoft.com/.default
+  cache:
+    directory: /opt/interview-cache
 
 interview:
   token:

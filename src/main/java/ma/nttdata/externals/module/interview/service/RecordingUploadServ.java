@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface RecordingUploadServ {
 
-    String uploadChunk(String interviewId, int chunkSequence, byte[] audioData, RecordingFileNamePlaceholdersDTO placeholders) ;
+    void uploadChunk(String interviewId, int chunkSequence, byte[] audioData, RecordingFileNamePlaceholdersDTO placeholders) ;
 
     void createFolder(String folderName);
 

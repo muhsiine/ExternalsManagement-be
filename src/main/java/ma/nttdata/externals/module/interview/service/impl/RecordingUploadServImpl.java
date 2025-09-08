@@ -10,12 +10,14 @@ import com.microsoft.graph.tasks.LargeFileUploadTask;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.config.SharePointConfig;
 import ma.nttdata.externals.module.interview.dto.RecordingFileNamePlaceholdersDTO;
+import ma.nttdata.externals.module.interview.service.ChunkCacheServ;
 import ma.nttdata.externals.module.interview.service.RecordingUploadServ;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +28,7 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
 
     private final SharePointConfig sharePointConfig;
     private GraphServiceClient graphClient;
+    private final ChunkCacheServ chunkCacheServ;
 
 
     private GraphServiceClient getGraphClient() {
@@ -48,18 +51,13 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
     }
 
     @Override
-    public String uploadChunk(String interviewId, int chunkSequence, byte[] audioData, RecordingFileNamePlaceholdersDTO placeholders) {
+    public void uploadChunk(String interviewId, int chunkSequence, byte[] audioData, RecordingFileNamePlaceholdersDTO placeholders) {
         try{
-            String fileName = String.format("%s_chunk_%d.webm", interviewId, chunkSequence);
             String monthFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
             String folderPath = sharePointConfig.getRecordingsFolderName()+monthFolder;
-            createFolder(folderPath);
+            //createFolder(folderPath);
+            chunkCacheServ.cacheChunk(interviewId, chunkSequence, audioData);
 
-            if(audioData.length <4*1024*1024) {
-                return uploadSmallFile(folderPath+"/"+fileName,audioData);
-            }else{
-                return uploadLargeFile(folderPath+"/"+fileName,audioData);
-            }
         }catch (Exception e){
             throw new RuntimeException("Failed to upload chunk: " + e.getMessage(), e);
         }
@@ -177,47 +175,16 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
             String mergedFileName = placeholders.CandidateName() + "_" + placeholders.offerTitle() + "_"
                     + placeholders.dayOfTheMonth() + "_" + interviewId + ".webm";
 
-            String siteName = extractSiteName(sharePointConfig.getSiteUrl());
-            var children = getGraphClient()
-                    .sites(siteName)
-                    .drives()
-                    .byId(sharePointConfig.getDocumentLibrary())
-                    .root()
-                    .itemWithPath(folderPath)
-                    .children()
-                    .buildRequest()
-                    .get()
-                    .getCurrentPage();
-
-            List<DriveItem> chunks = children.stream()
-                    .filter(c -> c.name.startsWith(interviewId + "_chunk_"))
-                    .sorted((a, b) -> {
-                        int seqA = Integer.parseInt(a.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
-                        int seqB = Integer.parseInt(b.name.replaceAll(".*_chunk_(\\d+)\\.mp4", "$1"));
-                        return Integer.compare(seqA, seqB);
-                    })
-                    .toList();
-
-            List<byte[]> chunkData = new java.util.ArrayList<>();
-            for (DriveItem item : chunks) {
-                byte[] data = getGraphClient()
-                        .sites(siteName)
-                        .drives()
-                        .byId(sharePointConfig.getDocumentLibrary())
-                        .items(item.id)
-                        .content()
-                        .buildRequest()
-                        .get().readAllBytes();
-                chunkData.add(data);
-            }
+            List<byte[]> chunkData = new ArrayList<>(chunkCacheServ.getAllCachedChunks(interviewId));
 
             if (lastChunk != null && (chunkData.isEmpty() || !Arrays.equals(chunkData.getLast(), lastChunk))) {
                 chunkData.add(lastChunk);
             }
 
             byte[] mergedBytes = mergeBytes(chunkData);
-
-            return uploadLargeFile(folderPath + "/" + mergedFileName,mergedBytes);
+            String uploadedUrl = uploadLargeFile(folderPath + "/" + mergedFileName, mergedBytes);
+            chunkCacheServ.clearCachedChunks(interviewId);
+            return uploadedUrl;
         } catch (Exception e) {
             throw new RuntimeException("Failed to merge chunks: " + e.getMessage(), e);
         }
