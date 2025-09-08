@@ -1,5 +1,4 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- countries
 INSERT INTO country (id, name, english_name)
 VALUES (uuid_generate_v4(), 'Maroc', 'Morocco')
@@ -99,9 +98,11 @@ SELECT
     (ARRAY['OCP Group','Attijariwafa Bank','Maroc Telecom','ONCF','Royal Air Maroc',
      'Saham Assurance','Yazaki Morocco','Managem','SNTL','Cosumar',
      'BMCE Bank','LafargeHolcim','Intelcia','Dell Technologies Morocco',
-     'IBM Morocco','Capgemini Morocco','HPS Morocco','Inwi','Orange Morocco'])[FLOOR(RANDOM()*19)+1],
+     'IBM Morocco','Capgemini Morocco','HPS Morocco','Inwi','Orange Morocco'
+         ])[FLOOR(RANDOM()*19)+1],
     (ARRAY['Software Engineer','Senior Developer','DevOps Specialist','Tech Lead',
-           'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'])[FLOOR(RANDOM()*8)+1],
+           'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'
+    ])[FLOOR(RANDOM()*8)+1],
     CURRENT_DATE - (years_of_experience + FLOOR(RANDOM()*3) || ' years')::INTERVAL,
     CASE WHEN RANDOM() > 0.3 THEN CURRENT_DATE - (FLOOR(RANDOM()*12) || ' months')::INTERVAL END,
     (ARRAY[
@@ -155,7 +156,7 @@ SELECT
     ])[FLOOR(RANDOM()*6)+1]
 FROM candidates;
 
--- languages (force English + random others)
+-- 🔧 languages (force English + random others)
 -- English (ADVANCED, native) for every candidate
 INSERT INTO languages (id, candidate_id, description, english_description, full_description, language, language_in_english, level, is_native)
 SELECT
@@ -214,6 +215,7 @@ SELECT
         json_build_object(
             'description', 'We are seeking an experienced, highly motivated, and technically proficient Senior Java Developer to join our growing technology team. The ideal candidate will have a deep understanding of Java development and a passion for building scalable, high-performance, and reliable software applications. You will play a critical role in designing, developing, and maintaining enterprise-level solutions that power our business operations and drive innovation.
                             In this role, you will be responsible for collaborating with cross-functional teams to analyze requirements, create technical specifications, and implement end-to-end solutions. You will ensure code quality, maintainability, and adherence to best practices while mentoring junior developers and contributing to architectural decisions. Your work will directly impact the performance, scalability, and reliability of our software products.',
+            -- 🔧 Reduced pool, aligned with candidates
             'mainTech', (ARRAY['Java','Python','React','Angular'])[FLOOR(RANDOM()*4)+1],
             'skills', (ARRAY[
                 'Java - Spring Boot - Docker - Kubernetes - AWS',
@@ -221,6 +223,7 @@ SELECT
                 'Python - Django - PostgresSQL - Kubernetes - AWS',
                 'C# - .NET - SQL Server - Azure - Agile'
             ])[FLOOR(RANDOM() * 4) + 1],
+            -- 🔧 Always English + maybe French/Spanish
             'languages', json_build_array(
                 json_build_object('languageName', 'English', 'level', 'INTERMEDIATE'),
                 json_build_object('languageName', (ARRAY['French','Spanish'])[FLOOR(RANDOM()*2)+1], 'level', 'ADVANCED')
@@ -371,38 +374,42 @@ FROM interview_ids i
     CROSS JOIN evaluation_type_ids e
     LIMIT 40;
 
--- QUESTIONS - Create questions without answers (answer_id = NULL)
-WITH questions_pool AS (
-    SELECT ARRAY[
-               'Explain your previous project experience.',
-           'How do you handle tight deadlines?',
-           'Describe a difficult technical problem you solved.',
-           'What motivates you to work in tech?',
-           'How do you stay updated with new technologies?',
-           'Describe your experience working in a team.',
-           'How do you prioritize tasks during a project?',
-           'What is your experience with version control systems?',
-           'How do you approach debugging complex issues?',
-           'Describe your experience with databases.',
-           'What is your preferred development methodology?',
-           'How do you ensure code quality in your projects?',
-           'Describe a time when you had to learn a new technology quickly.',
-           'How do you handle code reviews and feedback?',
-           'What are your thoughts on automated testing?'
-    ] AS question_list
-    ),
-    interview_question_mapping AS (
+-- ANSWERS and QUESTIONS seeding together with FK links fixed
+WITH inserted_answers AS (
+INSERT INTO answers (id, description, duration_in_minutes)
 SELECT
-    i.id as interview_id,
-    generate_series(1, GREATEST(2, FLOOR(RANDOM() * 4) + 2)::integer) as question_num -- At least 2 questions, up to 5
-FROM interviews i
+    uuid_generate_v4(),
+    (ARRAY[
+         'I worked on a large-scale system with a distributed architecture.',
+     'I break down tasks and communicate constantly with stakeholders.',
+     'I debugged a memory leak issue that improved performance by 30%.',
+     'I am passionate about learning and applying new skills.',
+     'I follow tech blogs, attend webinars, and take courses.',
+     'I believe teamwork and clear communication are key.',
+     'I use task management tools and set clear priorities daily.'
+         ])[FLOOR(RANDOM() * 7) + 1],
+    (ARRAY[2, 3, 4, 5])[FLOOR(RANDOM() * 4) + 1]
+FROM generate_series(1, 50)
+    RETURNING id
+    ),
+    random_interviews AS (
+SELECT id FROM interviews ORDER BY RANDOM() LIMIT 50
     )
 INSERT INTO questions (id, description, duration_in_minutes, interview_id, answer_id)
 SELECT
     uuid_generate_v4(),
-    q.question_list[FLOOR(RANDOM() * array_length(q.question_list, 1)) + 1],
-    (ARRAY[5, 10, 15, 20])[FLOOR(RANDOM() * 4) + 1],
-    iqm.interview_id,
-    NULL  -- No answer assigned to any question
-FROM interview_question_mapping iqm
-    CROSS JOIN questions_pool q;
+    (ARRAY[
+         'Explain your previous project experience.',
+     'How do you handle tight deadlines?',
+     'Describe a difficult technical problem you solved.',
+     'What motivates you to work in tech?',
+     'How do you stay updated with new technologies?',
+     'Describe your experience working in a team.',
+     'How do you prioritize tasks during a project?'
+         ])[FLOOR(RANDOM() * 7) + 1],
+  (ARRAY[5, 10, 15, 20])[FLOOR(RANDOM() * 4) + 1],
+  ri.id,
+  ia.id
+FROM random_interviews ri
+    JOIN inserted_answers ia ON TRUE
+    LIMIT 50;
