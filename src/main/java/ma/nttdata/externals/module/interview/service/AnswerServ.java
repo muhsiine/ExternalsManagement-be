@@ -4,6 +4,8 @@ import ma.nttdata.externals.module.interview.dto.AnswerDTO;
 
 import java.util.List;
 import java.util.UUID;
+import ma.nttdata.externals.module.interview.dto.CreateAnswerForQuestionDTO;
+
 
 public interface AnswerServ {
 
@@ -16,4 +18,7 @@ public interface AnswerServ {
     AnswerDTO updateAnswer(UUID id, AnswerDTO answerDTO);
 
     void deleteAnswer(UUID id);
+
+    AnswerDTO createAnswerForQuestion(CreateAnswerForQuestionDTO createAnswerDTO);
+
 }
