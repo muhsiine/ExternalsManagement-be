@@ -13,11 +13,5 @@ public interface ChunkCacheServ {
 
     void clearCachedChunks(String interviewId);
 
-    boolean hasChunks(String interviewId);
-
-    int getChunkCount(String interviewId);
-
-    long getTotalSize(String interviewId);
-
 
 }

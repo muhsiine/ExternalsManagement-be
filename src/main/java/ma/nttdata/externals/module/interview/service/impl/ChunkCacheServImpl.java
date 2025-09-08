@@ -19,20 +19,18 @@ public class ChunkCacheServImpl implements ChunkCacheServ {
 
     @Value("${app.cache.directory:${java.io.tmpdir}/interview-chunks}")
     private String cacheDirectory;
-    private final Pattern chunkPattern = Pattern.compile("(.+)_chunk_(\\d+)\\.webm");
+    private final Pattern chunkPattern = Pattern.compile("(.+)_chunk_(\\d+)\\.bin");
 
     @Override
     public void cacheChunk(String interviewId, int chunkSequence, byte[] audioData) {
         validateInputs(interviewId, chunkSequence, audioData);
         createCacheDirectory();
 
-        String fileName = String.format("%s_chunk_%05d.webm", interviewId, chunkSequence);
+        String fileName = String.format("%s_chunk_%05d.bin", interviewId, chunkSequence);
         Path filePath = Paths.get(cacheDirectory, fileName);
 
         try {
-            Path tempFile = Files.createTempFile(Paths.get(cacheDirectory), "temp_", ".webm");
-            Files.write(tempFile, audioData, StandardOpenOption.WRITE);
-            Files.move(tempFile, filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.write(filePath, audioData, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to cache chunk: " + fileName, e);
@@ -73,15 +71,10 @@ public class ChunkCacheServImpl implements ChunkCacheServ {
                     .filter(path -> isChunkFile(path, interviewId))
                     .collect(Collectors.toList());
 
-            int deletedCount = 0;
-            long deletedSize = 0;
-
             for (Path file : filesToDelete) {
                 try {
                     long size = Files.size(file);
                     Files.delete(file);
-                    deletedCount++;
-                    deletedSize += size;
                 } catch (IOException e) {
                     throw new RuntimeException("Failed to delete expired chunk : " + interviewId, e);
                 }
@@ -91,54 +84,6 @@ public class ChunkCacheServImpl implements ChunkCacheServ {
             throw new RuntimeException("Failed to delete expired chunks: " + interviewId, e);
         }
     }
-
-
-
-    @Override
-    public boolean hasChunks(String interviewId) {
-        validateInterviewId(interviewId);
-
-        try {
-            return Files.list(Paths.get(cacheDirectory))
-                    .anyMatch(path -> isChunkFile(path, interviewId));
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public int getChunkCount(String interviewId) {
-        validateInterviewId(interviewId);
-
-        try {
-            return (int) Files.list(Paths.get(cacheDirectory))
-                    .filter(path -> isChunkFile(path, interviewId))
-                    .count();
-        } catch (IOException e) {
-            return 0;
-        }
-    }
-
-    @Override
-    public long getTotalSize(String interviewId) {
-        validateInterviewId(interviewId);
-
-        try {
-            return Files.list(Paths.get(cacheDirectory))
-                    .filter(path -> isChunkFile(path, interviewId))
-                    .mapToLong(path -> {
-                        try {
-                            return Files.size(path);
-                        } catch (IOException e) {
-                            return 0;
-                        }
-                    })
-                    .sum();
-        } catch (IOException e) {
-            return 0;
-        }
-    }
-
 
     private void createCacheDirectory() {
         try {
@@ -165,7 +110,7 @@ public class ChunkCacheServImpl implements ChunkCacheServ {
 
     private boolean isChunkFile(Path path, String interviewId) {
         String fileName = path.getFileName().toString();
-        return fileName.startsWith(interviewId + "_chunk_") && fileName.endsWith(".webm");
+        return fileName.startsWith(interviewId + "_chunk_") && fileName.endsWith(".bin");
     }
 
 

@@ -15,6 +15,11 @@ import ma.nttdata.externals.module.interview.service.RecordingUploadServ;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -172,8 +177,10 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
         try {
             String monthFolder = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
             String folderPath = sharePointConfig.getRecordingsFolderName() + monthFolder;
-            String mergedFileName = placeholders.CandidateName() + "_" + placeholders.offerTitle() + "_"
-                    + placeholders.dayOfTheMonth() + "_" + interviewId + ".webm";
+            String mergedFileName = sanitize(placeholders.CandidateName()) + "_" +
+                    sanitize(placeholders.offerTitle()) + "_" +
+                    placeholders.dayOfTheMonth() + "_" +
+                    interviewId + ".webm";
 
             List<byte[]> chunkData = new ArrayList<>(chunkCacheServ.getAllCachedChunks(interviewId));
 
@@ -182,13 +189,25 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
             }
 
             byte[] mergedBytes = mergeBytes(chunkData);
-            String uploadedUrl = uploadLargeFile(folderPath + "/" + mergedFileName, mergedBytes);
+            //String uploadedUrl = uploadLargeFile(folderPath + "/" + mergedFileName, mergedBytes);
+            String uploadedUrl = uploadLargeFileToMemory(mergedFileName, mergedBytes);
             chunkCacheServ.clearCachedChunks(interviewId);
             return uploadedUrl;
         } catch (Exception e) {
             throw new RuntimeException("Failed to merge chunks: " + e.getMessage(), e);
         }
     }
+
+    private String uploadLargeFileToMemory(String targetPath, byte[] data) {
+        try {
+            Path targetFile = Paths.get("/opt/interview-cache").resolve(Paths.get(targetPath).getFileName());
+            Files.write(targetFile, data, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            return targetFile.toAbsolutePath().toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write merged file locally: " + e.getMessage(), e);
+        }
+    }
+
 
     @Override
     public byte[] mergeBytes(List<byte[]> chunks){
@@ -200,5 +219,10 @@ public class RecordingUploadServImpl implements RecordingUploadServ {
             pos+=chunk.length;
         }
         return merged;
+    }
+
+    private String sanitize(String input) {
+        if (input == null) return "";
+        return input.trim().replaceAll("\\s+", "_");
     }
 }
