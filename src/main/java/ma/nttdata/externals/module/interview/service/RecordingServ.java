@@ -28,4 +28,6 @@ public interface RecordingServ {
     void deleteRecording(RecordingDTO recordDTO);
 
     String formatInterviewTranscript(List<TranscriptFormattingRequestDTO> request);
+
+    RecordingDTO saveTranscriptAndCreateRecording(UUID interviewId, List<TranscriptFormattingRequestDTO> request);
 }

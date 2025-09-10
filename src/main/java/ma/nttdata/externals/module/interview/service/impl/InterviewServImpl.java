@@ -370,6 +370,15 @@ public class InterviewServImpl implements InterviewServ {
         return ResponseEntity.ok().headers(headers).body(audiosZipped);
     }
 
+    @Override
+    public void setRecordingForInterview(UUID interviewId, Recording recording){
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Interview",interviewId));
+
+        interview.setRecording(recording);
+        interviewRepository.save(interview);
+    }
+
 }
 
 

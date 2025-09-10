@@ -10,9 +10,11 @@ import ma.nttdata.externals.module.interview.dto.TranscriptFormattingRequestDTO;
 import ma.nttdata.externals.module.interview.entity.Recording;
 import ma.nttdata.externals.module.interview.mapper.RecordingMapper;
 import ma.nttdata.externals.module.interview.repository.RecordingRepository;
+import ma.nttdata.externals.module.interview.service.InterviewServ;
 import ma.nttdata.externals.module.interview.service.RecordingServ;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +25,7 @@ public class RecordingServImpl implements RecordingServ {
 
     private final RecordingRepository recordingRepository;
     private final RecordingMapper recordingMapper;
+    private final InterviewServ interviewServ;
 
     @Override
     public Recording createRecording(CreateRecordingRequestDTO request) {
@@ -98,5 +101,16 @@ public class RecordingServImpl implements RecordingServ {
         }catch(Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public RecordingDTO saveTranscriptAndCreateRecording(UUID interviewId, List<TranscriptFormattingRequestDTO> request) {
+
+        Recording recording = new Recording();
+        recording.setRecordedAt(LocalDateTime.now());
+        recording.setTranscript(formatInterviewTranscript(request));
+
+        interviewServ.setRecordingForInterview(interviewId, recording);
+        return recordingMapper.toDto(recordingRepository.save(recording));
     }
 }
