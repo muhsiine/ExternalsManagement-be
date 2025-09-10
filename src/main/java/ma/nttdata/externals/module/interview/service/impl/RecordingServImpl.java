@@ -1,10 +1,12 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
+import ma.nttdata.externals.module.interview.dto.TranscriptFormattingRequestDTO;
 import ma.nttdata.externals.module.interview.entity.Recording;
 import ma.nttdata.externals.module.interview.mapper.RecordingMapper;
 import ma.nttdata.externals.module.interview.repository.RecordingRepository;
@@ -86,5 +88,15 @@ public class RecordingServImpl implements RecordingServ {
             throw new ResourceNotFoundException("Record", id);
         }
         recordingRepository.delete(recordingMapper.toEntity(record));
+    }
+
+    @Override
+    public String formatInterviewTranscript(List<TranscriptFormattingRequestDTO> request) {
+        ObjectMapper mapper = new ObjectMapper();
+        try{
+            return mapper.writeValueAsString(request);
+        }catch(Exception e){
+            throw new RuntimeException(e);
+        }
     }
 }
