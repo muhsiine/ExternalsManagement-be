@@ -117,7 +117,7 @@ public class RecordingController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Recording created and transcript saved"),
             @ApiResponse(responseCode = "404", description = "Interview not found"),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error During the formaating of json")
+            @ApiResponse(responseCode = "500", description = "Internal Server Error During the formatting of json")
     })
     @DeleteMapping("/saveTranscript/{interviewId}")
     public ResponseEntity<?> formatTranscriptAndCreateRecording(@PathVariable UUID interviewId, @RequestBody List<TranscriptFormattingRequestDTO> request){

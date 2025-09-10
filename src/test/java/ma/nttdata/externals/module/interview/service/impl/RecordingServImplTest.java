@@ -5,7 +5,9 @@ import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
 import ma.nttdata.externals.module.interview.entity.Recording;
 import ma.nttdata.externals.module.interview.mapper.RecordingMapper;
+import ma.nttdata.externals.module.interview.repository.InterviewRepository;
 import ma.nttdata.externals.module.interview.repository.RecordingRepository;
+import ma.nttdata.externals.module.interview.service.InterviewServ;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +30,14 @@ public class RecordingServImplTest {
     private RecordingRepository recordingRepository;
     @Mock
     private RecordingMapper recordingMapper;
+    @Mock
+    private InterviewServ interviewServ;
 
     private RecordingServImpl recordServ;
 
     @BeforeEach
     public void setUp() {
-        recordServ = new RecordingServImpl(recordingRepository, recordingMapper);
+        recordServ = new RecordingServImpl(recordingRepository, recordingMapper,interviewServ);
     }
 
 
