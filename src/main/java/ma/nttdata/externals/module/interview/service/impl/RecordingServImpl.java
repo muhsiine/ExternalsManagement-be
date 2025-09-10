@@ -1,5 +1,6 @@
 package ma.nttdata.externals.module.interview.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -98,8 +99,8 @@ public class RecordingServImpl implements RecordingServ {
         ObjectMapper mapper = new ObjectMapper();
         try{
             return mapper.writeValueAsString(request);
-        }catch(Exception e){
-            throw new RuntimeException(e);
+        }catch (JsonProcessingException e) {
+            throw new RuntimeException("Error formatting transcript", e);
         }
     }
 

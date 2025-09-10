@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.interview.dto.CreateRecordingRequestDTO;
 import ma.nttdata.externals.module.interview.dto.RecordingDTO;
+import ma.nttdata.externals.module.interview.dto.TranscriptFormattingRequestDTO;
 import ma.nttdata.externals.module.interview.service.RecordingServ;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -109,6 +110,24 @@ public class RecordingController {
             return ResponseEntity.noContent().build();
         }catch(ResourceNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @Operation(summary = "create recording and save transcript")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Recording created and transcript saved"),
+            @ApiResponse(responseCode = "404", description = "Interview not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error During the formaating of json")
+    })
+    @DeleteMapping("/saveTranscript/{interviewId}")
+    public ResponseEntity<?> formatTranscriptAndCreateRecording(@PathVariable UUID interviewId, @RequestBody List<TranscriptFormattingRequestDTO> request){
+        try {
+            recordingServ.saveTranscriptAndCreateRecording(interviewId, request);
+            return ResponseEntity.status(HttpStatus.CREATED).body("transcript saved and recording created");
+        }catch(ResourceNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }catch(RuntimeException exception){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during the formatting of the transcript: "+exception.getMessage());
         }
     }
 }
