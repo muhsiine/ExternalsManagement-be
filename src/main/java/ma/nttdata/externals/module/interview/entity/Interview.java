@@ -33,9 +33,6 @@ public class Interview {
     @Column(name = "link")
     private String link ;
 
-    @Column(name = "feedback_general")
-    private String feedback_general;
-
     @Column(name = "scheduled_at")
     private LocalDateTime scheduledAt;
 

@@ -34,7 +34,6 @@ public abstract class InterviewMapper {
     @Mapping(target = "candidateFullName",source = "candidate.fullName")
     @Mapping(target= "candidateMainTech", source = "candidate.mainTech")
     @Mapping(target = "offerTitle", source = "offer.title")
-    @Mapping(target = "feedback_general", source = "feedback_general")
     public abstract InterviewListDTO fromInterviewToInterviewListDTO(Interview interview);
 
     // List mappings

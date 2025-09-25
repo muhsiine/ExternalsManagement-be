@@ -15,7 +15,6 @@ public record InterviewDTO(
         LocalDateTime endTime,
         String description ,
         String link  ,
-        String feedback_general ,
         LocalDateTime scheduledAt ,
         String comment,
         int numberOfQuestions,
