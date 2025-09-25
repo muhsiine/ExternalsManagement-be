@@ -325,7 +325,7 @@ FROM offer_ids o
          CROSS JOIN recording_ids r
     LIMIT 20;
 
--- EVALUATION_TYPES
+-- EVALUATION_TYPES (Including OverAll)
 INSERT INTO evaluation_types (id, description, coefficient)
 SELECT
     uuid_generate_v4(),
@@ -337,6 +337,7 @@ SELECT
         WHEN 'Cultural Fit' THEN 1
         WHEN 'Experience' THEN 2
         WHEN 'Motivation' THEN 1
+        WHEN 'OverAll' THEN 4
         ELSE 1
         END
 FROM (VALUES
@@ -345,34 +346,79 @@ FROM (VALUES
           ('Problem Solving'),
           ('Cultural Fit'),
           ('Experience'),
-          ('Motivation')
+          ('Motivation'),
+          ('OverAll')
      ) AS t(description);
 
--- EVALUATIONS
-WITH interview_ids AS (
-    SELECT id FROM interviews ORDER BY RANDOM() LIMIT 20
+-- EVALUATIONS - Random types per interview + OverAll always included
+WITH interview_data AS (
+    SELECT id FROM interviews ORDER BY RANDOM() LIMIT 15
     ),
-    evaluation_type_ids AS (
-SELECT id FROM evaluation_types ORDER BY RANDOM() LIMIT 3
+    candidate_profiles AS (
+SELECT
+    i.id as interview_id,
+    CASE (RANDOM() * 4)::INT
+    WHEN 0 THEN 'strong'
+    WHEN 1 THEN 'average'
+    WHEN 2 THEN 'weak'
+    ELSE 'mixed'
+    END as profile_type
+FROM interview_data i
+    ),
+    interview_evaluations AS (
+SELECT DISTINCT
+    cp.interview_id,
+    cp.profile_type,
+    et.id as evaluation_type_id,
+    et.description
+FROM candidate_profiles cp
+    CROSS JOIN evaluation_types et
+WHERE
+    et.description = 'OverAll'  -- Always include OverAll
+   OR
+    (et.description != 'OverAll' AND RANDOM() < 0.4)  -- 40% chance for other types
     )
 INSERT INTO evaluations (id, score, feedback, interview_id, evaluation_type_id)
 SELECT
     uuid_generate_v4(),
-    ROUND((RANDOM() * 100)::NUMERIC, 2),
-    (ARRAY[
-         'Excellent performance',
-     'Good knowledge but lacks experience',
-     'Strong communication skills',
-     'Needs improvement in problem solving',
-     'Great cultural fit',
-     'Highly motivated and eager to learn',
-     'Average technical skills'
-         ])[FLOOR(RANDOM() * 7) + 1],
-    i.id,
-    e.id
-FROM interview_ids i
-    CROSS JOIN evaluation_type_ids e
-    LIMIT 40;
+    CASE
+        WHEN ie.profile_type = 'strong' THEN 80 + (RANDOM() * 20)::INT
+        WHEN ie.profile_type = 'average' THEN 60 + (RANDOM() * 25)::INT
+        WHEN ie.profile_type = 'weak' THEN 30 + (RANDOM() * 35)::INT
+        ELSE 50 + (RANDOM() * 40)::INT
+END,
+    CASE
+        WHEN ie.profile_type = 'strong' THEN
+            (ARRAY[
+                'Excellent performance with strong competencies demonstrated. The candidate displayed a high level of expertise in their domain, with a clear and confident approach to complex challenges.',
+                'Outstanding results across all evaluation criteria. Their work ethic and proficiency were exceptional, exceeding all expectations for the role.',
+                'Exceptional candidate with impressive skills and experience. The candidate`s background perfectly aligns with our needs, showing great potential for immediate contribution and leadership.',
+                'Superior performance with great potential for success. The candidate has a unique set of skills and a keen insight that would be a significant asset to any team.'
+            ])[FLOOR(RANDOM() * 4) + 1]
+        WHEN ie.profile_type = 'average' THEN
+            (ARRAY[
+                'Good performance with a solid foundation and growth potential. The candidate has a decent understanding of the core concepts but could benefit from further development in specific areas.',
+                'Adequate skills demonstrated with room for development. The candidate meets the basic requirements of the role, but their skills may require some refinement to meet our long-term goals.',
+                'Reasonable competency shown with some areas for improvement. While the candidate is proficient in certain tasks, there are gaps in their knowledge that would need to be addressed through training.',
+                'Fair performance with potential for success with support. The candidate has a positive attitude and a willingness to learn, but they would need mentorship and guidance to reach their full potential.'
+            ])[FLOOR(RANDOM() * 4) + 1]
+        WHEN ie.profile_type = 'weak' THEN
+            (ARRAY[
+                'Below expectations with significant areas needing improvement. The candidate struggled with fundamental concepts and lacked the necessary skills to perform the required duties effectively.',
+                'Weak performance with major gaps in required competencies. The candidate`s background and experience do not align well with the demands of the role, leading to significant concerns about their suitability.',
+                'Insufficient demonstration of skills needed for the role. The candidate failed to provide convincing examples of their capabilities and seemed unprepared for the technical challenges of the interview.',
+                'Poor results with concerns about role suitability. The candidate lacks the foundational knowledge and practical experience necessary for this position, making them a poor fit for the role.'
+            ])[FLOOR(RANDOM() * 4) + 1]
+        ELSE
+            (ARRAY[
+                'Mixed performance with strengths in some areas but gaps in others. The candidate excelled in a few tasks but struggled with others, leading to an inconsistent overall assessment.',
+                'Variable results showing potential but inconsistent execution. The candidate showed flashes of brilliance, but their performance was unpredictable, raising concerns about reliability.',
+                'Uneven demonstration with good qualities offset by weaknesses. While the candidate has some positive attributes, their limitations in critical areas make them a risky hire.'
+            ])[FLOOR(RANDOM() * 3) + 1]
+END,
+    ie.interview_id,
+    ie.evaluation_type_id
+FROM interview_evaluations ie;
 
 -- ANSWERS and QUESTIONS seeding together with FK links fixed
 WITH inserted_answers AS (
