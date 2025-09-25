@@ -84,7 +84,10 @@ WHERE NOT EXISTS (SELECT 1 FROM address a WHERE a.candidate_id = cand.id);
 -- contacts
 INSERT INTO contacts (id, candidate_id, contact_type, contact_value)
 SELECT uuid_generate_v4(), id, 'Email',
-       LOWER(SPLIT_PART(full_name, ' ', 1) || '.' || SPLIT_PART(full_name, ' ', 2) || FLOOR(RANDOM()*10)::TEXT || '@domain.ma')
+       (ARRAY[
+            'bouraouiyoussef12@gmail.com',
+        'mohamedtaha.elyakoubi@nttdata.com'
+            ])[FLOOR(RANDOM()*2 + 1)]
 FROM candidates
 UNION ALL
 SELECT uuid_generate_v4(), id, 'Phone', '+2126' || LPAD(FLOOR(RANDOM()*100000000)::TEXT, 8, '0')
