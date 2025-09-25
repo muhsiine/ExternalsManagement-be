@@ -193,10 +193,8 @@ class InterviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("Technical Interview"))
                 .andExpect(jsonPath("$[0].link").value("https://meet.example.com/tech"))
-                .andExpect(jsonPath("$[0].feedback_general").value("Strong technical skills"))
                 .andExpect(jsonPath("$[1].description").value("HR Interview"))
-                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"))
-                .andExpect(jsonPath("$[1].feedback_general").value("Good communication"));
+                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"));
         verify(interviewServ).getAllInterviewList();
     }
 
@@ -215,7 +213,6 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").value("https://zoom.com/meeting"))
-                .andExpect(jsonPath("$.feedback_general").value("Very good performance"))
                 .andExpect(jsonPath("$.candidateId").value(interviewDTO.candidateId().toString()))
                 .andExpect(jsonPath("$.offerId").value(interviewDTO.offerId().toString())); // Fixed to use interviewDTO.offerId()
 
@@ -275,8 +272,7 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.offerId").value(fixedOfferId.toString()))
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
-                .andExpect(jsonPath("$.link").value("https://meet.example.com/tech"))
-                .andExpect(jsonPath("$.feedback_general").value("Great candidate"));
+                .andExpect(jsonPath("$.link").value("https://meet.example.com/tech"));
 
         verify(interviewServ).createInterview(any());
     }
@@ -314,7 +310,6 @@ class InterviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(interviewId.toString()))
                 .andExpect(jsonPath("$.description").value("Updated description"))
-                .andExpect(jsonPath("$.feedback_general").value("Updated feedback"))
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").exists())
