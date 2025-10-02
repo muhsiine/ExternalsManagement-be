@@ -1,4 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 -- countries
 INSERT INTO country (id, name, english_name)
 VALUES (uuid_generate_v4(), 'Maroc', 'Morocco')
@@ -24,7 +25,7 @@ SELECT
     uuid_generate_v4(),
     first_name || ' ' || last_name,
     DATE '1990-01-01' - (FLOOR(RANDOM() * 365 * 25) || ' days')::INTERVAL,
-        FLOOR(RANDOM() * 7) + 2, -- 2–8 years
+    FLOOR(RANDOM() * 7) + 2, -- 2–8 years
     gender,
     (ARRAY['Java','Python','React','Angular'])[FLOOR(RANDOM()*4)+1],
     (ARRAY[
@@ -98,11 +99,9 @@ SELECT
     (ARRAY['OCP Group','Attijariwafa Bank','Maroc Telecom','ONCF','Royal Air Maroc',
      'Saham Assurance','Yazaki Morocco','Managem','SNTL','Cosumar',
      'BMCE Bank','LafargeHolcim','Intelcia','Dell Technologies Morocco',
-     'IBM Morocco','Capgemini Morocco','HPS Morocco','Inwi','Orange Morocco'
-         ])[FLOOR(RANDOM()*19)+1],
+     'IBM Morocco','Capgemini Morocco','HPS Morocco','Inwi','Orange Morocco'])[FLOOR(RANDOM()*19)+1],
     (ARRAY['Software Engineer','Senior Developer','DevOps Specialist','Tech Lead',
-           'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'
-    ])[FLOOR(RANDOM()*8)+1],
+           'Full Stack Developer','Data Engineer','Mobile Developer','Cloud Architect'])[FLOOR(RANDOM()*8)+1],
     CURRENT_DATE - (years_of_experience + FLOOR(RANDOM()*3) || ' years')::INTERVAL,
     CASE WHEN RANDOM() > 0.3 THEN CURRENT_DATE - (FLOOR(RANDOM()*12) || ' months')::INTERVAL END,
     (ARRAY[
@@ -156,7 +155,7 @@ SELECT
     ])[FLOOR(RANDOM()*6)+1]
 FROM candidates;
 
--- 🔧 languages (force English + random others)
+-- languages (force English + random others)
 -- English (ADVANCED, native) for every candidate
 INSERT INTO languages (id, candidate_id, description, english_description, full_description, language, language_in_english, level, is_native)
 SELECT
@@ -215,7 +214,6 @@ SELECT
         json_build_object(
             'description', 'We are seeking an experienced, highly motivated, and technically proficient Senior Java Developer to join our growing technology team. The ideal candidate will have a deep understanding of Java development and a passion for building scalable, high-performance, and reliable software applications. You will play a critical role in designing, developing, and maintaining enterprise-level solutions that power our business operations and drive innovation.
                             In this role, you will be responsible for collaborating with cross-functional teams to analyze requirements, create technical specifications, and implement end-to-end solutions. You will ensure code quality, maintainability, and adherence to best practices while mentoring junior developers and contributing to architectural decisions. Your work will directly impact the performance, scalability, and reliability of our software products.',
-            -- 🔧 Reduced pool, aligned with candidates
             'mainTech', (ARRAY['Java','Python','React','Angular'])[FLOOR(RANDOM()*4)+1],
             'skills', (ARRAY[
                 'Java - Spring Boot - Docker - Kubernetes - AWS',
@@ -223,7 +221,6 @@ SELECT
                 'Python - Django - PostgresSQL - Kubernetes - AWS',
                 'C# - .NET - SQL Server - Azure - Agile'
             ])[FLOOR(RANDOM() * 4) + 1],
-            -- 🔧 Always English + maybe French/Spanish
             'languages', json_build_array(
                 json_build_object('languageName', 'English', 'level', 'INTERMEDIATE'),
                 json_build_object('languageName', (ARRAY['French','Spanish'])[FLOOR(RANDOM()*2)+1], 'level', 'ADVANCED')
@@ -241,16 +238,16 @@ INSERT INTO recording (id, recorded_at, file_url, transcript)
 SELECT
     uuid_generate_v4(),
     CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL,
-        'https://storage.example.com/recordings/' || uuid_generate_v4()::TEXT || '.mp3',
-        '[' || string_agg(
-                json_build_object(
-                        'Question', questions[FLOOR(RANDOM() * array_length(questions,1) + 1)::INT],
-                        'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
-                        'Answer', answers[FLOOR(RANDOM() * array_length(answers,1) + 1)::INT],
-                        'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
-                )::TEXT,
-                ','
-               ) || ']'
+    'https://storage.example.com/recordings/' || uuid_generate_v4()::TEXT || '.mp3',
+    '[' || string_agg(
+            json_build_object(
+                    'Question', questions[FLOOR(RANDOM() * array_length(questions,1) + 1)::INT],
+                    'QuestionTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60)),
+                    'Answer', answers[FLOOR(RANDOM() * array_length(answers,1) + 1)::INT],
+                    'AnswerTime', (FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60) || ':' || FLOOR(RANDOM() * 60))
+            )::TEXT,
+            ','
+           ) || ']'
 FROM generate_series(1,20) AS gs,
      LATERAL (
               SELECT ARRAY[
@@ -275,21 +272,54 @@ FROM generate_series(1,20) AS gs,
     ] AS answers
     ) AS q_and_a;
 
--- INTERVIEWS
-WITH offer_ids AS (
-    SELECT id FROM offers ORDER BY RANDOM() LIMIT 10
-    ),
-    candidate_ids AS (
-SELECT id FROM candidates ORDER BY RANDOM() LIMIT 20
-    ),
-    interview_times AS (
-SELECT
-    CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL AS starttime,
-    (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute' AS duration
-    ),
-    recording_ids AS (
-SELECT id FROM recording ORDER BY RANDOM() LIMIT 20
-    )
+-- INTERVIEWS - FIXED VERSION WITH UNIQUE DESCRIPTIONS
+WITH offer_candidates AS (
+    SELECT
+        o.id as offer_id,
+        o.title as offer_title,
+        c.id as candidate_id,
+        c.full_name as candidate_name,
+        ROW_NUMBER() OVER (ORDER BY RANDOM()) as rn
+    FROM offers o
+    CROSS JOIN candidates c
+    ORDER BY RANDOM()
+    LIMIT 20
+),
+interview_details AS (
+    SELECT
+        oc.*,
+        CURRENT_TIMESTAMP - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL AS starttime,
+        (30 + FLOOR(RANDOM() * 60)) * INTERVAL '1 minute' AS duration,
+        r.id as recording_id,
+        -- Generate unique interview descriptions
+        CASE
+            WHEN oc.rn % 8 = 1 THEN 'Technical Interview - ' || oc.offer_title || ' position with ' || oc.candidate_name
+            WHEN oc.rn % 8 = 2 THEN 'First Round Interview - ' || oc.candidate_name || ' for ' || oc.offer_title
+            WHEN oc.rn % 8 = 3 THEN 'HR Screening - ' || oc.offer_title || ' candidate assessment'
+            WHEN oc.rn % 8 = 4 THEN 'Final Interview - ' || oc.candidate_name || ' final evaluation'
+            WHEN oc.rn % 8 = 5 THEN 'Phone Interview - Initial screening for ' || oc.offer_title
+            WHEN oc.rn % 8 = 6 THEN 'Panel Interview - ' || oc.candidate_name || ' team assessment'
+            WHEN oc.rn % 8 = 7 THEN 'Behavioral Interview - ' || oc.offer_title || ' cultural fit evaluation'
+            ELSE 'Follow-up Interview - ' || oc.candidate_name || ' second round discussion'
+        END as interview_description,
+        -- Generate varied comments
+        (ARRAY[
+            'Candidate showed strong technical skills and communication',
+            'Good cultural fit, needs technical assessment follow-up',
+            'Excellent problem-solving abilities demonstrated',
+            'Strong background but limited in required technology',
+            'Impressive portfolio and project experience',
+            'Good teamwork skills, moderate technical knowledge',
+            'Outstanding communication and leadership potential',
+            'Solid technical foundation with room for growth',
+            'Exceptional analytical thinking and creativity',
+            'Great enthusiasm and willingness to learn'
+        ])[FLOOR(RANDOM() * 10) + 1] as interview_comment
+    FROM offer_candidates oc
+    CROSS JOIN LATERAL (
+        SELECT id FROM recording ORDER BY RANDOM() LIMIT 1
+    ) r
+)
 INSERT INTO interviews (
     id,
     offer_id,
@@ -307,23 +337,19 @@ INSERT INTO interviews (
 )
 SELECT
     uuid_generate_v4(),
-    o.id,
-    c.id,
-    t.starttime,
-    t.starttime + t.duration AS endtime,
-    'Interview for the position',
+    id.offer_id,
+    id.candidate_id,
+    id.starttime,
+    id.starttime + id.duration AS endtime,
+    id.interview_description,  -- Now unique for each interview
     'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
     NULL,
     CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
-    'Auto-generated comment for testing',
-    15,
-    60,
-    r.id
-FROM offer_ids o
-         CROSS JOIN candidate_ids c
-         CROSS JOIN interview_times t
-         CROSS JOIN recording_ids r
-    LIMIT 20;
+    id.interview_comment,  -- Varied comments
+    FLOOR(RANDOM() * 10) + 10,  -- 10-19 questions
+    FLOOR(RANDOM() * 30) + 45,  -- 45-74 minutes
+    id.recording_id
+FROM interview_details id;
 
 -- EVALUATION_TYPES
 INSERT INTO evaluation_types (id, description, coefficient)
@@ -349,67 +375,174 @@ FROM (VALUES
      ) AS t(description);
 
 -- EVALUATIONS
-WITH interview_ids AS (
-    SELECT id FROM interviews ORDER BY RANDOM() LIMIT 20
-    ),
-    evaluation_type_ids AS (
-SELECT id FROM evaluation_types ORDER BY RANDOM() LIMIT 3
-    )
+WITH interview_evaluation_combinations AS (
+    SELECT
+        i.id as interview_id,
+        et.id as evaluation_type_id,
+        et.description as eval_type
+    FROM interviews i
+    CROSS JOIN evaluation_types et
+    WHERE RANDOM() > 0.3  -- Not all combinations, create some variety
+)
 INSERT INTO evaluations (id, score, feedback, interview_id, evaluation_type_id)
 SELECT
     uuid_generate_v4(),
-    ROUND((RANDOM() * 100)::NUMERIC, 2),
-    (ARRAY[
-         'Excellent performance',
-     'Good knowledge but lacks experience',
-     'Strong communication skills',
-     'Needs improvement in problem solving',
-     'Great cultural fit',
-     'Highly motivated and eager to learn',
-     'Average technical skills'
-         ])[FLOOR(RANDOM() * 7) + 1],
-    i.id,
-    e.id
-FROM interview_ids i
-    CROSS JOIN evaluation_type_ids e
-    LIMIT 40;
+    CASE
+        WHEN iec.eval_type = 'Technical Skills' THEN ROUND((RANDOM() * 40 + 40)::NUMERIC, 2)  -- 40-80 range
+        WHEN iec.eval_type = 'Communication' THEN ROUND((RANDOM() * 30 + 50)::NUMERIC, 2)     -- 50-80 range
+        WHEN iec.eval_type = 'Problem Solving' THEN ROUND((RANDOM() * 35 + 45)::NUMERIC, 2)   -- 45-80 range
+        ELSE ROUND((RANDOM() * 40 + 50)::NUMERIC, 2)  -- 50-90 range for other skills
+    END,
+    CASE iec.eval_type
+        WHEN 'Technical Skills' THEN
+            (ARRAY[
+                'Strong Java and Spring Boot knowledge',
+                'Good understanding of microservices architecture',
+                'Needs improvement in database design',
+                'Excellent coding practices and clean code',
+                'Limited experience with cloud technologies',
+                'Outstanding debugging and problem-solving skills',
+                'Good grasp of testing frameworks and TDD',
+                'Needs more experience with DevOps practices'
+            ])[FLOOR(RANDOM() * 8) + 1]
+        WHEN 'Communication' THEN
+            (ARRAY[
+                'Excellent verbal communication skills',
+                'Clear and concise explanations',
+                'Good active listening abilities',
+                'Needs improvement in presentation skills',
+                'Strong interpersonal skills',
+                'Confident and articulate responses',
+                'Good at asking clarifying questions',
+                'Effective in explaining technical concepts'
+            ])[FLOOR(RANDOM() * 8) + 1]
+        WHEN 'Problem Solving' THEN
+            (ARRAY[
+                'Systematic approach to problem solving',
+                'Creative thinking and innovative solutions',
+                'Good analytical and logical reasoning',
+                'Needs to break down complex problems better',
+                'Strong debugging and troubleshooting skills',
+                'Good at identifying root causes',
+                'Effective in handling challenging scenarios',
+                'Quick learner with good adaptation skills'
+            ])[FLOOR(RANDOM() * 8) + 1]
+        WHEN 'Cultural Fit' THEN
+            (ARRAY[
+                'Great team player with collaborative spirit',
+                'Strong alignment with company values',
+                'Good cultural fit for agile environment',
+                'Positive attitude and growth mindset',
+                'Strong work ethic and dedication',
+                'Good fit for remote/hybrid work culture',
+                'Excellent interpersonal skills with team',
+                'Shows initiative and proactive approach'
+            ])[FLOOR(RANDOM() * 8) + 1]
+        WHEN 'Experience' THEN
+            (ARRAY[
+                'Solid experience in enterprise applications',
+                'Good background in startup environment',
+                'Relevant project experience in similar domain',
+                'Limited but promising career progression',
+                'Strong portfolio of completed projects',
+                'Good mix of frontend and backend experience',
+                'Valuable experience in team leadership',
+                'Impressive internship and academic projects'
+            ])[FLOOR(RANDOM() * 8) + 1]
+        ELSE
+            (ARRAY[
+                'Highly motivated and enthusiastic',
+                'Strong desire for continuous learning',
+                'Clear career goals and aspirations',
+                'Good understanding of role expectations',
+                'Passionate about technology and innovation',
+                'Shows commitment to professional growth',
+                'Eager to contribute to team success',
+                'Demonstrates self-motivation and drive'
+            ])[FLOOR(RANDOM() * 8) + 1]
+    END,
+    iec.interview_id,
+    iec.evaluation_type_id
+FROM interview_evaluation_combinations iec;
 
--- ANSWERS and QUESTIONS seeding together with FK links fixed
-WITH inserted_answers AS (
-INSERT INTO answers (id, description, duration_in_minutes)
-SELECT
-    uuid_generate_v4(),
-    (ARRAY[
-         'I worked on a large-scale system with a distributed architecture.',
-     'I break down tasks and communicate constantly with stakeholders.',
-     'I debugged a memory leak issue that improved performance by 30%.',
-     'I am passionate about learning and applying new skills.',
-     'I follow tech blogs, attend webinars, and take courses.',
-     'I believe teamwork and clear communication are key.',
-     'I use task management tools and set clear priorities daily.'
-         ])[FLOOR(RANDOM() * 7) + 1],
-    (ARRAY[2, 3, 4, 5])[FLOOR(RANDOM() * 4) + 1]
-FROM generate_series(1, 50)
-    RETURNING id
-    ),
-    random_interviews AS (
-SELECT id FROM interviews ORDER BY RANDOM() LIMIT 50
-    )
+-- QUESTIONS - Create varied questions for each interview
+WITH interview_question_pools AS (
+    SELECT
+        i.id as interview_id,
+        o.title as position_title,
+        -- Different question sets based on position
+        CASE
+            WHEN o.title LIKE '%Java%' OR o.title LIKE '%Backend%' THEN
+                ARRAY[
+                    'Explain the difference between String, StringBuilder, and StringBuffer in Java',
+                    'How do you handle exceptions in Spring Boot applications?',
+                    'Describe your experience with microservices architecture',
+                    'What is dependency injection and how does Spring implement it?',
+                    'How do you optimize database queries in your applications?',
+                    'Explain the concept of RESTful web services',
+                    'How do you implement security in Spring Boot applications?',
+                    'Describe your testing strategy for backend applications'
+                ]
+            WHEN o.title LIKE '%Frontend%' OR o.title LIKE '%React%' OR o.title LIKE '%Angular%' THEN
+                ARRAY[
+                    'Explain the virtual DOM concept in React',
+                    'How do you manage state in large React applications?',
+                    'What are React hooks and how do you use them?',
+                    'Describe your approach to responsive web design',
+                    'How do you optimize frontend application performance?',
+                    'Explain the difference between controlled and uncontrolled components',
+                    'How do you handle API integration in frontend applications?',
+                    'Describe your experience with CSS preprocessors and frameworks'
+                ]
+            WHEN o.title LIKE '%DevOps%' THEN
+                ARRAY[
+                    'Explain the CI/CD pipeline you have implemented',
+                    'How do you monitor application performance in production?',
+                    'Describe your experience with containerization using Docker',
+                    'How do you implement infrastructure as code?',
+                    'What is your approach to automated testing in DevOps?',
+                    'Explain blue-green deployment strategy',
+                    'How do you handle secrets management in applications?',
+                    'Describe your experience with cloud platforms (AWS, Azure, GCP)'
+                ]
+            WHEN o.title LIKE '%Full Stack%' THEN
+                ARRAY[
+                    'Describe a full-stack application you have developed',
+                    'How do you ensure consistency between frontend and backend?',
+                    'Explain your database design approach for web applications',
+                    'How do you handle authentication and authorization?',
+                    'Describe your API design principles',
+                    'How do you manage data flow in full-stack applications?',
+                    'What is your approach to code organization in full-stack projects?',
+                    'How do you handle real-time features in web applications?'
+                ]
+            ELSE
+                ARRAY[
+                    'Tell me about a challenging project you worked on',
+                    'How do you stay updated with new technologies?',
+                    'Describe a time when you had to debug a complex issue',
+                    'How do you approach code reviews?',
+                    'What is your experience working in agile environments?',
+                    'How do you handle tight deadlines and pressure?',
+                    'Describe your collaboration style with team members',
+                    'What motivates you in software development?'
+                ]
+        END as question_pool
+    FROM interviews i
+    JOIN offers o ON i.offer_id = o.id
+),
+interview_questions AS (
+    SELECT
+        iqp.interview_id,
+        iqp.question_pool[FLOOR(RANDOM() * array_length(iqp.question_pool, 1)) + 1] as question_text,
+        generate_series(1, (FLOOR(RANDOM() * 4) + 3)::integer) as question_num  -- 3-6 questions per interview
+    FROM interview_question_pools iqp
+)
 INSERT INTO questions (id, description, duration_in_minutes, interview_id, answer_id)
 SELECT
     uuid_generate_v4(),
-    (ARRAY[
-         'Explain your previous project experience.',
-     'How do you handle tight deadlines?',
-     'Describe a difficult technical problem you solved.',
-     'What motivates you to work in tech?',
-     'How do you stay updated with new technologies?',
-     'Describe your experience working in a team.',
-     'How do you prioritize tasks during a project?'
-         ])[FLOOR(RANDOM() * 7) + 1],
-  (ARRAY[5, 10, 15, 20])[FLOOR(RANDOM() * 4) + 1],
-  ri.id,
-  ia.id
-FROM random_interviews ri
-    JOIN inserted_answers ia ON TRUE
-    LIMIT 50;
+    iq.question_text,
+    (ARRAY[5, 8, 10, 12, 15, 20])[FLOOR(RANDOM() * 6) + 1],  -- Varied duration
+    iq.interview_id,
+    NULL  -- No answer assigned initially
+FROM interview_questions iq;
