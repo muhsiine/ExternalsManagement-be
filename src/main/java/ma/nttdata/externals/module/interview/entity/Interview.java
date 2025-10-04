@@ -65,4 +65,6 @@ public class Interview {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     @JoinColumn(name = "recording_id", nullable = true)
     private Recording recording;
+
+    private List<String> transcription;
 }
