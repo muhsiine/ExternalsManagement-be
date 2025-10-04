@@ -268,5 +268,27 @@ public class InterviewController  {
         return interviewServ.generateInterviewQuestionsAudios(interviewId);
     }
 
+    @Operation(
+            summary = "Get the transcription of an interview",
+            description = "Retrieves the full transcription of a specific interview identified by its ID. " +
+                    "The transcription includes all questions asked by the AI and the corresponding " +
+                    "answers provided by the candidate, with timestamps relative to the start of the interview."
+    )
+    @GetMapping("/{interviewId}/transcription")
+    public List<String> getInterviewTranscription(@PathVariable UUID interviewId) throws IOException {
+        return interviewServ.getTanscription(interviewId);
+    }
+
+    @Operation(
+            summary = "Update the transcription of an interview",
+            description = "Update the full transcription of a specific interview identified by its ID. " +
+                    "The transcription includes all questions asked by the AI and the corresponding " +
+                    "answers provided by the candidate, with timestamps relative to the start of the interview."
+    )
+    @PostMapping("/{interviewId}/transcription")
+    public InterviewDTO updateInterviewTranscription(@PathVariable UUID interviewId,@RequestBody List<String> transcription) throws IOException {
+        return interviewServ.updateTranscription(interviewId,transcription);
+    }
+
 
 }
