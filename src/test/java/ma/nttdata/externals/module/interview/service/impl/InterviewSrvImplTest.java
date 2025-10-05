@@ -114,6 +114,7 @@ class InterviewSrvImplTest {
                 offerId,
                 candidateId,
                 new ArrayList<>(),
+                new ArrayList<>(),
                 new ArrayList<>()
         );
 
@@ -142,7 +143,7 @@ class InterviewSrvImplTest {
         List<Interview> interviews = List.of(new Interview());
         when(interviewRepository.findAll()).thenReturn(interviews);
         when(interviewMapper.toDtoList(interviews)).thenReturn(List.of(
-                new InterviewDTO(null, null, null, null, null, null, null, null, 7,40,null, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(null, null, null, null, null, null, null, null, 7,40,null, null, new ArrayList<>(), new ArrayList<>(),new ArrayList<>())
         ));
 
         List<InterviewDTO> result = interviewServ.getAllInterviews();
@@ -156,7 +157,7 @@ class InterviewSrvImplTest {
         Interview interview = new Interview();
         when(interviewRepository.findById(id)).thenReturn(Optional.of(interview));
         when(interviewMapper.toDto(interview)).thenReturn(
-                new InterviewDTO(id, null, null, null, null, null, null, null,5,30, null, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(id, null, null, null, null, null, null, null,5,30, null, null, new ArrayList<>(), new ArrayList<>(),new ArrayList<>())
         );
 
         InterviewDTO result = interviewServ.getInterviewById(id);
@@ -188,6 +189,7 @@ class InterviewSrvImplTest {
                 offerId,
                 candidateId,
                 new ArrayList<>(),
+                new ArrayList<>(),
                 new ArrayList<>()
         );
 
@@ -215,7 +217,7 @@ class InterviewSrvImplTest {
         List<Interview> list = List.of(new Interview());
         when(interviewRepository.findByOfferId(offerId)).thenReturn(list);
         when(interviewMapper.toDtoList(list)).thenReturn(List.of(
-                new InterviewDTO(null, null, null, null, null, null, null, null,8,50, offerId, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(null, null, null, null, null, null, null, null,8,50, offerId, null, new ArrayList<>(), new ArrayList<>(),new ArrayList<>())
         ));
 
         List<InterviewDTO> result = interviewServ.getInterviewsByOfferId(offerId);
@@ -616,6 +618,7 @@ class InterviewSrvImplTest {
                 null,
                 null,
                 null,
+                null,
                 null
         );
 
@@ -857,5 +860,67 @@ class InterviewSrvImplTest {
         verify(questionServ, times(1)).findAllQuestionsDTOSByInterviewId(interviewId);
         verify(textToSpeechServ, times(1)).speak("Question 1");
         verify(textToSpeechServ, times(1)).speak("Question 2");
+    }
+
+    @Test
+    void testGetTranscription(){
+        UUID interviewId = UUID.randomUUID();
+        List<String> transcription = List.of("AI - 00:00:10 : Question || Candidate - 00:00:30 : Answer");
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setTranscription(transcription);
+
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
+
+        List<String> result = interviewServ.getTanscription(interviewId);
+        assertEquals(transcription, result);
+    }
+
+    @Test
+    void testUpdateTranscription() {
+        UUID interviewId = UUID.randomUUID();
+        List<String> transcription = List.of("AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2");
+
+        Candidate mockCandidate = new Candidate();
+        mockCandidate.setId(UUID.randomUUID());
+
+        Offer mockOffer = new Offer();
+        mockOffer.setId(UUID.randomUUID());
+
+        Interview interview = new Interview();
+        interview.setId(interviewId);
+        interview.setTranscription(new ArrayList<>());
+        interview.setCandidate(mockCandidate);
+        interview.setOffer(mockOffer);
+
+        InterviewDTO expectedDto = new InterviewDTO(
+                interviewId,
+                null, null, null, null, null, null, null,
+                0, 0,
+                mockOffer.getId(),
+                mockCandidate.getId(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                transcription
+        );
+
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
+
+        when(interviewRepository.save(any(Interview.class))).thenAnswer(i -> {
+            Interview savedInterview = i.getArgument(0);
+            savedInterview.setCandidate(mockCandidate);
+            savedInterview.setOffer(mockOffer);
+            return savedInterview;
+        });
+
+        when(interviewMapper.toDto(any(Interview.class))).thenReturn(expectedDto);
+
+        InterviewDTO result = interviewServ.updateTranscription(interviewId, transcription);
+
+        assertNotNull(result);
+        assertEquals(transcription, result.transcription());
+
+        verify(interviewRepository, times(1)).save(interview);
     }
 }

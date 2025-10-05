@@ -30,6 +30,7 @@ import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -124,7 +125,12 @@ class InterviewControllerTest {
                 candidateId,
                 offerId,
                 List.of(evaluationDTO),
-                List.of(questionDTO));
+                List.of(questionDTO),
+                List.of(
+                        "AI - 00:00:10 : What is polymorphism? || Candidate - 00:01:05 : Polymorphism allows objects to take many forms.",
+                        "AI - 00:02:30 : Explain dependency injection. || Candidate - 00:03:15 : It’s a design pattern for decoupling components."
+                )
+                );
 
         candidateDTO = new CandidateDTO(
                 candidateId,
@@ -246,6 +252,7 @@ class InterviewControllerTest {
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
+                Collections.emptyList(),
                 Collections.emptyList()
         );
 
@@ -263,6 +270,7 @@ class InterviewControllerTest {
                 inputDto.candidateId(),
                 inputDto.offerId(),
                 Collections.emptyList(),
+                Collections.emptyList(),
                 Collections.emptyList()
         );
 
@@ -272,7 +280,7 @@ class InterviewControllerTest {
         mockMvc.perform(post("/api/v1/interviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(fixedInterviewId.toString()))
                 .andExpect(jsonPath("$.description").value("Technical round"))
@@ -307,6 +315,7 @@ class InterviewControllerTest {
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
+                Collections.emptyList(),
                 Collections.emptyList()
         );
 
@@ -316,7 +325,7 @@ class InterviewControllerTest {
         mockMvc.perform(put("/api/v1/interviews/{id}", interviewId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedDto))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(interviewId.toString()))
                 .andExpect(jsonPath("$.description").value("Updated description"))
@@ -338,7 +347,7 @@ class InterviewControllerTest {
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/interviews/{id}", interviewId)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         verify(interviewServ).deleteInterview(interviewId);
@@ -553,7 +562,7 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
                         .accept(MediaType.APPLICATION_JSON)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
                 .andExpect(jsonPath("$[0].description").value("What is your experience with Spring Boot?"))
@@ -606,7 +615,7 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest)
                         .accept(MediaType.APPLICATION_JSON)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Evaluation is created and saved"));
 
@@ -635,6 +644,51 @@ class InterviewControllerTest {
         System.out.println("Token: " + token);
     }
 
+    @Test
+    @WithMockUser
+    void testGetTranscriptionEndpoint() throws Exception {
+        UUID interviewId = UUID.randomUUID();
+        List<String> transcription = List.of("AI - 00:00:10 : Q1 || Candidate - 00:00:30 : A1");
+
+        when(interviewServ.getTanscription(interviewId)).thenReturn(transcription);
+
+        mockMvc.perform(get("/api/v1/interviews/{id}/transcription", interviewId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0]").value("AI - 00:00:10 : Q1 || Candidate - 00:00:30 : A1"));
+    }
+
+    @Test
+    @WithMockUser
+    void testUpdateTranscriptionEndpoint() throws Exception {
+        UUID interviewId = UUID.randomUUID();
+        List<String> transcription = List.of("AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2");
+
+        InterviewDTO dto =
+            new InterviewDTO(
+                    interviewId,
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusHours(1),
+                    "Updated description",
+                    "https://meet.example.com/interview",
+                    "Updated feedback",
+                    LocalDateTime.of(2025, 8, 3, 6, 0),
+                    "Candidate showed great problem-solving skills",
+                    15,
+                    60,
+                    null,
+                    null,
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    transcription
+            );
+
+        when(interviewServ.updateTranscription(eq(interviewId), anyList())).thenReturn(dto);
+        mockMvc.perform(post("/api/v1/interviews/{id}/transcription", interviewId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(transcription))
+                        .with(csrf()))
+                        .andExpect(jsonPath("$.transcription[0]").value("AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2"));
+    }
 
 
 
