@@ -41,7 +41,6 @@ class InterviewMapperTest {
         interview.setEndTime(LocalDateTime.of(2025, 7, 20, 11, 0));
         interview.setDescription("Tech interview");
         interview.setLink("https://zoom.com/interview123");
-        interview.setFeedback_general("Very good candidate");
         interview.setScheduledAt(LocalDateTime.of(2025, 8, 3, 6, 0));
         interview.setComment("Excellent communication skills");
         interview.setCandidate(candidate);
@@ -59,7 +58,6 @@ class InterviewMapperTest {
         assertEquals(interview.getEndTime(), dto.endTime());
         assertEquals(interview.getDescription(), dto.description());
         assertEquals(interview.getLink(), dto.link());
-        assertEquals(interview.getFeedback_general(), dto.feedback_general());
         assertEquals(interview.getScheduledAt(), dto.scheduledAt());
         assertEquals(interview.getComment(), dto.comment());
         assertEquals(candidateId, dto.candidateId());
@@ -90,7 +88,6 @@ class InterviewMapperTest {
         interview.setEndTime(LocalDateTime.now().plusHours(1));
         interview.setDescription("Interview for testing");
         interview.setLink("http://example.com/interview");
-        interview.setFeedback_general("No feedback yet");
         interview.setScheduledAt(LocalDateTime.now().plusDays(1));
         interview.setComment("Initial comment");
         interview.setNumberOfQuestions(5);
@@ -106,7 +103,6 @@ class InterviewMapperTest {
         assertThat(res.endTime()).isEqualTo(interview.getEndTime());
         assertThat(res.description()).isEqualTo(interview.getDescription());
         assertThat(res.link()).isEqualTo(interview.getLink());
-        assertThat(res.feedback_general()).isEqualTo(interview.getFeedback_general());
         assertThat(res.scheduledAt()).isEqualTo(interview.getScheduledAt());
         assertThat(res.comment()).isEqualTo(interview.getComment());
         assertThat(res.candidateFullName()).isEqualTo(candidate.getFullName());

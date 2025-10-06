@@ -117,7 +117,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 21, 10, 0),
                 "Technical round",
                 "https://zoom.com/meeting",
-                "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 15,
@@ -169,7 +168,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 21, 11, 0),
                 "Technical Interview",
                 "https://meet.example.com/tech",
-                "Strong technical skills",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 "test1 test1",
@@ -183,7 +181,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 22, 14, 45),
                 "HR Interview",
                 "https://meet.example.com/hr",
-                "Good communication",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 "test test",
@@ -202,10 +199,8 @@ class InterviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("Technical Interview"))
                 .andExpect(jsonPath("$[0].link").value("https://meet.example.com/tech"))
-                .andExpect(jsonPath("$[0].feedback_general").value("Strong technical skills"))
                 .andExpect(jsonPath("$[1].description").value("HR Interview"))
-                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"))
-                .andExpect(jsonPath("$[1].feedback_general").value("Good communication"));
+                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"));
         verify(interviewServ).getAllInterviewList();
     }
 
@@ -224,7 +219,6 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").value("https://zoom.com/meeting"))
-                .andExpect(jsonPath("$.feedback_general").value("Very good performance"))
                 .andExpect(jsonPath("$.candidateId").value(interviewDTO.candidateId().toString()))
                 .andExpect(jsonPath("$.offerId").value(interviewDTO.offerId().toString())); // Fixed to use interviewDTO.offerId()
 
@@ -244,7 +238,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 22, 15, 0),
                 "Technical round",
                 "https://meet.example.com/tech",
-                "Great candidate",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 15,
@@ -262,7 +255,6 @@ class InterviewControllerTest {
                 inputDto.endTime(),
                 inputDto.description(),
                 inputDto.link(),
-                inputDto.feedback_general(),
                 inputDto.scheduledAt(),
                 inputDto.comment(),
                 15,
@@ -288,8 +280,7 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.offerId").value(fixedOfferId.toString()))
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
-                .andExpect(jsonPath("$.link").value("https://meet.example.com/tech"))
-                .andExpect(jsonPath("$.feedback_general").value("Great candidate"));
+                .andExpect(jsonPath("$.link").value("https://meet.example.com/tech"));
 
         verify(interviewServ).createInterview(any());
     }
@@ -307,7 +298,6 @@ class InterviewControllerTest {
                 LocalDateTime.now().plusHours(1),
                 "Updated description",
                 "https://meet.example.com/interview",
-                "Updated feedback",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 15,
@@ -329,7 +319,6 @@ class InterviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(interviewId.toString()))
                 .andExpect(jsonPath("$.description").value("Updated description"))
-                .andExpect(jsonPath("$.feedback_general").value("Updated feedback"))
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").exists())

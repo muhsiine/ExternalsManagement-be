@@ -101,9 +101,11 @@ class InterviewTokenServImplTest {
     void validateToken_WithTamperedToken_ShouldReturnFalse() {
         LocalDateTime scheduledAt = LocalDateTime.now();
         String validToken = tokenService.generateToken(scheduledAt, testInterviewId);
-        char lastChar = validToken.charAt(validToken.length() - 1);
-        char tamperChar = lastChar != 'X' ? 'X' : 'Y';
-        String tamperedToken = validToken.substring(0, validToken.length() - 1) + tamperChar;
+        String[] parts = validToken.split("\\.");
+        assertEquals(3, parts.length, "JWT must have 3 parts");
+
+        String tamperedSignature = parts[2].substring(0, parts[2].length() - 1) + "X";
+        String tamperedToken = parts[0] + "." + parts[1] + "." + tamperedSignature;
 
         boolean isValid = tokenService.validateToken(tamperedToken);
 
