@@ -608,7 +608,7 @@ class InterviewSrvImplTest {
                 null,
                 null,
                 null,
-                null,
+                "This is a new comment",
                 0,
                 0,
                 null,
