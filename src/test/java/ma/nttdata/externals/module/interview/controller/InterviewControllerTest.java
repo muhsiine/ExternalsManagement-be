@@ -659,7 +659,6 @@ class InterviewControllerTest {
                     LocalDateTime.now().plusHours(1),
                     "Updated description",
                     "https://meet.example.com/interview",
-                    "Updated feedback",
                     LocalDateTime.of(2025, 8, 3, 6, 0),
                     "Candidate showed great problem-solving skills",
                     15,

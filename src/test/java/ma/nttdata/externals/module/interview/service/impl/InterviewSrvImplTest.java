@@ -113,6 +113,7 @@ class InterviewSrvImplTest {
                 offerId,
                 candidateId,
                 new ArrayList<>(),
+                new ArrayList<>(),
                 new ArrayList<>()
         );
 
@@ -141,7 +142,7 @@ class InterviewSrvImplTest {
         List<Interview> interviews = List.of(new Interview());
         when(interviewRepository.findAll()).thenReturn(interviews);
         when(interviewMapper.toDtoList(interviews)).thenReturn(List.of(
-                new InterviewDTO(null, null, null, null, null, null, null, 7,40,null, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(null, null, null, null, null, null, null, 7,40,null, null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>())
         ));
 
         List<InterviewDTO> result = interviewServ.getAllInterviews();
@@ -155,7 +156,7 @@ class InterviewSrvImplTest {
         Interview interview = new Interview();
         when(interviewRepository.findById(id)).thenReturn(Optional.of(interview));
         when(interviewMapper.toDto(interview)).thenReturn(
-                new InterviewDTO(id, null, null, null, null, null, null, 5,30, null, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(id, null, null, null, null, null, null, 5,30, null, null, new ArrayList<>(), new ArrayList<>(),new ArrayList<>())
         );
 
         InterviewDTO result = interviewServ.getInterviewById(id);
@@ -186,6 +187,7 @@ class InterviewSrvImplTest {
                 offerId,
                 candidateId,
                 new ArrayList<>(),
+                new ArrayList<>(),
                 new ArrayList<>()
         );
 
@@ -213,7 +215,7 @@ class InterviewSrvImplTest {
         List<Interview> list = List.of(new Interview());
         when(interviewRepository.findByOfferId(offerId)).thenReturn(list);
         when(interviewMapper.toDtoList(list)).thenReturn(List.of(
-                new InterviewDTO(null, null, null, null, null, null, null, 8,50, offerId, null, new ArrayList<>(), new ArrayList<>())
+                new InterviewDTO(null, null, null, null, null,null, null, 8,50, offerId, null, new ArrayList<>(), new ArrayList<>(),new ArrayList<>())
         ));
 
         List<InterviewDTO> result = interviewServ.getInterviewsByOfferId(offerId);
@@ -609,6 +611,7 @@ class InterviewSrvImplTest {
                 comment,
                 0,
                 0,
+                null,
                 null,
                 null,
                 null,
