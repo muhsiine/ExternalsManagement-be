@@ -102,14 +102,15 @@ class InterviewTokenServImplTest {
         LocalDateTime scheduledAt = LocalDateTime.now();
         String validToken = tokenService.generateToken(scheduledAt, testInterviewId);
         String[] parts = validToken.split("\\.");
-        assertEquals(3, parts.length, "JWT must have 3 parts");
 
-        String tamperedSignature = parts[2].substring(0, parts[2].length() - 1) + "X";
-        String tamperedToken = parts[0] + "." + parts[1] + "." + tamperedSignature;
+        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+        String tamperedPayload = payloadJson.replace(testInterviewId.toString(), "tampered-id");
 
-        boolean isValid = tokenService.validateToken(tamperedToken);
+        String tamperedToken = parts[0] + "." +
+                Base64.getUrlEncoder().withoutPadding().encodeToString(tamperedPayload.getBytes()) +
+                "." + parts[2];
 
-        assertFalse(isValid);
+        assertFalse(tokenService.validateToken(tamperedToken));
     }
 
     @Test
