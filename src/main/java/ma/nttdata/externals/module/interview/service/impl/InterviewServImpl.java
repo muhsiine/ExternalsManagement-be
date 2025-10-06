@@ -370,12 +370,12 @@ public class InterviewServImpl implements InterviewServ {
         return ResponseEntity.ok().headers(headers).body(audiosZipped);
     }
 
-    public List<String> getTanscription(UUID interviewId){
+    public String getTanscription(UUID interviewId){
         Interview interview = interviewRepository.findById(interviewId).orElseThrow(() -> new EntityNotFoundException("Interview not found with ID: " + interviewId));
         return interview.getTranscription();
     }
 
-    public InterviewDTO updateTranscription(UUID interviewId, List<String> transcription){
+    public InterviewDTO updateTranscription(UUID interviewId, String transcription){
         Interview interview = interviewRepository.findById(interviewId).orElseThrow(() -> new EntityNotFoundException("Interview not found with ID: " + interviewId));
         interview.setTranscription(transcription);
         Interview updatedInterview = interviewRepository.save(interview);

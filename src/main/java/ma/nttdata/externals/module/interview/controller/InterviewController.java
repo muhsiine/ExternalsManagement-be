@@ -275,7 +275,7 @@ public class InterviewController  {
                     "answers provided by the candidate, with timestamps relative to the start of the interview."
     )
     @GetMapping("/{interviewId}/transcription")
-    public List<String> getInterviewTranscription(@PathVariable UUID interviewId) throws IOException {
+    public String getInterviewTranscription(@PathVariable UUID interviewId) throws IOException {
         return interviewServ.getTanscription(interviewId);
     }
 
@@ -286,7 +286,7 @@ public class InterviewController  {
                     "answers provided by the candidate, with timestamps relative to the start of the interview."
     )
     @PostMapping("/{interviewId}/transcription")
-    public InterviewDTO updateInterviewTranscription(@PathVariable UUID interviewId,@RequestBody List<String> transcription) throws IOException {
+    public InterviewDTO updateInterviewTranscription(@PathVariable UUID interviewId,@RequestBody String transcription) throws IOException {
         return interviewServ.updateTranscription(interviewId,transcription);
     }
 

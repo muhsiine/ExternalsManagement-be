@@ -63,8 +63,5 @@ public class Interview {
     @JoinColumn(name = "recording_id", nullable = true)
     private Recording recording;
 
-    @ElementCollection
-    @CollectionTable(name = "interview_transcriptions", joinColumns = @JoinColumn(name = "interview_id"))
-    @Column(name = "transcription_line", columnDefinition = "TEXT")
-    private List<String> transcription;
+    private String transcription;
 }

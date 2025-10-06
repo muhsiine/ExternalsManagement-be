@@ -73,7 +73,7 @@ public interface InterviewServ {
 
     ResponseEntity<byte[]> generateInterviewQuestionsAudios(UUID interviewId) throws IOException;
 
-    List<String> getTanscription(UUID interviewId);
+    String getTanscription(UUID interviewId);
 
-    InterviewDTO updateTranscription(UUID interviewId, List<String> transcription);
+    InterviewDTO updateTranscription(UUID interviewId, String transcription);
 }

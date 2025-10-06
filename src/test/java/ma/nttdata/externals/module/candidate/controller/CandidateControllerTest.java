@@ -71,7 +71,7 @@ class CandidateControllerTest {
                 offerId,
                 Collections.emptyList(), // evaluations
                 Collections.emptyList(), // questions
-                Collections.emptyList()
+                null
         );
 
         // Create a candidate DTO with the new structure

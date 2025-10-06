@@ -125,10 +125,7 @@ class InterviewControllerTest {
                 offerId,
                 List.of(evaluationDTO),
                 List.of(questionDTO),
-                List.of(
-                        "AI - 00:00:10 : What is polymorphism? || Candidate - 00:01:05 : Polymorphism allows objects to take many forms.",
-                        "AI - 00:02:30 : Explain dependency injection. || Candidate - 00:03:15 : It’s a design pattern for decoupling components."
-                )
+                null
                 );
 
         candidateDTO = new CandidateDTO(
@@ -246,7 +243,7 @@ class InterviewControllerTest {
                 fixedOfferId,
                 Collections.emptyList(),
                 Collections.emptyList(),
-                Collections.emptyList()
+                null
         );
 
         InterviewDTO savedInterviewDTO = new InterviewDTO(
@@ -263,7 +260,7 @@ class InterviewControllerTest {
                 inputDto.offerId(),
                 Collections.emptyList(),
                 Collections.emptyList(),
-                Collections.emptyList()
+                null
         );
 
         when(interviewServ.createInterview(any())).thenReturn(savedInterviewDTO);
@@ -306,7 +303,7 @@ class InterviewControllerTest {
                 fixedOfferId,
                 Collections.emptyList(),
                 Collections.emptyList(),
-                Collections.emptyList()
+                null
         );
 
         when(interviewServ.updateInterview(eq(interviewId), any())).thenReturn(updatedDto);
@@ -637,20 +634,20 @@ class InterviewControllerTest {
     @WithMockUser
     void testGetTranscriptionEndpoint() throws Exception {
         UUID interviewId = UUID.randomUUID();
-        List<String> transcription = List.of("AI - 00:00:10 : Q1 || Candidate - 00:00:30 : A1");
+        String transcription = "[\"AI - 00:00:10 : Q1 || Candidate - 00:00:30 : A1\"]";
 
         when(interviewServ.getTanscription(interviewId)).thenReturn(transcription);
 
         mockMvc.perform(get("/api/v1/interviews/{id}/transcription", interviewId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value("AI - 00:00:10 : Q1 || Candidate - 00:00:30 : A1"));
+                .andExpect(content().string(transcription));
     }
 
     @Test
     @WithMockUser
     void testUpdateTranscriptionEndpoint() throws Exception {
         UUID interviewId = UUID.randomUUID();
-        List<String> transcription = List.of("AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2");
+        String transcription = "[\"AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2\"]";
 
         InterviewDTO dto =
             new InterviewDTO(
@@ -670,12 +667,13 @@ class InterviewControllerTest {
                     transcription
             );
 
-        when(interviewServ.updateTranscription(eq(interviewId), anyList())).thenReturn(dto);
+        when(interviewServ.updateTranscription(eq(interviewId), any(String.class))).thenReturn(dto);
         mockMvc.perform(post("/api/v1/interviews/{id}/transcription", interviewId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(transcription))
+                        .content(transcription)
                         .with(csrf()))
-                        .andExpect(jsonPath("$.transcription[0]").value("AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2"));
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.transcription").value(transcription));
     }
 
 

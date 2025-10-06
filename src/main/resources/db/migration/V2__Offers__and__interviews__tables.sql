@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS interviews (
     candidate_id UUID NOT NULL,
     offer_id UUID NOT NULL,
     recording_id UUID,
+    transcription TEXT,
 
     CONSTRAINT fk_candidate
         FOREIGN KEY (candidate_id)

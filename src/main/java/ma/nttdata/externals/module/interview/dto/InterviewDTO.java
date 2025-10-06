@@ -23,5 +23,5 @@ public record InterviewDTO(
         UUID candidateId ,
         List<EvaluationDTO> evaluations ,
         List<QuestionDTO> questions,
-        List<String> transcription
+        String transcription
 ) {}
