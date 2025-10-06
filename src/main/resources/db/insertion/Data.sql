@@ -292,6 +292,58 @@ SELECT
     ),
     recording_ids AS (
 SELECT id FROM recording ORDER BY RANDOM() LIMIT 20
+    ),
+    dynamic_transcription AS (
+SELECT
+    t.g,
+    -- AI Question (Dynamic Time)
+    'AI - 00:' || LPAD((FLOOR(RANDOM() * 20) + 1)::TEXT, 2, '0') || ':00 : ' ||
+    (ARRAY[
+    'Could you explain the concept of **Polymorphism** in Java and give a real-world example?',
+    'Describe a scenario where you would use the **Singleton design pattern** versus a Factory pattern.',
+    'What are the performance implications when choosing between **String, StringBuilder, and StringBuffer**?',
+    'Walk me through the lifecycle of a **Spring bean** and point out where dependency injection occurs.',
+    'Explain how **Garbage Collection** works in the JVM and what Generational Garbage Collection achieves.',
+    'How do you manage configuration secrets and credentials in a **Kubernetes** environment?',
+    'What is the primary difference between **IaaS, PaaS, and SaaS**, and which do you prefer for application deployment?',
+    'Describe your experience with **CI/CD pipelines** using tools like Jenkins or GitLab CI.',
+    'When scaling microservices, what strategies do you employ for **service discovery and load balancing**?',
+    'What are the advantages of using a **message broker** like Kafka or RabbitMQ in a distributed system?',
+    'What is the difference between a **JOIN and an ACID transaction** in PostgreSQL?',
+    'Explain the concept of **indexing** in a relational database and how to decide which columns to index.',
+    'Describe how you handle large dataset migrations with **zero downtime**.',
+    'What are the benefits and drawbacks of using a **NoSQL database** like MongoDB over a traditional SQL database?',
+    'How do you optimize slow-running database queries and identify bottlenecks?',
+    'Describe a time you had to **mentor a junior developer** on a complex technical issue.',
+    'How do you ensure the **security** of the code you write from a high-level perspective?',
+    'What is the most complex **legacy code** base you have had to work with, and how did you approach it?',
+    'Explain the process of **Test-Driven Development (TDD)** and how it impacts your workflow.',
+    'Where do you see yourself in five years, especially concerning **cloud architecture**?'
+    ])[FLOOR(RANDOM()*20)+1] || ' || Candidate - 00:' || LPAD((FLOOR(RANDOM() * 20) + 1)::TEXT, 2, '0') || ':30 : ' ||
+    -- Candidate Answer (Dynamic Time)
+    (ARRAY[
+    'Polymorphism allows objects of different classes to be treated as objects of a common type. A good example is using a list of a parent class type to hold various sub-class objects and iterating through them.',
+    'The Singleton is best for resources like database connection pools or logging, guaranteeing a single instance. Factory is for abstracting object creation, giving clients flexibility without exposing instantiation logic.',
+    'String is immutable, leading to memory overhead with constant concatenation. StringBuilder is faster and mutable but not thread-safe; StringBuffer is thread-safe but slightly slower. I use StringBuilder in single-threaded environments.',
+    'The bean lifecycle starts with instantiation, followed by dependency injection (via setters/constructors), initialization callbacks (@PostConstruct), and finally, it’s ready for use. It ends with the container closing and destruction callbacks.',
+    'GC tracks and removes unreferenced objects. Generational GC segments the heap into young and old generations, which significantly optimizes performance because most objects die young, avoiding expensive full collections.',
+    'I use **Kubernetes Secrets** for sensitive data, coupled with external solutions like HashiCorp Vault or cloud-native key management services for better protection and rotation.',
+    'I prefer **PaaS (Platform as a Service)**, like AWS Elastic Beanstalk or Azure App Service, as it balances control with productivity, handling the underlying OS/infrastructure updates for me. IaaS is too much manual overhead.',
+    'I have designed Jenkins pipelines that include static code analysis (SonarQube), unit/integration testing, and deployment to staging environments, all triggered automatically on every pull request merge.',
+    'I use a **service mesh** like Istio or Consul for automated service discovery, coupled with Round Robin or Least Connections algorithms for traffic distribution at the ingress level.',
+    'Message brokers are vital for **decoupling services** and handling asynchronous communication, ensuring reliability for tasks like order fulfillment or notification processing, which don''t require immediate synchronous confirmation.',
+    'A **JOIN** is a standard SQL operation to combine columns from two or more rows based on a related column. An **ACID transaction** is a fundamental concept guaranteeing that database operations are reliable and complete as a single unit.',
+    'Indexing significantly speeds up search queries on large tables but slows down writes (INSERT/UPDATE). I index columns frequently used in `WHERE` clauses, `ORDER BY`, or `JOIN` conditions, but avoid over-indexing, especially on low-cardinality columns.',
+    'I use a **shadow database strategy** or **logical replication**. For shadow databases, the new schema is built alongside the old, and data is double-written during the transition phase, ensuring seamless cutover.',
+    'NoSQL is great for **high-velocity, schema-less data** like session logs or user profiles, offering horizontal scalability. SQL is better when data integrity (ACID) and complex relational querying are non-negotiable requirements.',
+    'I start by running an `EXPLAIN ANALYZE` on the query to understand its execution plan, looking for **full table scans** or missing indexes. Often, rewriting a subquery or adjusting an index solves the issue.',
+    'I use a **pair programming** approach initially, guiding them through debugging without giving them the direct answer. I emphasize the thought process and resource utilization over the immediate fix, building long-term competence.',
+    'Security is a layered approach. I start with **OWASP Top 10** checks, use static analysis tools in the pipeline, and ensure all input is validated and sanitized, following the principle of least privilege in access controls.',
+    'I dealt with a monolithic banking system using Java 6 and legacy EJBs. My approach was to implement an **anti-corruption layer** around key business domains, allowing us to slowly extract services into a modern framework without halting feature development.',
+    'TDD forces me to think about the **contract and interface** before implementation. It results in code that is inherently more testable, modular, and leads to fewer production bugs because the requirements are enshrined in automated tests.',
+    'I aim to transition into a **Principal or Lead Architect** role, focusing on designing highly available, multi-region cloud systems, specifically leveraging serverless technologies and advanced networking on AWS or Azure.'
+    ])[FLOOR(RANDOM()*20)+1] AS line
+FROM generate_series(1, 25) AS t(g)
     )
 INSERT INTO interviews (
     id,
@@ -305,7 +357,8 @@ INSERT INTO interviews (
     comment,
     number_of_questions,
     estimated_duration,
-    recording_id
+    recording_id,
+    transcription -- This column must be in the SELECT list below
 )
 SELECT
     uuid_generate_v4(),
@@ -315,15 +368,29 @@ SELECT
     t.starttime + t.duration AS endtime,
     'Interview for the position',
     'https://meetings.example.com/' || uuid_generate_v4()::TEXT,
-    CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
+            CURRENT_TIMESTAMP + (FLOOR(RANDOM() * 10) || ' days')::INTERVAL,
     'Auto-generated comment for testing',
     15,
     60,
-    r.id
+    r.id,
+    -- DYNAMICALLY GENERATE THE TRANSCRIPTION STRING
+    '[' || string_agg('"' || dt.line || '"', ',' ORDER BY dt.g) || ']' AS transcription
 FROM offer_ids o
          CROSS JOIN candidate_ids c
          CROSS JOIN interview_times t
          CROSS JOIN recording_ids r
+    -- This lateral join creates a temporary set of random transcription lines for each row
+         CROSS JOIN LATERAL (
+    SELECT line, g FROM dynamic_transcription
+    ORDER BY RANDOM() LIMIT (FLOOR(RANDOM()*20)+1)
+    ) dt
+-- Group the primary interview columns so we can aggregate the transcription lines
+GROUP BY
+    o.id,
+    c.id,
+    t.starttime,
+    t.duration,
+    r.id
     LIMIT 20;
 
 -- EVALUATION_TYPES (Including OverAll)
