@@ -439,8 +439,7 @@ WITH interview_evaluation_combinations AS (
         et.id as evaluation_type_id,
         et.description as eval_type
     FROM interviews i
-    CROSS JOIN evaluation_types et
-    WHERE RANDOM() > 0.3  -- Not all combinations, create some variety
+             CROSS JOIN evaluation_types et
 )
 INSERT INTO evaluations (id, score, feedback, interview_id, evaluation_type_id)
 SELECT
@@ -450,79 +449,78 @@ SELECT
         WHEN iec.eval_type = 'Communication' THEN ROUND((RANDOM() * 30 + 50)::NUMERIC, 2)     -- 50-80 range
         WHEN iec.eval_type = 'Problem Solving' THEN ROUND((RANDOM() * 35 + 45)::NUMERIC, 2)   -- 45-80 range
         ELSE ROUND((RANDOM() * 40 + 50)::NUMERIC, 2)  -- 50-90 range for other skills
-    END,
+        END,
     CASE iec.eval_type
         WHEN 'Technical Skills' THEN
             (ARRAY[
-                'Strong Java and Spring Boot knowledge',
-                'Good understanding of microservices architecture',
-                'Needs improvement in database design',
-                'Excellent coding practices and clean code',
-                'Limited experience with cloud technologies',
-                'Outstanding debugging and problem-solving skills',
-                'Good grasp of testing frameworks and TDD',
-                'Needs more experience with DevOps practices'
-            ])[FLOOR(RANDOM() * 8) + 1]
+                 'Demonstrated strong proficiency in Java and Spring Boot framework. Showcased solid understanding of dependency injection, AOP, and RESTful API design. Able to discuss design patterns and their applications. However, questions about advanced Spring Security configurations revealed gaps that could be addressed with experience.',
+             'Good understanding of microservices architecture and distributed systems. Explained service decomposition strategies, API gateway patterns, and inter-service communication effectively. Showed familiarity with Docker and container orchestration. Would benefit from hands-on experience with service mesh technologies and distributed transactions.',
+             'Technical knowledge is solid but needs improvement in database design and optimization. Understood basic SQL operations and normalization but struggled with complex query optimization and indexing strategies. Recommend training in database performance tuning and execution plans before handling production systems.',
+             'Excellent coding practices and clean code principles. Wrote well-structured, readable code during the assessment. Demonstrated understanding of SOLID principles, proper naming conventions, and code organization. Their approach to refactoring legacy code showed maturity and attention to maintainability.',
+             'Limited experience with cloud technologies, particularly AWS services. Has theoretical knowledge of cloud computing but lacks practical implementation with EC2, S3, Lambda, and RDS. This gap could be bridged through targeted training and guided project work in the first few months.',
+             'Outstanding debugging and problem-solving skills throughout the technical interview. Systematically approached issues, used effective debugging techniques, and showed strong logical reasoning. Able to identify root causes quickly and propose multiple solution approaches. This is a standout strength.',
+             'Good grasp of testing frameworks including JUnit, Mockito, and TDD principles. Wrote meaningful unit tests and understood the importance of test coverage. Demonstrated knowledge of integration testing and mocking strategies. Could improve in test-driven development discipline and writing tests first.',
+             'Needs more experience with DevOps practices and CI/CD pipelines. Familiar with Git and version control but has limited exposure to Jenkins, GitLab CI, or GitHub Actions. Understanding of infrastructure as code and deployment automation is basic. Mentoring in DevOps culture would be beneficial.'
+                 ])[FLOOR(RANDOM() * 8) + 1]
         WHEN 'Communication' THEN
             (ARRAY[
-                'Excellent verbal communication skills',
-                'Clear and concise explanations',
-                'Good active listening abilities',
-                'Needs improvement in presentation skills',
-                'Strong interpersonal skills',
-                'Confident and articulate responses',
-                'Good at asking clarifying questions',
-                'Effective in explaining technical concepts'
-            ])[FLOOR(RANDOM() * 8) + 1]
+                 'Excellent verbal communication skills demonstrated throughout the interview. Articulated thoughts clearly and confidently, maintained good eye contact, and showed enthusiasm discussing technical topics. Adapted communication style appropriately when explaining complex concepts to non-technical panel members.',
+             'Provided clear and concise explanations without unnecessary jargon. Has the ability to break down complex technical problems into understandable components. Responded to questions directly and stayed on topic. Their communication style would work well in client-facing situations and cross-functional collaboration.',
+             'Demonstrated good active listening abilities and emotional intelligence. Waited for questions to be completed before responding, asked thoughtful follow-up questions, and showed understanding of what was asked. Acknowledged when they didn''t understand something rather than making assumptions, which shows maturity.',
+             'Needs improvement in presentation skills and structuring longer responses. While they know the material well, explanations sometimes wandered or lacked clear structure. Would benefit from practicing the STAR method for behavioral questions and organizing technical explanations with clear structure.',
+             'Strong interpersonal skills and natural rapport-building ability. Was personable, showed genuine interest in the team and company culture, and engaged in meaningful dialogue beyond answering questions. Demonstrated humor and warmth while maintaining professionalism. Would be an asset to team dynamics.',
+             'Confident and articulate responses showing strong command of technical vocabulary. Spoke with authority on their areas of expertise without appearing arrogant. Admitted knowledge gaps honestly and showed curiosity about learning. Their confidence would likely inspire trust with stakeholders and team members.',
+             'Good at asking clarifying questions before diving into answers. Didn''t make assumptions and sought to understand the full context of problems presented. This shows analytical thinking and desire to provide accurate responses. Such an approach would be valuable in requirements gathering and client interactions.',
+             'Effective in explaining technical concepts to diverse audiences. Demonstrated ability to adjust their language and level of detail based on the audience. When asked to explain a technical topic to a business stakeholder, successfully removed jargon and focused on business value and outcomes.'
+                 ])[FLOOR(RANDOM() * 8) + 1]
         WHEN 'Problem Solving' THEN
             (ARRAY[
-                'Systematic approach to problem solving',
-                'Creative thinking and innovative solutions',
-                'Good analytical and logical reasoning',
-                'Needs to break down complex problems better',
-                'Strong debugging and troubleshooting skills',
-                'Good at identifying root causes',
-                'Effective in handling challenging scenarios',
-                'Quick learner with good adaptation skills'
-            ])[FLOOR(RANDOM() * 8) + 1]
+                 'Demonstrated systematic approach to problem solving during the assessment. Broke down complex problems into smaller, manageable pieces and tackled them methodically. Documented their thought process clearly and considered edge cases. Their structured approach would be valuable for handling complex production issues.',
+             'Shows creative thinking and proposes innovative solutions to challenges. Didn''t just rely on standard approaches but thought outside the box when presented with constraints. Suggested alternative solutions and weighed trade-offs effectively. This creative problem-solving would be beneficial for architecture discussions and optimization tasks.',
+             'Good analytical and logical reasoning skills evident in coding exercises. Approached problems logically, identified patterns, and applied appropriate algorithms. Explained their reasoning clearly before coding and adjusted approach based on feedback. Strong foundation in computer science fundamentals supports their problem-solving ability.',
+             'Needs to improve at breaking down complex problems into smaller components. Sometimes tried to solve everything at once rather than decomposing the problem. This led to confusion and backtracking during the coding assessment. With practice in systematic problem decomposition, they could significantly improve effectiveness.',
+             'Strong debugging and troubleshooting skills demonstrated with real-world scenarios. When presented with a bug in existing code, used systematic debugging techniques, formed hypotheses, and tested them methodically. Didn''t jump to conclusions and thoroughly verified fixes. This analytical approach to debugging is exactly what we need.',
+             'Good at identifying root causes rather than treating symptoms. Showed depth in their analysis and didn''t stop at surface-level solutions. Asked probing questions to understand underlying issues and considered long-term implications. This mindset would help prevent recurring problems in production systems.',
+             'Effective in handling challenging scenarios and pressure situations. When given a time-boxed problem-solving exercise, remained calm, prioritized effectively, and delivered a working solution. Communicated progress and didn''t panic when encountering obstacles. This composure under pressure is crucial for incident response.',
+             'Quick learner with good adaptation skills when introduced to unfamiliar concepts. When presented with a technology they hadn''t used, quickly grasped key concepts and applied them appropriately. Asked insightful questions and made connections to similar technologies they knew. This learning agility is highly valuable.'
+                 ])[FLOOR(RANDOM() * 8) + 1]
         WHEN 'Cultural Fit' THEN
             (ARRAY[
-                'Great team player with collaborative spirit',
-                'Strong alignment with company values',
-                'Good cultural fit for agile environment',
-                'Positive attitude and growth mindset',
-                'Strong work ethic and dedication',
-                'Good fit for remote/hybrid work culture',
-                'Excellent interpersonal skills with team',
-                'Shows initiative and proactive approach'
-            ])[FLOOR(RANDOM() * 8) + 1]
+                 'Great team player with collaborative spirit and positive energy. Emphasized teamwork in their examples, showed appreciation for diverse perspectives, and demonstrated conflict resolution skills. Expressed genuine interest in mentoring junior developers and learning from senior team members. Their collaborative mindset aligns perfectly with our team-first culture.',
+             'Strong alignment with company values, particularly around innovation and customer focus. Career choices and project selections demonstrate values consistent with ours. Spoke passionately about delivering value to end users and showed understanding of balancing technical excellence with business needs. Cultural alignment appears very strong.',
+             'Good cultural fit for our agile environment and iterative development approach. Has experience with agile methodologies, understands the importance of feedback loops, and embraces change. Expressed comfort with ambiguity and iterative refinement. Their mindset matches our fast-paced, adaptive work environment well.',
+             'Positive attitude and growth mindset evident throughout the conversation. Views challenges as learning opportunities and spoke enthusiastically about areas where they want to grow. Didn''t make excuses for gaps in knowledge but instead expressed excitement about learning. This attitude would contribute positively to team morale.',
+             'Strong work ethic and dedication to quality demonstrated through examples. Shared stories of going above and beyond to deliver excellent results, taking ownership of problems, and following through on commitments. Their professionalism and reliability would make them a dependable team member.',
+             'Good fit for our remote/hybrid work culture with strong self-management skills. Has experience working remotely, demonstrated good communication practices for distributed teams, and showed initiative in staying connected with teammates. Understands the importance of overcommunication and documentation in remote settings.',
+             'Excellent interpersonal skills that would enhance team dynamics. Is approachable, empathetic, and showed emotional intelligence in their responses. Demonstrated ability to build relationships, give and receive feedback constructively, and navigate interpersonal challenges. Would be a positive influence on team culture.',
+             'Shows initiative and proactive approach to problem-solving and improvement. Provided examples of identifying issues before they became critical, suggesting process improvements, and taking ownership beyond immediate responsibilities. This proactive mindset aligns with our culture of continuous improvement and ownership.'
+                 ])[FLOOR(RANDOM() * 8) + 1]
         WHEN 'Experience' THEN
             (ARRAY[
-                'Solid experience in enterprise applications',
-                'Good background in startup environment',
-                'Relevant project experience in similar domain',
-                'Limited but promising career progression',
-                'Strong portfolio of completed projects',
-                'Good mix of frontend and backend experience',
-                'Valuable experience in team leadership',
-                'Impressive internship and academic projects'
-            ])[FLOOR(RANDOM() * 8) + 1]
+                 'Solid experience in enterprise applications with exposure to complex business domains. Has worked on large-scale systems serving thousands of users, dealt with enterprise integration challenges, and understands compliance requirements. Their experience with enterprise patterns would be immediately applicable to our projects.',
+             'Good background in startup environment showing adaptability and versatility. Has worn multiple hats, worked in fast-paced settings with limited resources, and delivered features quickly. Understands the trade-offs between speed and perfection. This startup experience has made them resourceful and comfortable with ambiguity.',
+             'Relevant project experience in similar domains, particularly in e-commerce and payment processing. Has implemented shopping carts, payment gateway integrations, and order management systems. This domain knowledge would significantly reduce their ramp-up time and allow meaningful contributions from day one.',
+             'Limited professional experience but shows promising career progression and continuous learning. Has made smart career moves, consistently taken on more responsibility, and actively sought learning opportunities. While they lack senior-level experience, their trajectory suggests they will reach that level quickly with mentoring.',
+             'Strong portfolio of completed projects demonstrating end-to-end ownership. Has shipped multiple projects from conception to production, handled deployment and monitoring, and maintained systems post-launch. This full-cycle experience shows they understand all phases of software development lifecycle.',
+             'Good mix of frontend and backend experience with full-stack capabilities. Is comfortable working across the stack, from database design through API development to UI implementation. While stronger on the backend, their frontend skills are sufficient for full-stack collaboration. This versatility would be valuable for cross-functional teams.',
+             'Valuable experience in team leadership and mentoring junior developers. Has led small teams, conducted code reviews, mentored interns, and helped establish development practices. Their leadership experience, even if informal, would be beneficial as we''re looking for someone who can grow into a tech lead role.',
+             'Impressive internship and academic projects showing strong foundation and passion. While early in their career, has built substantial projects during studies and internships. Contributed to open-source, participated in hackathons, and pursued self-directed learning. This initiative and passion suggest high potential for growth.'
+                 ])[FLOOR(RANDOM() * 8) + 1]
         ELSE
             (ARRAY[
-                'Highly motivated and enthusiastic',
-                'Strong desire for continuous learning',
-                'Clear career goals and aspirations',
-                'Good understanding of role expectations',
-                'Passionate about technology and innovation',
-                'Shows commitment to professional growth',
-                'Eager to contribute to team success',
-                'Demonstrates self-motivation and drive'
-            ])[FLOOR(RANDOM() * 8) + 1]
-    END,
+                 'Highly motivated and enthusiastic about the role and company mission. Did thorough research about our products, asked insightful questions about our roadmap, and expressed genuine excitement about potential contributions. Their enthusiasm is infectious and would bring positive energy to the team.',
+             'Strong desire for continuous learning and professional development. Actively pursues learning through online courses, technical books, conferences, and side projects. Articulated clear learning goals and showed openness to feedback. This commitment to growth aligns well with our investment in employee development.',
+             'Clear career goals and aspirations that align with our growth opportunities. Wants to develop into a technical architect role and has mapped out skills they need to develop. Our team structure and projects offer the right path for this progression. The alignment between their goals and our opportunities is excellent.',
+             'Good understanding of role expectations and realistic about challenges. Asked thoughtful questions about the role, understood the technical challenges ahead, and showed awareness of areas where they''d need to grow. This realistic self-assessment and understanding of expectations bodes well for successful onboarding.',
+             'Passionate about technology and innovation with genuine curiosity. Stays current with industry trends, experiments with new technologies in personal projects, and thinks critically about tech adoption. Brought up interesting technical discussions during the interview showing depth of interest beyond job requirements.',
+             'Shows commitment to professional growth and taking ownership of career development. Has sought out mentors, participated in professional communities, and invested personal time in skill development. Views their career as a journey they''re actively managing rather than something that happens to them.',
+             'Eager to contribute to team success and make immediate impact. Asked about onboarding process, how they could add value quickly, and showed genuine interest in understanding team challenges. Their focus on contribution rather than personal benefit is refreshing and indicates strong team orientation.',
+             'Demonstrates self-motivation and internal drive for excellence. Provided examples of going beyond requirements, pursuing excellence even when not required, and pushing themselves to improve. This intrinsic motivation is more valuable than external pressure and suggests they''ll thrive in our autonomous work environment.'
+                 ])[FLOOR(RANDOM() * 8) + 1]
+        END,
     iec.interview_id,
     iec.evaluation_type_id
 FROM interview_evaluation_combinations iec;
-
 -- QUESTIONS - Create varied questions for each interview
 WITH interview_question_pools AS (
     SELECT
