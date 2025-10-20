@@ -204,7 +204,7 @@ public class InterviewController  {
                     payload.candidateFullName(),
                     payload.offerTitle(),
                     payload.link(),
-                    payload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
+                    payload.scheduledDate()
             );
 
             emailServiceImpl.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
