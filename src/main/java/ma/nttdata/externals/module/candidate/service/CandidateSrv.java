@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.dto.OfferPassedCandidatesDTO;
 import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
 import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
 
@@ -23,6 +24,9 @@ public interface CandidateSrv {
     Long getTotalCandidates();
     List<String> getDistinctMainTechs();
     List<OfferCandidatesDTO> findRecommendedCandidates(OfferFormattedDescriptionDTO offer);
+
+    List<OfferPassedCandidatesDTO> getPassedCandidatesForOffer(UUID offerID);
+
 
 
 }

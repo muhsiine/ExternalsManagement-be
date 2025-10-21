@@ -7,6 +7,7 @@ import ma.nttdata.externals.commons.exception.InternalServerException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.constants.LanguageLevel;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.dto.OfferPassedCandidatesDTO;
 import ma.nttdata.externals.module.candidate.entity.*;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
@@ -14,9 +15,21 @@ import ma.nttdata.externals.module.candidate.repository.CityRepository;
 import ma.nttdata.externals.module.candidate.repository.CountryRepository;
 import ma.nttdata.externals.module.candidate.repository.LanguageRepository;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
+import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
+import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
+import ma.nttdata.externals.module.interview.dto.FullEvaluationDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewDTO;
+import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
+import ma.nttdata.externals.module.interview.service.EvaluationServ;
+import ma.nttdata.externals.module.interview.service.EvaluationTypeServ;
+import ma.nttdata.externals.module.interview.service.InterviewServ;
 import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
 import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
+import ma.nttdata.externals.module.offer.service.OfferServ;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,17 +41,27 @@ public class CandidateSrvImpl implements CandidateSrv {
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
     private final LanguageRepository languageRepository;
+    private final OfferServ offerServ;
+    private final InterviewServ interviewServ;
+    private final EvaluationServ evaluationServ;
+    private final EvaluationTypeServ evaluationTypeServ;
+    private final EvaluationMapper evaluationMapper;
 
     public CandidateSrvImpl(CandidateMapper candidateMapper,
                             CandidateRepository candidateRepository,
                             CountryRepository countryRepository,
                             CityRepository cityRepository,
-                            LanguageRepository languageRepository) {
+                            LanguageRepository languageRepository, OfferServ offerServ, InterviewServ interviewServ, EvaluationServ evaluationServ, EvaluationTypeServ evaluationTypeServ, EvaluationMapper evaluationMapper) {
         this.mapper = candidateMapper;
         this.candidateRepository = candidateRepository;
         this.countryRepository = countryRepository;
         this.cityRepository = cityRepository;
         this.languageRepository = languageRepository;
+        this.offerServ = offerServ;
+        this.interviewServ = interviewServ;
+        this.evaluationServ = evaluationServ;
+        this.evaluationTypeServ = evaluationTypeServ;
+        this.evaluationMapper = evaluationMapper;
     }
 
     @Override
@@ -258,5 +281,40 @@ public class CandidateSrvImpl implements CandidateSrv {
         // relies on the enum order (BEGINNER < INTERMEDIATE < ADVANCED < NATIVE)
         return candidateLevel.ordinal() >= offerLevel.ordinal();
     }
+
+    public List<OfferPassedCandidatesDTO> getPassedCandidatesForOffer(UUID offerId) {
+        try {
+            OfferDTO offer = offerServ.getOfferById(offerId);
+
+            List<InterviewDTO> interviews = interviewServ.getInterviewsByOfferId(offerId);
+
+            return interviews.stream()
+                    .map(interview -> {
+                        CandidateDTO candidateDTO = getById(interview.candidateId());
+
+                        List<FullEvaluationDTO> fullEvaluations = evaluationServ
+                                .getAllEvaluationsByInterviewID(interview.id()).stream()
+                                .map(evaluationMapper::toDto)
+                                .map(evaluation -> {
+                                    EvaluationTypeDTO type = evaluationTypeServ.getTypeById(evaluation.evaluationTypeId());
+                                    return new FullEvaluationDTO(
+                                            evaluation.id(),
+                                            evaluation.score(),
+                                            evaluation.feedback(),
+                                            evaluation.interviewId(),
+                                            type
+                                    );
+                                })
+                                .toList();
+
+                        return new OfferPassedCandidatesDTO(candidateDTO.id(), candidateDTO.fullName(), fullEvaluations);
+                    })
+                    .toList();
+
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Offer not found with id: " + offerId, e);
+        }
+    }
+
 
 }
