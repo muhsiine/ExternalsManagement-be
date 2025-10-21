@@ -19,8 +19,7 @@ public class EmailContentBuilder {
 
     public String buildInterviewEmail(String fullName, String offerTitle, String link, LocalDateTime scheduledDate) {
         try{
-            LocalDateTime deadline = scheduledDate.plusHours(48);
-            String formattedDeadline = deadline.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"));
+            String formattedDeadline = scheduledDate.format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"));
             String interviewInvitationTemplate = loadTemplate(InterviewInvitationEmailTemplate);
             return  interviewInvitationTemplate.formatted(fullName, offerTitle,formattedDeadline, link);
         }catch (IOException e){
