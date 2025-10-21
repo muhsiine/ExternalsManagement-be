@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import ma.nttdata.externals.commons.exception.BadRequestException;
 import ma.nttdata.externals.commons.exception.ResourceNotFoundException;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.dto.OfferPassedCandidatesDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import ma.nttdata.externals.module.offer.dto.OfferCandidatesDTO;
 import ma.nttdata.externals.module.offer.dto.OfferFormattedDescriptionDTO;
@@ -19,7 +20,6 @@ import ma.nttdata.externals.module.offer.service.OfferServ;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ma.nttdata.externals.module.offer.service.OfferServ;
 
 import java.util.List;
 import java.util.Map;
@@ -291,5 +291,22 @@ public class CandidateController {
 
         return ResponseEntity.ok(recommendedCandidates);
     }
+
+    @GetMapping("/{id}/passed-candidates")
+    @Operation(
+            summary = "Get candidates who passed interviews for an offer",
+            description = "Retrieves the list of candidates that have passed the interviews for a specific job offer, " +
+                    "including their evaluations and scores for each evaluation type."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of passed candidates retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OfferPassedCandidatesDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Offer not found")
+    })
+    public ResponseEntity<List<OfferPassedCandidatesDTO>> getPassedCandidates(@PathVariable UUID id) {
+        List<OfferPassedCandidatesDTO> candidates = candidateSrv.getPassedCandidatesForOffer(id);
+        return ResponseEntity.ok(candidates);
+    }
+
 
 }
