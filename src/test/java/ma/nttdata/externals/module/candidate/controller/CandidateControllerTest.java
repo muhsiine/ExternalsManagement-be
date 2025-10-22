@@ -65,7 +65,6 @@ class CandidateControllerTest {
                 LocalDateTime.of(2025, 7, 21, 10, 0),
                 "Technical round",
                 "https://zoom.com/meeting",
-                "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 1,
@@ -73,7 +72,8 @@ class CandidateControllerTest {
                 candidateId,
                 offerId,
                 Collections.emptyList(), // evaluations
-                Collections.emptyList() // questions
+                Collections.emptyList(), // questions
+                null
         );
 
         // Create a candidate DTO with the new structure

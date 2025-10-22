@@ -10,7 +10,6 @@ public record InterviewListDTO(
         LocalDateTime endTime,
         String description ,
         String link  ,
-        String feedback_general ,
         LocalDateTime scheduledAt ,
         String comment,
         String candidateFullName,

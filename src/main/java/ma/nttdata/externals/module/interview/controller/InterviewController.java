@@ -204,7 +204,7 @@ public class InterviewController  {
                     payload.candidateFullName(),
                     payload.offerTitle(),
                     payload.link(),
-                    payload.scheduledDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm"))
+                    payload.scheduledDate()
             );
 
             emailServiceImpl.sendEmail(payload.email(), "Your Interview at NTT DATA", html);
@@ -266,6 +266,28 @@ public class InterviewController  {
     @GetMapping("/{interviewId}/generateQuestionsAudios")
     public ResponseEntity<byte[]> getInterviewQuestionsAudios(@PathVariable UUID interviewId) throws IOException {
         return interviewServ.generateInterviewQuestionsAudios(interviewId);
+    }
+
+    @Operation(
+            summary = "Get the transcription of an interview",
+            description = "Retrieves the full transcription of a specific interview identified by its ID. " +
+                    "The transcription includes all questions asked by the AI and the corresponding " +
+                    "answers provided by the candidate, with timestamps relative to the start of the interview."
+    )
+    @GetMapping("/{interviewId}/transcription")
+    public String getInterviewTranscription(@PathVariable UUID interviewId) throws IOException {
+        return interviewServ.getTanscription(interviewId);
+    }
+
+    @Operation(
+            summary = "Update the transcription of an interview",
+            description = "Update the full transcription of a specific interview identified by its ID. " +
+                    "The transcription includes all questions asked by the AI and the corresponding " +
+                    "answers provided by the candidate, with timestamps relative to the start of the interview."
+    )
+    @PostMapping("/{interviewId}/transcription")
+    public InterviewDTO updateInterviewTranscription(@PathVariable UUID interviewId,@RequestBody String transcription) throws IOException {
+        return interviewServ.updateTranscription(interviewId,transcription);
     }
 
 

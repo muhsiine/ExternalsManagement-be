@@ -101,13 +101,16 @@ class InterviewTokenServImplTest {
     void validateToken_WithTamperedToken_ShouldReturnFalse() {
         LocalDateTime scheduledAt = LocalDateTime.now();
         String validToken = tokenService.generateToken(scheduledAt, testInterviewId);
-        char lastChar = validToken.charAt(validToken.length() - 1);
-        char tamperChar = lastChar != 'X' ? 'X' : 'Y';
-        String tamperedToken = validToken.substring(0, validToken.length() - 1) + tamperChar;
+        String[] parts = validToken.split("\\.");
 
-        boolean isValid = tokenService.validateToken(tamperedToken);
+        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+        String tamperedPayload = payloadJson.replace(testInterviewId.toString(), "tampered-id");
 
-        assertFalse(isValid);
+        String tamperedToken = parts[0] + "." +
+                Base64.getUrlEncoder().withoutPadding().encodeToString(tamperedPayload.getBytes()) +
+                "." + parts[2];
+
+        assertFalse(tokenService.validateToken(tamperedToken));
     }
 
     @Test

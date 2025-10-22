@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS interviews (
     endTime TIMESTAMP,
     description TEXT,
     link VARCHAR(500),
-    feedback_general VARCHAR(255),
     scheduled_at TIMESTAMP,
     comment VARCHAR(255),
     number_of_questions INTEGER,
@@ -38,6 +37,7 @@ CREATE TABLE IF NOT EXISTS interviews (
     candidate_id UUID NOT NULL,
     offer_id UUID NOT NULL,
     recording_id UUID,
+    transcription TEXT,
 
     CONSTRAINT fk_candidate
         FOREIGN KEY (candidate_id)

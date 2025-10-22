@@ -33,9 +33,6 @@ public class Interview {
     @Column(name = "link")
     private String link ;
 
-    @Column(name = "feedback_general")
-    private String feedback_general;
-
     @Column(name = "scheduled_at")
     private LocalDateTime scheduledAt;
 
@@ -65,4 +62,6 @@ public class Interview {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
     @JoinColumn(name = "recording_id", nullable = true)
     private Recording recording;
+
+    private String transcription;
 }
