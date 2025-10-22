@@ -9,6 +9,7 @@ import java.util.UUID;
 public record OfferPassedCandidatesDTO(
         UUID id,
         String fullName,
+        AddressDTO address,
         List<FullEvaluationDTO> evaluations
 ){}
 

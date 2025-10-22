@@ -307,7 +307,7 @@ public class CandidateSrvImpl implements CandidateSrv {
                                 })
                                 .toList();
 
-                        return new OfferPassedCandidatesDTO(candidateDTO.id(), candidateDTO.fullName(), fullEvaluations);
+                        return new OfferPassedCandidatesDTO(candidateDTO.id(), candidateDTO.fullName(),candidateDTO.address(), fullEvaluations);
                     })
                     .toList();
 
