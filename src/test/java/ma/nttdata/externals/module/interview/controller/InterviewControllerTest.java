@@ -30,6 +30,7 @@ import java.util.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -116,7 +117,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 21, 10, 0),
                 "Technical round",
                 "https://zoom.com/meeting",
-                "Very good performance",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 15,
@@ -124,7 +124,9 @@ class InterviewControllerTest {
                 candidateId,
                 offerId,
                 List.of(evaluationDTO),
-                List.of(questionDTO));
+                List.of(questionDTO),
+                null
+                );
 
         candidateDTO = new CandidateDTO(
                 candidateId,
@@ -163,7 +165,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 21, 11, 0),
                 "Technical Interview",
                 "https://meet.example.com/tech",
-                "Strong technical skills",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 "test1 test1",
@@ -177,7 +178,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 22, 14, 45),
                 "HR Interview",
                 "https://meet.example.com/hr",
-                "Good communication",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 "test test",
@@ -196,10 +196,8 @@ class InterviewControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("Technical Interview"))
                 .andExpect(jsonPath("$[0].link").value("https://meet.example.com/tech"))
-                .andExpect(jsonPath("$[0].feedback_general").value("Strong technical skills"))
                 .andExpect(jsonPath("$[1].description").value("HR Interview"))
-                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"))
-                .andExpect(jsonPath("$[1].feedback_general").value("Good communication"));
+                .andExpect(jsonPath("$[1].link").value("https://meet.example.com/hr"));
         verify(interviewServ).getAllInterviewList();
     }
 
@@ -218,7 +216,6 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").value("https://zoom.com/meeting"))
-                .andExpect(jsonPath("$.feedback_general").value("Very good performance"))
                 .andExpect(jsonPath("$.candidateId").value(interviewDTO.candidateId().toString()))
                 .andExpect(jsonPath("$.offerId").value(interviewDTO.offerId().toString())); // Fixed to use interviewDTO.offerId()
 
@@ -238,7 +235,6 @@ class InterviewControllerTest {
                 LocalDateTime.of(2025, 7, 22, 15, 0),
                 "Technical round",
                 "https://meet.example.com/tech",
-                "Great candidate",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 15,
@@ -246,7 +242,8 @@ class InterviewControllerTest {
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                null
         );
 
         InterviewDTO savedInterviewDTO = new InterviewDTO(
@@ -255,7 +252,6 @@ class InterviewControllerTest {
                 inputDto.endTime(),
                 inputDto.description(),
                 inputDto.link(),
-                inputDto.feedback_general(),
                 inputDto.scheduledAt(),
                 inputDto.comment(),
                 15,
@@ -263,7 +259,8 @@ class InterviewControllerTest {
                 inputDto.candidateId(),
                 inputDto.offerId(),
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                null
         );
 
         when(interviewServ.createInterview(any())).thenReturn(savedInterviewDTO);
@@ -272,7 +269,7 @@ class InterviewControllerTest {
         mockMvc.perform(post("/api/v1/interviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(inputDto))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(fixedInterviewId.toString()))
                 .andExpect(jsonPath("$.description").value("Technical round"))
@@ -280,8 +277,7 @@ class InterviewControllerTest {
                 .andExpect(jsonPath("$.offerId").value(fixedOfferId.toString()))
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
-                .andExpect(jsonPath("$.link").value("https://meet.example.com/tech"))
-                .andExpect(jsonPath("$.feedback_general").value("Great candidate"));
+                .andExpect(jsonPath("$.link").value("https://meet.example.com/tech"));
 
         verify(interviewServ).createInterview(any());
     }
@@ -299,7 +295,6 @@ class InterviewControllerTest {
                 LocalDateTime.now().plusHours(1),
                 "Updated description",
                 "https://meet.example.com/interview",
-                "Updated feedback",
                 LocalDateTime.of(2025, 8, 3, 6, 0),
                 "Candidate showed great problem-solving skills",
                 15,
@@ -307,7 +302,8 @@ class InterviewControllerTest {
                 fixedCandidateId,
                 fixedOfferId,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                null
         );
 
         when(interviewServ.updateInterview(eq(interviewId), any())).thenReturn(updatedDto);
@@ -316,11 +312,10 @@ class InterviewControllerTest {
         mockMvc.perform(put("/api/v1/interviews/{id}", interviewId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedDto))
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(interviewId.toString()))
                 .andExpect(jsonPath("$.description").value("Updated description"))
-                .andExpect(jsonPath("$.feedback_general").value("Updated feedback"))
                 .andExpect(jsonPath("$.startTime").exists())
                 .andExpect(jsonPath("$.endTime").exists())
                 .andExpect(jsonPath("$.link").exists())
@@ -338,7 +333,7 @@ class InterviewControllerTest {
 
         // Act & Assert
         mockMvc.perform(delete("/api/v1/interviews/{id}", interviewId)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         verify(interviewServ).deleteInterview(interviewId);
@@ -553,7 +548,7 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody)
                         .accept(MediaType.APPLICATION_JSON)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(3)))
                 .andExpect(jsonPath("$[0].description").value("What is your experience with Spring Boot?"))
@@ -606,7 +601,7 @@ class InterviewControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest)
                         .accept(MediaType.APPLICATION_JSON)
-                        .with(SecurityMockMvcRequestPostProcessors.csrf()))
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Evaluation is created and saved"));
 
@@ -635,6 +630,51 @@ class InterviewControllerTest {
         System.out.println("Token: " + token);
     }
 
+    @Test
+    @WithMockUser
+    void testGetTranscriptionEndpoint() throws Exception {
+        UUID interviewId = UUID.randomUUID();
+        String transcription = "[\"AI - 00:00:10 : Q1 || Candidate - 00:00:30 : A1\"]";
+
+        when(interviewServ.getTanscription(interviewId)).thenReturn(transcription);
+
+        mockMvc.perform(get("/api/v1/interviews/{id}/transcription", interviewId))
+                .andExpect(status().isOk())
+                .andExpect(content().string(transcription));
+    }
+
+    @Test
+    @WithMockUser
+    void testUpdateTranscriptionEndpoint() throws Exception {
+        UUID interviewId = UUID.randomUUID();
+        String transcription = "[\"AI - 00:01:00 : Q2 || Candidate - 00:01:30 : A2\"]";
+
+        InterviewDTO dto =
+            new InterviewDTO(
+                    interviewId,
+                    LocalDateTime.now(),
+                    LocalDateTime.now().plusHours(1),
+                    "Updated description",
+                    "https://meet.example.com/interview",
+                    LocalDateTime.of(2025, 8, 3, 6, 0),
+                    "Candidate showed great problem-solving skills",
+                    15,
+                    60,
+                    null,
+                    null,
+                    Collections.emptyList(),
+                    Collections.emptyList(),
+                    transcription
+            );
+
+        when(interviewServ.updateTranscription(eq(interviewId), any(String.class))).thenReturn(dto);
+        mockMvc.perform(post("/api/v1/interviews/{id}/transcription", interviewId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(transcription)
+                        .with(csrf()))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.transcription").value(transcription));
+    }
 
 
 

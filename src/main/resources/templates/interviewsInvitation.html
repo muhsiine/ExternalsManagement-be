@@ -6,54 +6,87 @@
     <title>Interview Invitation - NTT DATA</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            color: #333333;
-            background-color: #f9f9f9;
-            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #333;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
         }
         .container {
-            max-width: 600px;
-            margin: 20px auto;
+            max-width: 650px;
+            margin: 40px auto;
             background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-radius: 6px;
-            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
         }
-        h2 {
-            color: #004c97;
-            margin-bottom: 0;
+        .header {
+            background-color: #004c97;
+            color: #ffffff;
+            text-align: center;
+            padding: 25px 20px;
         }
-        p {
-            line-height: 1.5;
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        .content p {
+            line-height: 1.6;
             font-size: 16px;
+            margin-bottom: 16px;
         }
-        a {
-            color: #1a73e8;
+        .button {
+            display: inline-block;
+            background-color: #0071bc;
+            color: #ffffff !important;
             text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
         }
-        a:hover {
-            text-decoration: underline;
+        .button:hover {
+            background-color: #005a94;
         }
         .footer {
-            font-size: 12px;
-            color: #777777;
-            margin-top: 30px;
-            border-top: 1px solid #eeeeee;
-            padding-top: 10px;
+            background-color: #f1f3f5;
+            color: #666666;
+            font-size: 13px;
+            text-align: center;
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        .footer p {
+            margin: 5px 0;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
 <div class="container" role="article" aria-label="Interview Invitation Email">
-    <h2>NTT DATA Interview Invitation</h2>
-    <p>Hello <strong>%s</strong>,</p>
-    <p>You are invited for an interview for the position of <strong>%s</strong>.</p>
-    <p><strong>Date:</strong> %s</p>
-    <p><strong>Link:</strong> <a href="%s" target="_blank" rel="noopener noreferrer">%s</a></p>
-    <p>If you have any questions, feel free to contact us.</p>
+    <div class="header">
+        <h2>NTT DATA Interview Invitation</h2>
+    </div>
+    <div class="content">
+        <p>Hello <strong>%s</strong>,</p>
+        <p>You are invited to attend an interview for the position of <strong>%s</strong>.</p>
+        <p><strong>Timeframe:</strong> You have <strong>48 hours starting from %s</strong> to complete the interview.</p>
+
+        <p style="text-align: center; margin: 30px 0;">
+            <a href="%s" target="_blank" rel="noopener noreferrer" class="button">Click Here to Start the Interview</a>
+        </p>
+
+        <p>If you have any questions, please feel free to contact us.</p>
+        <p>Best regards,<br><strong>The NTT DATA Team</strong></p>
+    </div>
     <div class="footer">
-        <p>NTT DATA<br />
-            Parc Tétouan Shore, Shore 3, Route de Cabo Negro, Martil-Maroc.</p>
+        <p>NTT DATA Morocco</p>
+        <p>Parc Tétouan Shore, Shore 3, Route de Cabo Negro, Martil, Morocco.</p>
         <p>If you did not expect this email, please contact our support team.</p>
     </div>
 </div>
