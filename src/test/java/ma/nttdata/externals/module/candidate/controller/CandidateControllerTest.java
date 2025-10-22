@@ -468,11 +468,11 @@ class CandidateControllerTest {
 
         // Create dummy candidates
         OfferPassedCandidatesDTO candidate1 = new OfferPassedCandidatesDTO(
-                candidateId1, "John Doe", List.of(eval1, eval2)
+                candidateId1, "John Doe",null, List.of(eval1, eval2)
         );
 
         OfferPassedCandidatesDTO candidate2 = new OfferPassedCandidatesDTO(
-                candidateId2, "Jane Smith", Collections.emptyList() // candidate with no evaluations
+                candidateId2, "Jane Smith",null, Collections.emptyList() // candidate with no evaluations
         );
 
         List<OfferPassedCandidatesDTO> passedCandidates = List.of(candidate1, candidate2);

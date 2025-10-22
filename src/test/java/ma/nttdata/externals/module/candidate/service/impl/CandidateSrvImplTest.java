@@ -351,8 +351,8 @@ class CandidateSrvImplTest {
         // Mock Interview - IMPORTANT: use candidateId from setUp()
         InterviewDTO interview = new InterviewDTO(
                 interviewId, null, null, null, null, null,
-                null, null, 0, 0, candidateId, offerId,
-                Collections.emptyList(), Collections.emptyList()
+                null, 0, 0, offerId, candidateId, new ArrayList<>(),
+                new ArrayList<>(),""
         );
         when(interviewServ.getInterviewsByOfferId(offerId))
                 .thenReturn(Collections.singletonList(interview));
