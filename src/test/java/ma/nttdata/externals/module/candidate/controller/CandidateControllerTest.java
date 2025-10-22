@@ -3,6 +3,8 @@ package ma.nttdata.externals.module.candidate.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.*;
+import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
+import ma.nttdata.externals.module.interview.dto.FullEvaluationDTO;
 import ma.nttdata.externals.module.interview.dto.InterviewDTO;
 import ma.nttdata.externals.module.candidate.service.CandidateSrv;
 import ma.nttdata.externals.module.offer.service.OfferServ;
@@ -443,4 +445,57 @@ class CandidateControllerTest {
 
         verify(candidateSrv).getCandidates();
     }
+
+    @Test
+    @WithMockUser
+    void testGetPassedCandidatesForOffer() throws Exception {
+        // Arrange
+        UUID offerId = UUID.randomUUID();
+        UUID candidateId1 = UUID.randomUUID();
+        UUID candidateId2 = UUID.randomUUID();
+        UUID evaluationTypeId = UUID.randomUUID();
+
+        // Create dummy evaluations
+        FullEvaluationDTO eval1 = new FullEvaluationDTO(
+                UUID.randomUUID(), 85.0, "Good", UUID.randomUUID(),
+                new EvaluationTypeDTO(evaluationTypeId, "overAll",3.0)
+        );
+
+        FullEvaluationDTO eval2 = new FullEvaluationDTO(
+                UUID.randomUUID(), 90.0, "Excellent", UUID.randomUUID(),
+                new EvaluationTypeDTO(evaluationTypeId, "communication",3.0)
+        );
+
+        // Create dummy candidates
+        OfferPassedCandidatesDTO candidate1 = new OfferPassedCandidatesDTO(
+                candidateId1, "John Doe", List.of(eval1, eval2)
+        );
+
+        OfferPassedCandidatesDTO candidate2 = new OfferPassedCandidatesDTO(
+                candidateId2, "Jane Smith", Collections.emptyList() // candidate with no evaluations
+        );
+
+        List<OfferPassedCandidatesDTO> passedCandidates = List.of(candidate1, candidate2);
+
+        // Mock the service
+        when(candidateSrv.getPassedCandidatesForOffer(eq(offerId))).thenReturn(passedCandidates);
+
+        // Act & Assert
+        mockMvc.perform(get(API_URL + "/{id}/passed-candidates", offerId)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(candidateId1.toString()))
+                .andExpect(jsonPath("$[0].fullName").value("John Doe"))
+                .andExpect(jsonPath("$[0].evaluations", hasSize(2)))
+                .andExpect(jsonPath("$[0].evaluations[0].score").value(85.0))
+                .andExpect(jsonPath("$[0].evaluations[0].evaluationType.description").value("overAll"))
+                .andExpect(jsonPath("$[1].id").value(candidateId2.toString()))
+                .andExpect(jsonPath("$[1].fullName").value("Jane Smith"))
+                .andExpect(jsonPath("$[1].evaluations", hasSize(0)));
+
+        // Verify that the service method was called once
+        verify(candidateSrv, times(1)).getPassedCandidatesForOffer(eq(offerId));
+    }
+
 }

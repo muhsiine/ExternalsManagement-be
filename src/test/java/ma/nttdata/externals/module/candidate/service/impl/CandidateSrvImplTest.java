@@ -3,12 +3,26 @@ package ma.nttdata.externals.module.candidate.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.dto.OfferPassedCandidatesDTO;
 import ma.nttdata.externals.module.candidate.entity.*;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
 import ma.nttdata.externals.module.candidate.repository.CityRepository;
 import ma.nttdata.externals.module.candidate.repository.CountryRepository;
 import ma.nttdata.externals.module.candidate.repository.LanguageRepository;
+import ma.nttdata.externals.module.interview.dto.EvaluationDTO;
+import ma.nttdata.externals.module.interview.dto.EvaluationTypeDTO;
+import ma.nttdata.externals.module.interview.dto.InterviewDTO;
+import ma.nttdata.externals.module.interview.entity.Evaluation;
+import ma.nttdata.externals.module.interview.entity.EvaluationType;
+import ma.nttdata.externals.module.interview.entity.Interview;
+import ma.nttdata.externals.module.interview.mapper.EvaluationMapper;
+import ma.nttdata.externals.module.interview.mapper.InterviewMapper;
+import ma.nttdata.externals.module.interview.service.impl.EvaluationServImpl;
+import ma.nttdata.externals.module.interview.service.impl.EvaluationTypeServImpl;
+import ma.nttdata.externals.module.interview.service.impl.InterviewServImpl;
+import ma.nttdata.externals.module.offer.dto.OfferDTO;
+import ma.nttdata.externals.module.offer.service.impl.OfferServImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +35,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,6 +43,9 @@ class CandidateSrvImplTest {
 
     @Mock
     private CandidateMapper candidateMapper;
+
+    @Mock
+    private EvaluationMapper evaluationMapper;
 
     @Mock
     private CandidateRepository candidateRepository;
@@ -41,7 +59,19 @@ class CandidateSrvImplTest {
     @Mock
     private LanguageRepository languageRepository;
 
-    @InjectMocks
+    @Mock
+    private OfferServImpl offerServ;
+
+    @Mock
+    private InterviewServImpl interviewServ;
+
+    @Mock
+    private EvaluationServImpl evaluationServ;
+
+    @Mock
+    private EvaluationTypeServImpl evaluationTypeServ;
+
+    // Don't use @InjectMocks - we'll manually inject
     private CandidateSrvImpl candidateSrv;
 
     private Candidate candidate;
@@ -50,6 +80,21 @@ class CandidateSrvImplTest {
 
     @BeforeEach
     void setUp() {
+        // Manually create the instance - adjust constructor parameters based on CandidateSrvImpl
+        // This ensures all mocks are properly injected
+        candidateSrv = new CandidateSrvImpl(
+                candidateMapper,
+                candidateRepository,
+                countryRepository,
+                cityRepository,
+                languageRepository,
+                offerServ,
+                interviewServ,
+                evaluationServ,
+                evaluationTypeServ,
+                evaluationMapper
+        );
+
         candidateId = UUID.randomUUID();
 
         // Create a candidate entity
@@ -240,7 +285,7 @@ class CandidateSrvImplTest {
         List<Object[]> languageResults = new ArrayList<>();
         Object[] englishResult = new Object[] {"English", 1L};
         languageResults.add(englishResult);
-        
+
         when(languageRepository.countCandidatesByLanguage()).thenReturn(languageResults);
 
         // Execute
@@ -279,5 +324,93 @@ class CandidateSrvImplTest {
 
         // Verify
         assertEquals(5L, result);
+    }
+
+    @Test
+    void testGetPassedCandidatesForOffer() {
+        // Debug: verify mocks are not null
+        assertNotNull(offerServ, "offerServ mock should not be null");
+        assertNotNull(interviewServ, "interviewServ mock should not be null");
+        assertNotNull(evaluationServ, "evaluationServ mock should not be null");
+
+        // Setup - use the candidateId from setUp()
+        UUID offerId = UUID.randomUUID();
+        UUID interviewId = UUID.randomUUID();
+        UUID evaluationTypeId = UUID.randomUUID();
+
+        // Mock OfferDTO - correct constructor with 5 parameters
+        OfferDTO offerDTO = new OfferDTO(
+                offerId,
+                "Test Offer",
+                "Test Description",
+                null,
+                Collections.emptyList()
+        );
+        when(offerServ.getOfferById(offerId)).thenReturn(offerDTO);
+
+        // Mock Interview - IMPORTANT: use candidateId from setUp()
+        InterviewDTO interview = new InterviewDTO(
+                interviewId, null, null, null, null, null,
+                null, null, 0, 0, candidateId, offerId,
+                Collections.emptyList(), Collections.emptyList()
+        );
+        when(interviewServ.getInterviewsByOfferId(offerId))
+                .thenReturn(Collections.singletonList(interview));
+
+        // Mock the repository to return the candidate entity
+        when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));
+        when(candidateMapper.candidateToCandidateDTO(candidate)).thenReturn(candidateDTO);
+
+        // Mock Evaluation entity
+        EvaluationType evaluationType = new EvaluationType();
+        evaluationType.setId(evaluationTypeId);
+        evaluationType.setDescription("Technical");
+
+        Evaluation evaluation = new Evaluation();
+        evaluation.setId(UUID.randomUUID());
+        evaluation.setScore(95.0);
+        evaluation.setFeedback("Excellent");
+        Interview mockInterview = new Interview();
+        mockInterview.setId(interviewId);
+        evaluation.setInterview(mockInterview);
+        evaluation.setEvaluationType(evaluationType);
+
+        when(evaluationServ.getAllEvaluationsByInterviewID(interviewId))
+                .thenReturn(Collections.singletonList(evaluation));
+
+        // Mock mapper
+        EvaluationDTO evaluationDTO = new EvaluationDTO(
+                evaluation.getId(),
+                evaluation.getScore(),
+                evaluation.getFeedback(),
+                interviewId,
+                evaluationTypeId
+        );
+        when(evaluationMapper.toDto(evaluation)).thenReturn(evaluationDTO);
+
+        // Mock EvaluationType service
+        EvaluationTypeDTO evaluationTypeDTO = new EvaluationTypeDTO(evaluationTypeId, "Technical", 3.0);
+        when(evaluationTypeServ.getTypeById(evaluationTypeId)).thenReturn(evaluationTypeDTO);
+
+        // Execute
+        List<OfferPassedCandidatesDTO> result = candidateSrv.getPassedCandidatesForOffer(offerId);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(1, result.size());
+
+        OfferPassedCandidatesDTO candidateResult = result.get(0);
+        assertEquals(candidateId, candidateResult.id());
+        assertEquals(candidateDTO.fullName(), candidateResult.fullName());
+        assertEquals(1, candidateResult.evaluations().size());
+        assertEquals("Technical", candidateResult.evaluations().get(0).evaluationType().description());
+
+        // Verify mocks were called
+        verify(offerServ).getOfferById(offerId);
+        verify(interviewServ).getInterviewsByOfferId(offerId);
+        verify(candidateRepository).findById(candidateId);
+        verify(evaluationServ).getAllEvaluationsByInterviewID(interviewId);
+        verify(evaluationMapper).toDto(evaluation);
+        verify(evaluationTypeServ).getTypeById(evaluationTypeId);
     }
 }
