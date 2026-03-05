@@ -1,9 +1,41 @@
 services:
-  postgres:
-    image: 'postgres:latest'
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: externals-management-api
+    env_file:
+      - .env
     environment:
-      - 'POSTGRES_DB=externals-db'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=postgres'
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/externals-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    restart: unless-stopped
+
+  postgres:
+    image: 'postgres:16'
+    container_name: externals-management-postgres
+    environment:
+      POSTGRES_DB: externals-db
+      POSTGRES_PASSWORD: secret
+      POSTGRES_USER: postgres
     ports:
       - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d externals-db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
