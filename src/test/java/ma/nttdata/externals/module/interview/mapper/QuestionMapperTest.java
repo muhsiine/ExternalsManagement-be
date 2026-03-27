@@ -6,6 +6,7 @@ import ma.nttdata.externals.module.interview.entity.Interview;
 import ma.nttdata.externals.module.interview.entity.Question;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.util.ArrayList;
 import java.util.List;

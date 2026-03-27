@@ -1,0 +1,4 @@
+Hello %s,
+You applied for %s.
+Your interview is scheduled on %s.
+Join here: %s

@@ -9,6 +9,7 @@ import ma.nttdata.externals.module.offer.entity.Offer;
 import ma.nttdata.externals.module.offer.repository.OfferRepository;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +17,6 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-
 
 class InterviewMapperTest {
 

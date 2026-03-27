@@ -4,12 +4,12 @@ import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.entity.CvFile;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 class CvFileMapperTest {
 
     private final CvFileMapper cvFileMapper = Mappers.getMapper(CvFileMapper.class);

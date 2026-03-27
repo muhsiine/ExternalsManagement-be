@@ -2,7 +2,10 @@ package ma.nttdata.externals.module.candidate.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
+import ma.nttdata.externals.module.candidate.dto.AddressDTO;
 import ma.nttdata.externals.module.candidate.dto.CandidateDTO;
+import ma.nttdata.externals.module.candidate.dto.CityDTO;
+import ma.nttdata.externals.module.candidate.dto.CountryDTO;
 import ma.nttdata.externals.module.candidate.entity.*;
 import ma.nttdata.externals.module.candidate.mapper.CandidateMapper;
 import ma.nttdata.externals.module.candidate.repository.CandidateRepository;
@@ -15,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -63,10 +67,10 @@ class CandidateSrvImplTest {
         candidate.setSummary("Experienced Java developer");
 
         // Create address with country and city
-        Address address = new Address();
-        Country country = new Country();
+        AddressDTO address = new AddressDTO();
+        CountryDTO country = new CountryDTO();
         country.setEnglishName("United States");
-        City city = new City();
+        CityDTO city = new CityDTO();
         city.setName("New York");
         city.setCountry(country);
         address.setCountry(country);

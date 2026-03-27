@@ -10,6 +10,7 @@ import java.util.List;
 
 import static ma.nttdata.externals.module.candidate.constants.LanguageLevel.ADVANCED;
 import static org.assertj.core.api.Assertions.assertThat;
+
 @DataJpaTest
 class CandidateRepositoryTest {
 

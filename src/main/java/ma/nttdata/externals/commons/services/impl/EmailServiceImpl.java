@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setText(dynamicHtmlBody, true);
 
             mailSender.send(message);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             throw new InternalServerException("Failed to send email", e);
         }
     }

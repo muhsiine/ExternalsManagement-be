@@ -3,12 +3,14 @@ package ma.nttdata.externals.module.candidate.mapper;
 import ma.nttdata.externals.module.candidate.constants.GenderEnum;
 import ma.nttdata.externals.module.candidate.constants.LanguageLevel;
 import ma.nttdata.externals.module.candidate.constants.ProficiencyLevel;
+import ma.nttdata.externals.module.candidate.controller.CandidateController;
 import ma.nttdata.externals.module.candidate.dto.*;
 import ma.nttdata.externals.module.candidate.entity.*;
 import ma.nttdata.externals.module.cv.dto.CvFileDTO;
 import ma.nttdata.externals.module.cv.entity.CvFile;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +20,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 class CandidateMapperTest {
 
     private final CandidateMapper candidateMapper = Mappers.getMapper(CandidateMapper.class);
@@ -99,8 +100,8 @@ class CandidateMapperTest {
         candidate.setContacts(contacts);
 
         // Add experiences
-        List<Experience> experiences = new ArrayList<>();
-        Experience experience = new Experience();
+        List<ExperienceDTO> experiences = new ArrayList<>();
+        ExperienceDTO experience = new ExperienceDTO();
         experience.setId(UUID.randomUUID());
         experience.setCompanyName("Tech Corp");
         experience.setPosition("Senior Developer");
@@ -112,8 +113,8 @@ class CandidateMapperTest {
         candidate.setExperiences(experiences);
 
         // Add skills
-        List<Skill> skills = new ArrayList<>();
-        Skill skill = new Skill();
+        List<SkillDTO> skills = new ArrayList<>();
+        SkillDTO skill = new SkillDTO();
         skill.setId(UUID.randomUUID());
         skill.setSkillName("Spring Boot");
         skill.setProficiencyLevel(ProficiencyLevel.EXPERT);
