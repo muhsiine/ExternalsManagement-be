@@ -6,4 +6,19 @@ services:
       - 'POSTGRES_PASSWORD=secret'
       - 'POSTGRES_USER=postgres'
     ports:
-      - '5432:5432'
+      - '5433:5432'
+    volumes:
+      - './db-init:/docker-entrypoint-initdb.d'
+
+  keycloak:
+    image: 'quay.io/keycloak/keycloak:latest'
+    command: 'start-dev --import-realm'
+    environment:
+      - 'KEYCLOAK_ADMIN=admin'
+      - 'KEYCLOAK_ADMIN_PASSWORD=admin'
+    ports:
+      - '9090:8080'
+    volumes:
+      - './keycloak:/opt/keycloak/data/import'
+    depends_on:
+      - postgres
